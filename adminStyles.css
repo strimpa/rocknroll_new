@@ -7,6 +7,7 @@
 {
 	position:absolute;
 	background-color:#01274C;
+	border:1px white solid; 
 	left:112px;
 	width:625px;
 	padding:5px;
@@ -19,22 +20,49 @@
 #choice
 {
 	top:0px;
-	height:20px;
+	height:60px;
 }
 
 #meta
 {
-	top:60px;
+	top:80px;
 	height:130px;
 }
 
 #content
 {
-	top:200px;
+	top:230px;
 }
 
 #outputDiv
 {
-	top:500px;
-	height:300px;
+	top:0px;
+	left:755px;
+	height:98%;
+	overflow:auto;
+}
+
+.LeftGroupBox
+{
+	position:absolute; 
+	left:0px;
+	top:5px; 
+	width: 210px;
+}
+.RightGroupBox
+{
+	position:absolute; 
+	left:250px;
+	top:5px; 
+	width: 300px;
+}
+
+.fullSizeControl
+{
+	width:200px;
+}
+
+.listBox
+{
+	font-size:12px;
 }
