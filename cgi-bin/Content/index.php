@@ -10,23 +10,37 @@
 <script type="text/javascript" src="adminApp.js"></script>
 </head>
 
-<body onload="adminApp.Init();">
+<body> <!--  onload="adminApp.Init();" -->
 
-<div class="editfield" id="choice" style="left: 112px; top: 0px; height: 45px">
-	<form method="post">
-		<fieldset name="pagesDropDown" style="width: 171px">
-			<legend>Select page:</legend>
-			<select name="Select1" style="width: 156px">
+<div class="editfield" id="choice">
+	<fieldset class="LeftGroupBox">
+		<legend>Artikel auswaehlen:</legend>
+		<select id="pagesDropDown" class="fullSizeControl">
 			<option></option>
-			</select>
-		</fieldset>
-		<fieldset name="pagesCreate" style="position:absolute; left:200px; top:5px; width: 397px;">
-			<legend>Create new:</legend>
-			<input name="Text1" style="width: 165px" type="text" /><input name="Submit1" type="submit" value="submit" />
-		</fieldset>
-	</form>
+		</select>
+	</fieldset>
+	<fieldset class="RightGroupBox">
+		<legend>Neu erstellen:</legend>
+		<input name="Text1" class="fullSizeControl" type="text" />
+		<input id="createButton" type="button" value="create" />
+	</fieldset>
 </div>
 <div class="editfield" id="meta">
+	<fieldset class="LeftGroupBox">
+		<legend>Submenu Eintraege:</legend>
+		<textarea id="submenuEntries" class="listBox" cols="23" rows="6" readonly="true"></textarea>
+	</fieldset>
+	<fieldset class="RightGroupBox">
+		<legend>Neu erstellen:</legend>
+		<input name="Text1" class="fullSizeControl" type="text" />
+		<input id="createButton" type="button" value="create" />
+	</fieldset>
+	<fieldset class="RightGroupBox" style="top:60px;">
+		<legend>Absatz-Anker Link:</legend>
+		<select id="paragraphDropDown" class="fullSizeControl">
+			<option></option>
+		</select>
+	</fieldset>
 </div>
 <div class="editfield" id="content">
 </div>

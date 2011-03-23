@@ -3,26 +3,36 @@
 	include("../Utils.php");
 	include("../Aufenthalt.php");
 
-	$query = FilenameFromUrl();
-	$result = Aufenthalt::GetInstance()->GetConn()->GetTableContent($query, "*");
+	$params = array();
+	$query = FilenameFromUrl($params);
 	
-	$doc = new DOMDocument();
-	$currRow = NULL;
-	foreach($result as $row)
+	$pattern = '/(pages|submenus|paragraphs|links)/';
+	if(0!=preg_match($pattern, $query, $matches, PREG_OFFSET_CAPTURE))
 	{
-		$currRow = $doc->createElement("row");
-		$doc->appendChild($currRow);
-		for($colIndex=0;$colIndex<count($row);$colIndex++)
+		$result = Aufenthalt::GetInstance()->GetConn()->GetTableContent($query, "*", $params);
+		
+		$doc = new DOMDocument();
+		$currRow = NULL;
+		foreach($result as $row)
 		{
-			$keyArray = array_keys($row);
-			$fieldName = $keyArray[$colIndex];
-			$col = $doc->createElement($fieldName);
-			$col->nodeValue = $row[$fieldName];
-			$currRow->appendChild($col);
+			$currRow = $doc->createElement("row");
+			$doc->appendChild($currRow);
+			for($colIndex=0;$colIndex<count($row);$colIndex++)
+			{
+				$keyArray = array_keys($row);
+				$fieldName = $keyArray[$colIndex];
+				$col = $doc->createElement($fieldName);
+				$col->nodeValue = $row[$fieldName];
+				$currRow->appendChild($col);
+			}
 		}
+	
+		print $doc->saveHTML();
 	}
-
-	print $doc->saveHTML();
+	else
+	{
+		print "invalid request!";
+	}
 
 
 ?>
