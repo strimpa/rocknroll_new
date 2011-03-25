@@ -10,37 +10,17 @@
 	/////////////////////////////////////////////////////////////////////////
 	// 'Global functions'
 	/////////////////////////////////////////////////////////////////////////
-	function output(text)
+	
+	function element(name)
 	{
-		outputDiv.innerHTML += text+"<br />";
+		return document.getElementById(name);
 	}
 	
-	function getXMLHttp()
+	function output(text)
 	{
-		if(window.XMLHttpRequest )
-		{
-			return new XMLHttpRequest();
-		}
-		else
-			return new ActiveXObject( "Microsoft.XMLHTTP" );
-			
+		element("outputDiv").innerHTML += text+"<br />";
 	}
-	function stateHandler()
-	{
-		output("readyState:"+ajax.readyState);
-		switch(ajax.readyState)
-		{
-			case 4:
-				currCallback(ajax.responseText);
-				break;
-		}
-	}
-
-	function xmlInterpreter()
-	{
-		
-	}
-
+	
 	/////////////////////////////////////////////////////////////////////////
 	// view
 	/////////////////////////////////////////////////////////////////////////
@@ -83,7 +63,19 @@
 	
 		function populateParagraphs(response)
 		{
-		    $menuXml =  getXmlDocFromResponse(response);
+		    $paragraphXml =  getXmlDocFromResponse(response);
+		    output($paragraphXml.text());
+		    $paragraphXml.children().each(function()
+		    {
+		    	alert(this.tagName);
+		    	$(this).find( 'title').each(function(index, value)
+			    {
+			    	alert($(this).text());
+					optn = document.createElement("OPTION");
+					optn.textContent = $(this).text();
+				    $("#paragraphDropDown").append(optn);
+			    })
+			});
 		}
 
 		this.selectContentHandler = function()
@@ -101,7 +93,7 @@
 			// trigger paragraph creation
 		    var paragraphs = $($contentCache.find( 'paragraphs' )[selectedIndex]).text();
 		    output("ContentPage paragraphs:"+paragraphs);
-		    paragraphs.replace(/,/g, " OR ");
+		    paragraphs = paragraphs.replace(/,/g, "' OR '");
 		    $.fn.loadContent("paragraphs", populateParagraphs, {"id":paragraphs});
 		}
 		
@@ -124,7 +116,7 @@
 			var endIndex = area.text().length;
 			if(rowNumber<texts.length)
 				endIndex  = area.text().indexOf(texts[rowNumber]);
-			submenuEntries.setSelectionRange(startIndex, endIndex);
+			element("submenuEntries").setSelectionRange(startIndex, endIndex);
 		}
 				
 		$("#pagesDropDown").change(this.selectContentHandler);
@@ -141,7 +133,6 @@
 	{
 		currCallback = callback;
 		
-		ajax = getXMLHttp();
 		var url = 'DBAccess.php/'+content;
 		if(null!=requirements)
 		{
@@ -159,11 +150,10 @@
 			}
 		}
 		output("loading url:"+url);
-		ajax.open('GET', url);
-//		this.ajax.setRequestHeader('X-Test', 'one');
-//		this.ajax.setRequestHeader('X-Test', 'two');
-		ajax.onreadystatechange = stateHandler;
-		ajax.send();
+		$.get(url, callback)
+		.success(function() { output("second success"); })
+		.error(function() { output("error"); })
+		.complete(function() { output("complete"); });
 	}
 	$.fn.Init = function() 
 	{

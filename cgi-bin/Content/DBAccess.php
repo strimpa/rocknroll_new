@@ -11,23 +11,44 @@
 	{
 		$result = Aufenthalt::GetInstance()->GetConn()->GetTableContent($query, "*", $params);
 		
-		$doc = new DOMDocument();
+		// Creates an instance of the DOMImplementation class
+//		$imp = new DOMImplementation();
+		
+		// Creates a DOMDocumentType instance
+//		$dtd = $imp->createDocumentType('graph', '', 'graph.dtd');
+		
+		// Creates a DOMDocument instance
+		$doc =  new DOMDocument(); //$imp->createDocument("", "", $dtd);
+		
+		// Set other properties
+//		$doc->encoding = 'UTF-8';
+//		$doc->standalone = false;
+		
 		$currRow = NULL;
 		foreach($result as $row)
 		{
 			$currRow = $doc->createElement("row");
-			$doc->appendChild($currRow);
 			for($colIndex=0;$colIndex<count($row);$colIndex++)
 			{
 				$keyArray = array_keys($row);
 				$fieldName = $keyArray[$colIndex];
 				$col = $doc->createElement($fieldName);
-				$col->nodeValue = $row[$fieldName];
+				$importdoc = new DOMDocument();
+				$importdoc->loadXML("<balls>".$row[$fieldName]."</balls>");
+				$text = $doc->importNode($importdoc->firstChild, true);
+//				$text = $doc->createTextNode($row[$fieldName]);
+				$col->nodeValue = $text->nodeValue;
+//				if($row[$fieldName]!="")
 				$currRow->appendChild($col);
 			}
+//			print("<test>".$currRow->nodeValue."</test>");
+//			$doc->normalizeDocument();
+			$doc->appendChild($currRow);
 		}
 	
-		print $doc->saveHTML();
+		$output = $doc->saveXML();
+		$output = preg_replace("/[\n\r]/", "", $output);
+		print $output;
 	}
 	else
 	{

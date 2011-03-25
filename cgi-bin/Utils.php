@@ -1,5 +1,13 @@
 <?php
 
+
+function MyHtmlSpecialVars_decode($string)
+{
+	$newString = preg_replace("/%27/", "'", $string);
+	$newString = preg_replace("/%20/", " ", $newString);
+	return $newString;
+}
+
 function FilenameFromUrl(&$params=NULL)
 {
 	$start = strrpos($_SERVER['REQUEST_URI'], "/");
@@ -18,6 +26,8 @@ function FilenameFromUrl(&$params=NULL)
 
 	if(NULL!=$_SERVER['QUERY_STRING'])
 	{
+		$_SERVER['QUERY_STRING'] = MyHtmlSpecialVars_decode($_SERVER['QUERY_STRING']);
+//		print "<!-- ".$_SERVER['QUERY_STRING']." //-->";
 		$params = array();
 		$singleParams = explode("&", $_SERVER['QUERY_STRING']);
 		foreach($singleParams as $oneParam)

@@ -80,6 +80,7 @@ class Verbindung
 			{
 				if($index>0)
 					$reqString .= " AND ";
+				$value = preg_replace("/%20/", " ", $value);
 				$reqString .= $key." LIKE '".$value."'";
 			}
 		}
@@ -91,7 +92,7 @@ class Verbindung
 			$sql .= ' WHERE '.$reqString;
 		}
 		$sql .= ';';
-//        print("sql:".$sql."\n");
+//        print("<!-- sql:".$sql." //-->\n");
 		$result = mysql_query($sql);
 		if($result && mysql_num_rows($result)>0)
 		{
