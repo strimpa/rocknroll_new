@@ -26,12 +26,12 @@
 #meta
 {
 	top:80px;
-	height:130px;
+	height:140px;
 }
 
-#content
+#admincontent
 {
-	top:230px;
+	top:240px;
 }
 
 #outputDiv
@@ -65,4 +65,25 @@
 .listBox
 {
 	font-size:12px;
+	border:1px solid white;
+	overflow:auto;
+}
+
+.listboxRow
+{
+	width:auto;
+	border:1px solid gray; 
+}
+.listboxRowHover
+{
+	background-color:#09F;
+}
+
+/*overrides*/
+
+.paragraph
+{
+	left:10px;
+	border:1px solid white;
+	width:600px;
 }

@@ -43,6 +43,10 @@ class ContentMgr
 	{
 		return $this->htmlBuilder;
 	}
+	public function &GetFactory()
+	{
+		return $this->contentFactory;
+	}
 	
 	public function RenderContent()
 	{

@@ -23,6 +23,17 @@ class Article
 		array_push($this->paragraphs, $para);
 	}
 	
+	public function RenderParagraphs(&$contentDiv)
+	{
+		$builder = ContentMgr::GetInstance()->GetBuilder();
+		$currentOffset = 20;
+		foreach($this->paragraphs as $para)
+		{
+		    $para->Render($contentDiv, $currentOffset);
+		}	
+		$builder->AddStyle($contentDiv, ("height:".$currentOffset."px;"));
+	}
+	
 	public function Render(&$parentNode)
 	{
 		$builder = ContentMgr::GetInstance()->GetBuilder();
@@ -31,13 +42,7 @@ class Article
 		$parentNode->appendChild($contentDiv);
 		
 		$contentDiv->appendChild($builder->AddTag("div", "articleTitle", NULL, $this->title));
-		
-		$currentOffset = 20;
-		foreach($this->paragraphs as $para)
-		{
-		    $para->Render($contentDiv, $currentOffset);
-		}	
-		$builder->AddStyle($contentDiv, ("height:".$currentOffset."px;"));
+		$this->RenderParagraphs($contentDiv);
 	}
 }
 

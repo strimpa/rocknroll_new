@@ -40,7 +40,7 @@ class ContentFactory
 		$target->AddMenuEntry($mt);
 	}
 
-	public function CreateParagraph($paraResult, $target)
+	public function CreateParagraph($paraResult)
 	{
 		$p = NULL;
 		switch($paraResult["type"])
@@ -55,7 +55,7 @@ class ContentFactory
 			break;
 		}
 		$p->Init($paraResult["title"], $paraResult["meta"], $paraResult["content"]);
-		$target->AddParagraph($p);
+		return $p;
 	}
 
 	public function CreateContentPages($id)
@@ -81,7 +81,7 @@ class ContentFactory
 			foreach($paraIndeces as $index)
 			{
 				$paragraph = $dbConn->GetParagraph($index);
-				$this->CreateParagraph($paragraph, $article);
+				$article->AddParagraph($this->CreateParagraph($paragraph));
 			}
 			
 			// add

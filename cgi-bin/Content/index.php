@@ -4,6 +4,7 @@
 <head>
 <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
 <title>Adminbereich</title>
+<link href="../../mainStyles.css" rel="stylesheet" type="text/css" />
 <link href="../../adminStyles.css" rel="stylesheet" type="text/css" />
 
 <script type="text/javascript" src="../../script/jquery-1.5.1.min.js"></script>
@@ -28,7 +29,7 @@
 <div class="editfield" id="meta">
 	<fieldset class="LeftGroupBox">
 		<legend>Submenu Eintraege:</legend>
-		<textarea id="submenuEntries" class="listBox" cols="23" rows="6" readonly="true"></textarea>
+		<div id="submenuEntries" class="listBox" style="width:150px; height:110px"></div>
 	</fieldset>
 	<fieldset class="RightGroupBox">
 		<legend>Neu erstellen:</legend>
@@ -42,7 +43,7 @@
 		</select>
 	</fieldset>
 </div>
-<div class="editfield" id="content">
+<div class="editfield" id="admincontent">
 </div>
 
 <div class="editfield" id="outputDiv">

@@ -76,7 +76,14 @@ class PicPara implements iParagraph
 		$pic = $builder->AddImage($this->picUrl, $this->picAlign);
 		$div->appendChild($pic);
 		$div->appendChild($content);
-		$builder->AddText($content, $this->content);//DitchQuotes(
+		
+		$importdoc = new DOMDocument();
+		$importdoc->loadXML("<balls>".$this->content."</balls>");
+		$doc = $builder->GetDoc();
+		$text = $doc->importNode($importdoc->firstChild, true);
+		
+		$content->nodeValue = $text->nodeValue;
+//		$builder->AddText($content, $this->content);//DitchQuotes(
 
 		$parentNode->appendChild($div);
 		

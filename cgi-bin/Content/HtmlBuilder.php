@@ -22,6 +22,10 @@ class HtmlBuilder
 	
 	public function &GetDoc()
 	{
+		return $this->doc;
+	}
+	public function &GetRoot()
+	{
 		return $this->rootnode;
 	}
 	

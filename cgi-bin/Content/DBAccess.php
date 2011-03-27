@@ -25,6 +25,8 @@
 //		$doc->standalone = false;
 		
 		$currRow = NULL;
+		$rootElem = $doc->createElement($query);
+		$doc->appendChild($rootElem);
 		foreach($result as $row)
 		{
 			$currRow = $doc->createElement("row");
@@ -38,16 +40,15 @@
 				$text = $doc->importNode($importdoc->firstChild, true);
 //				$text = $doc->createTextNode($row[$fieldName]);
 				$col->nodeValue = $text->nodeValue;
-//				if($row[$fieldName]!="")
 				$currRow->appendChild($col);
 			}
 //			print("<test>".$currRow->nodeValue."</test>");
 //			$doc->normalizeDocument();
-			$doc->appendChild($currRow);
+			$rootElem->appendChild($currRow);
 		}
 	
 		$output = $doc->saveXML();
-		$output = preg_replace("/[\n\r]/", "", $output);
+//		$output = preg_replace("/[\n\r]/", "", $output);
 		print $output;
 	}
 	else

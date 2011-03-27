@@ -48,34 +48,68 @@
 			    $("#pagesDropDown").append(optn);
 		    });
 		}
+		
+		function listboxEntryClick()
+		{
+			var index = $(this).attr("listBoxIndex");
+			output("Selected idnex: "+index);
+			$("#submenuEntries").attr("selectedIndex", index);
+			$("#paragraphDropDown").find("option").each(function()
+			{
+				var index = $("#submenuEntries").attr("selectedIndex");
+				var url = currSubMenuUrls[index];
+				output("url: "+url);
+				if($(this).text()==url)	
+					element("paragraphDropDown").value = url;
+			});
+		}
 
 		function populateSubMenuItems(response)
 		{
 		    $menuXml =  getXmlDocFromResponse(response);
 		    // titles
 		    var entries = $menuXml.find( 'entries' ).first().text();
-		    entries = entries.replace(/,/g, "\n");
-			$("#submenuEntries").append(entries);
+		    var entryArray = entries.split(",");
+			for(var entryIndex in entryArray)
+			{
+				var subMenuEntry = document.createElement("div");
+				subMenuEntry.setAttribute("class", "listboxRow");
+				subMenuEntry.textContent = entryArray[entryIndex];
+				subMenuEntry.setAttribute("listboxIndex", entryIndex);
+				$(subMenuEntry).mouseover(function(){$(this).attr("class", "listboxRow listboxRowHover");});
+				$(subMenuEntry).mouseout(function(){$(this).attr("class", "listboxRow");});
+				$(subMenuEntry).click(listboxEntryClick);
+				$("#submenuEntries").append(subMenuEntry);
+			};
 			// anchor urls
-		    var entries = $menuXml.find( 'links' ).first().text();
-		    currSubMenuUrls = entries.split(",");
+		    var links = $menuXml.find( 'links' ).first().text();
+		    currSubMenuUrls = links.split(",");
 		}
 	
 		function populateParagraphs(response)
 		{
 		    $paragraphXml =  getXmlDocFromResponse(response);
-		    output($paragraphXml.text());
+//		    output($paragraphXml.text());
 		    $paragraphXml.children().each(function()
 		    {
-		    	alert(this.tagName);
 		    	$(this).find( 'title').each(function(index, value)
 			    {
-			    	alert($(this).text());
 					optn = document.createElement("OPTION");
 					optn.textContent = $(this).text();
 				    $("#paragraphDropDown").append(optn);
 			    })
 			});
+			
+		}
+		
+		function renderPargraphHTML(result)
+		{
+			$("#admincontent").append(result);
+		}
+		
+		function importParagraphHTML(identifier)
+		{
+			var html = $.fn.loadContent("paragraphs", renderPargraphHTML, {"identifier":identifier}, "html");
 		}
 
 		this.selectContentHandler = function()
@@ -88,13 +122,15 @@
 			// trigger submenu creation			
 		    var menuRef = $($contentCache.find( 'menuRef' )[selectedIndex]).text();
 			output("Sub menu reference: "+menuRef);
-		    $.fn.loadContent("submenus", populateSubMenuItems, {"id":menuRef});
+		    $.fn.loadContent("submenus", populateSubMenuItems, {"id":menuRef}, "xml");
 		    
 			// trigger paragraph creation
 		    var paragraphs = $($contentCache.find( 'paragraphs' )[selectedIndex]).text();
 		    output("ContentPage paragraphs:"+paragraphs);
 		    paragraphs = paragraphs.replace(/,/g, "' OR '");
-		    $.fn.loadContent("paragraphs", populateParagraphs, {"id":paragraphs});
+		    $.fn.loadContent("paragraphs", populateParagraphs, {"id":paragraphs}, "xml");
+		    
+			importParagraphHTML(selection);
 		}
 		
 		this.createContentHandler = function()
@@ -109,6 +145,8 @@
 			rowNumber /= charHeight;
 			rowNumber = Math.floor(rowNumber);
 			output("Selection row number:"+rowNumber);
+			
+			// simulate listbox
 			var texts = area.text().split("\n");
 			if(rowNumber>=texts.length)
 				return;
@@ -117,23 +155,30 @@
 			if(rowNumber<texts.length)
 				endIndex  = area.text().indexOf(texts[rowNumber]);
 			element("submenuEntries").setSelectionRange(startIndex, endIndex);
+			
+			// tyry to select dropdown item
+			output("surrent link:"+currSubMenuUrls[rowNumber]);
 		}
 				
 		$("#pagesDropDown").change(this.selectContentHandler);
 		$("#createButton").click(this.createContentHandler);
-		$("#submenuEntries").click(this.selectSubMenuItemHandler);
-		$.fn.loadContent("pages", populateContentDropDown);
+		$.fn.loadContent("pages", populateContentDropDown, null, "xml");
 		
 	}
 
 	/////////////////////////////////////////////////////////////////////////
 	// Per instance functions
 	/////////////////////////////////////////////////////////////////////////
-	$.fn.loadContent = function(content, callback, requirements)
+	$.fn.loadContent = function(content, callback, requirements, type)
 	{
 		currCallback = callback;
 		
-		var url = 'DBAccess.php/'+content;
+		var url = null;
+		switch(type)
+		{
+			case "xml":url = 'DBAccess.php/'+content; break;
+			case "html":url = 'ContentAccess.php/'+content; break;
+		}
 		if(null!=requirements)
 		{
 			url += "?"
