@@ -9,8 +9,17 @@
 	$pattern = '/(pages|submenus|paragraphs|links)/';
 	if(0!=preg_match($pattern, $query, $matches, PREG_OFFSET_CAPTURE))
 	{
-		$result = Aufenthalt::GetInstance()->GetConn()->GetTableContent($query, "*", $params);
-		
+		if(isset($params["write"]) && $params["write"]==true)
+		{
+			print "<!-- write!! //-->".$_POST['identifier'];
+			$result = Aufenthalt::GetInstance()->GetConn()->InsertTableContent($query, $_POST);
+		}
+		else
+		{
+//			print "<!-- read!! //-->";
+			$result = Aufenthalt::GetInstance()->GetConn()->GetTableContent($query, "*", $_POST);
+		}
+			
 		// Creates an instance of the DOMImplementation class
 //		$imp = new DOMImplementation();
 		

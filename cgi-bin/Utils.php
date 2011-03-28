@@ -10,35 +10,27 @@ function MyHtmlSpecialVars_decode($string)
 
 function FilenameFromUrl(&$params=NULL)
 {
-	$start = strrpos($_SERVER['REQUEST_URI'], "/");
-	$end = strrpos($_SERVER['REQUEST_URI'], ".");
-	if(-1 == $end || $start > $end)
-	{
-		$end = strrpos($_SERVER['REQUEST_URI'], "?");
-		//
-		// call with params
-		//
-	}
-	if(-1 == $end ||$start > $end)
-	{
-		$end = strlen($_SERVER['REQUEST_URI']);
-	}
+	$start = strrpos($_SERVER['REQUEST_URI'], ".")+5;
+	$end = strlen($_SERVER['REQUEST_URI']);
+	
+	$query = substr($_SERVER['REQUEST_URI'], $start, $end);
 
-	if(NULL!=$_SERVER['QUERY_STRING'])
-	{
-		$_SERVER['QUERY_STRING'] = MyHtmlSpecialVars_decode($_SERVER['QUERY_STRING']);
+	$query = MyHtmlSpecialVars_decode($query);
 //		print "<!-- ".$_SERVER['QUERY_STRING']." //-->";
-		$params = array();
-		$singleParams = explode("&", $_SERVER['QUERY_STRING']);
-		foreach($singleParams as $oneParam)
-		{
-			$paramTuple = explode("=", $oneParam);
+	$params = array();
+	$singleParams = explode("/", $query);
+	foreach($singleParams as $oneParam)
+	{
+//		$paramTuple = explode("=", $oneParam);
 //			print ($paramTuple[0]." =>". $paramTuple[1]);
-			$params[$paramTuple[0]] = $paramTuple[1];
-		}
+//		if(count($paramTuple)>1)
+//			$params[$paramTuple[0]] = $paramTuple[1];
+//		else
+		$params[$oneParam] = true;
 	}
 
-	return substr($_SERVER['REQUEST_URI'], $start+1, $end-$start-1);
+	$data = array_keys($params);
+	return $data[0];//substr($_SERVER['REQUEST_URI'], $start+1, $end-$start-1);
 }
 
 function MakeSafeString($string)

@@ -15,6 +15,14 @@ class DBController
 	{
 		return $this->meineVerbindung->GetTableContent($table, $fields, $requirements);
 	}
+	public function SetTableContent($table, $fields, $requirements = NULL, $values = NULL)
+	{
+		return $this->meineVerbindung->GetTableContent($table, $fields, $requirements, $values);
+	}
+	public function InsertTableContent($table, $fields, $requirements = NULL)
+	{
+		return $this->meineVerbindung->InsertTableContent($table, $fields, $requirements);
+	}
 	public function GetContent($id)
 	{
 		return $this->meineVerbindung->GetTableContent("pages", "*", array("identifier"=>$id));

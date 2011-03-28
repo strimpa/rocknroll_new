@@ -3,19 +3,25 @@
 	include("ContentMgr.php");
 
 	$params = array();
-	$query = FilenameFromUrl($params);
 	
+	$query = FilenameFromUrl($params);
 	$builder = ContentMgr::GetInstance()->GetBuilder();
-	switch($query)
+	$doc = $builder->Reset();
+	if(isset($_POST["io"]) && $_POST["io"]=="write")
 	{
-		case "paragraphs":
+	}
+	else
+	{
+		switch($query)
 		{
-			$doc = $builder->Reset();
-			$contentDiv = $builder->AddTag("div");
-			$factory = ContentMgr::GetInstance()->GetFactory();
-			$p = $factory->CreateContentPages($params["identifier"]);
-			$doc->appendChild($contentDiv);
-			$p->GetArticle()->RenderParagraphs($contentDiv);
+			case "paragraphs":
+			{
+				$contentDiv = $builder->AddTag("div");
+				$factory = ContentMgr::GetInstance()->GetFactory();
+				$p = $factory->CreateContentPages($_POST["identifier"]);
+				$doc->appendChild($contentDiv);
+				$p->GetArticle()->RenderParagraphs($contentDiv);
+			}
 		}
 	}
 	$builder->Render();

@@ -22,7 +22,7 @@
 	</fieldset>
 	<fieldset class="RightGroupBox">
 		<legend>Neu erstellen:</legend>
-		<input name="Text1" class="fullSizeControl" type="text" />
+		<input id="createNameTf" class="fullSizeControl" type="text" />
 		<input id="createButton" type="button" value="create" />
 	</fieldset>
 </div>

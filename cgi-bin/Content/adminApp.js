@@ -52,13 +52,12 @@
 		function listboxEntryClick()
 		{
 			var index = $(this).attr("listBoxIndex");
-			output("Selected idnex: "+index);
 			$("#submenuEntries").attr("selectedIndex", index);
+			element("paragraphDropDown").selectedIndex = 0;
 			$("#paragraphDropDown").find("option").each(function()
 			{
 				var index = $("#submenuEntries").attr("selectedIndex");
 				var url = currSubMenuUrls[index];
-				output("url: "+url);
 				if($(this).text()==url)	
 					element("paragraphDropDown").value = url;
 			});
@@ -133,8 +132,26 @@
 			importParagraphHTML(selection);
 		}
 		
+		function createContentCallback(result)
+		{
+			output(result);
+		}
+		
 		this.createContentHandler = function()
 		{
+			var tf = element("createNameTf");
+			if(tf.text=="")
+			{
+				alert("Sie muessen einen neuen Namen eingeben!");
+				return false;
+			}
+			var data = 
+			{
+				"identifier":tf.value
+			};
+			
+			$.fn.loadContent("pages", createContentCallback, data, "data", true);
+			$.fn.loadContent("pages", populateContentDropDown, null, "xml");
 		}
 		
 		this.selectSubMenuItemHandler = function(e)
@@ -169,33 +186,39 @@
 	/////////////////////////////////////////////////////////////////////////
 	// Per instance functions
 	/////////////////////////////////////////////////////////////////////////
-	$.fn.loadContent = function(content, callback, requirements, type)
+	$.fn.loadContent = function(content, callback, data, type, write)
 	{
 		currCallback = callback;
 		
 		var url = null;
 		switch(type)
 		{
-			case "xml":url = 'DBAccess.php/'+content; break;
 			case "html":url = 'ContentAccess.php/'+content; break;
+			default:url = 'DBAccess.php/'+content; break;
 		}
-		if(null!=requirements)
+		if(write)
+			url += "/write";
+/*
+		if(null!=data)
 		{
 			url += "?"
 			var appendSeparator = false;
-			for(var key in requirements)
+			for(var key in data)
 			{
 				if(appendSeparator)
 				{
 					url += "&amp;";
 				}
-				value = requirements[key];
+				value = data[key];
 				url += key+"="+value;
 				appendSeparator = true;
 			}
 		}
+*/
 		output("loading url:"+url);
-		$.get(url, callback)
+		if(null!=data)
+			for(d in data){output("data:"+data[d])};
+		$.post(url, data, callback)
 		.success(function() { output("second success"); })
 		.error(function() { output("error"); })
 		.complete(function() { output("complete"); });
