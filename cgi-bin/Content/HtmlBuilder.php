@@ -32,7 +32,9 @@ class HtmlBuilder
 	public function &AddMenuEntry($menuTuple, $index, $safePic=false)
 	{
 	    $link = $this->doc->createElement( 'a' );
-	    $link->setAttribute("href", $menuTuple->url);
+	    $anchorTarget = "#paragraph_".$menuTuple->url;
+	    $anchorTarget = preg_replace("/\s/", "_", $anchorTarget);
+	    $link->setAttribute("href", $anchorTarget);
 	    $ele = $this->doc->createElement( 'div' );
 	    $index = sprintf("%02d", $index+1);
 //		print("titleArray:".$menuTuple->title."\n");
@@ -63,7 +65,7 @@ class HtmlBuilder
 		$picDiv = $this->doc->createElement("div");
 	    switch($align)
 	    {
-	    	case PicPara::$ePIC_LEFT:
+	    	case PicPara::eTYPE_PIC_LEFT:
 			    $picDiv->setAttribute("class", "picFrame picFrameLeft");
 	    		break;
 	    	default:
@@ -92,7 +94,7 @@ class HtmlBuilder
 
 	public function Render()
 	{
-	    print $this->doc->saveHTML();
+	    print $this->doc->C14N();
     }
 }
 

@@ -6,59 +6,99 @@
 	$params = array();
 	$query = FilenameFromUrl($params);
 	
-	$pattern = '/(pages|submenus|paragraphs|links)/';
+//	PrintHtmlComment("fuckin DBAccess!");
+	
+	$pattern = '/(pages|submenus|paragraphs|events|links|pictures)/';
 	if(0!=preg_match($pattern, $query, $matches, PREG_OFFSET_CAPTURE))
 	{
 		if(isset($params["write"]) && $params["write"]==true)
 		{
-			print "<!-- write!! //-->".$_POST['identifier'];
-			$result = Aufenthalt::GetInstance()->GetConn()->InsertTableContent($query, $_POST);
+			PrintHtmlComment("write:");
+			if($query=="pages")
+			{
+				Aufenthalt::GetInstance()->GetConn()->InsertTableContent("submenus");
+				// get submenu with highest id:
+				$result = Aufenthalt::GetInstance()->GetConn()->GetTableContent("submenus", "max(id)");
+				$_POST['menuRef'] =  $result[0]["max(id)"];
+				$result = Aufenthalt::GetInstance()->GetConn()->InsertTableContent($query, $_POST);
+			}
+			else
+			{
+				$result = Aufenthalt::GetInstance()->GetConn()->InsertTableContent($query, $_POST);
+			}
+			$result = Aufenthalt::GetInstance()->GetConn()->GetTableContent($query, "max(id)");
+		}
+		else if(isset($params["delete"]) && $params["delete"]==true)
+		{
+			PrintHtmlComment("delete:".$_POST['identifier']);
+			if($query=="pages")
+			{
+				$result = Aufenthalt::GetInstance()->GetConn()->DropTableContent($query, $_POST);
+			}
+		}
+		else if(isset($params["edit"]) && $params["edit"]==true)
+		{
+			$requirements = NULL;
+			if(isset($params["req"]))
+			{
+				$reqTuple = explode("=", $params["req"]);
+				$requirements = array($reqTuple[0]=>$reqTuple[1]);
+				PrintHtmlComment("edit:".$reqTuple[0].",".$reqTuple[1]);
+			}
+			$result = Aufenthalt::GetInstance()->GetConn()->SetTableContent($query, array_keys($_POST), $requirements, array_values($_POST));
 		}
 		else
 		{
-//			print "<!-- read!! //-->";
-			$result = Aufenthalt::GetInstance()->GetConn()->GetTableContent($query, "*", $_POST);
+//			PrintHtmlComment("read!!");
+			$selector = "*";
+			if(isset($params['selector']))
+				$selector = $params['selector'];
+//			PrintHtmlComment('$_POST[id]:'.$_POST['id']);
+			$result = Aufenthalt::GetInstance()->GetConn()->GetTableContent($query, $selector, $_POST);
 		}
-			
-		// Creates an instance of the DOMImplementation class
-//		$imp = new DOMImplementation();
 		
-		// Creates a DOMDocumentType instance
-//		$dtd = $imp->createDocumentType('graph', '', 'graph.dtd');
-		
-		// Creates a DOMDocument instance
-		$doc =  new DOMDocument(); //$imp->createDocument("", "", $dtd);
-		
-		// Set other properties
-//		$doc->encoding = 'UTF-8';
-//		$doc->standalone = false;
-		
-		$currRow = NULL;
-		$rootElem = $doc->createElement($query);
-		$doc->appendChild($rootElem);
-		foreach($result as $row)
+		if(!is_bool($result))
 		{
-			$currRow = $doc->createElement("row");
-			for($colIndex=0;$colIndex<count($row);$colIndex++)
+			$doc =  new DOMDocument(); //$imp->createDocument("", "", $dtd);
+			// Set other properties
+	//		$doc->encoding = 'UTF-8';
+	//		$doc->standalone = false;
+			
+			$currRow = NULL;
+			$rootElem = $doc->createElement($query);
+			$doc->appendChild($rootElem);
+			foreach($result as $row)
 			{
-				$keyArray = array_keys($row);
-				$fieldName = $keyArray[$colIndex];
-				$col = $doc->createElement($fieldName);
-				$importdoc = new DOMDocument();
-				$importdoc->loadXML("<balls>".$row[$fieldName]."</balls>");
-				$text = $doc->importNode($importdoc->firstChild, true);
-//				$text = $doc->createTextNode($row[$fieldName]);
-				$col->nodeValue = $text->nodeValue;
-				$currRow->appendChild($col);
+				$currRow = $doc->createElement("row");
+				if(is_bool($row))
+				{
+					$currRow->nodeValue = $row;
+				}
+				else 
+				{
+					for($colIndex=0;$colIndex<count($row);$colIndex++)
+					{
+						$keyArray = array_keys($row);
+						$fieldName = $keyArray[$colIndex];
+						$tagName = MakeSafeTagName($fieldName);
+						$col = $doc->createElement($tagName);
+						$importdoc = new DOMDocument();
+						$importdoc->loadXML("<balls>".$row[$fieldName]."</balls>");
+						$text = $doc->importNode($importdoc->firstChild, true);
+		//				$text = $doc->createTextNode($row[$fieldName]);
+						$col->nodeValue = $text->nodeValue;
+						$currRow->appendChild($col);
+					}
+		//			print("<test>".$currRow->nodeValue."</test>");
+		//			$doc->normalizeDocument();
+				}			
+				$rootElem->appendChild($currRow);
 			}
-//			print("<test>".$currRow->nodeValue."</test>");
-//			$doc->normalizeDocument();
-			$rootElem->appendChild($currRow);
+		
+			$output = $doc->saveXML();
+	//		$output = preg_replace("/[\n\r]/", "", $output);
+			print $output;
 		}
-	
-		$output = $doc->saveXML();
-//		$output = preg_replace("/[\n\r]/", "", $output);
-		print $output;
 	}
 	else
 	{

@@ -8,6 +8,11 @@
 <link href="../../adminStyles.css" rel="stylesheet" type="text/css" />
 
 <script type="text/javascript" src="../../script/jquery-1.5.1.min.js"></script>
+<script type="text/javascript" src="../../script/ui/jquery.ui.core.js"></script>
+<script type="text/javascript" src="../../script/ui/jquery.ui.widget.js"></script>
+<script type="text/javascript" src="../../script/ui/jquery.ui.button.js"></script>
+<script type="text/javascript" src="../../script/ui/jquery.ui.spinner.js"></script>
+<script type="text/javascript" src="creationTemplates.json"></script>
 <script type="text/javascript" src="adminApp.js"></script>
 </head>
 
@@ -19,11 +24,13 @@
 		<select id="pagesDropDown" class="fullSizeControl">
 			<option></option>
 		</select>
+		<input id="pageTitle" class="fullSizeControl" type="text" readonly="true"/>
 	</fieldset>
 	<fieldset class="RightGroupBox">
 		<legend>Neu erstellen:</legend>
-		<input id="createNameTf" class="fullSizeControl" type="text" />
-		<input id="createButton" type="button" value="create" />
+		<input id="createPageButton" class="createButton" type="button" value="create" />
+		<input id="editPageButton" class="editButton" type="button" value="edit" />
+		<input id="deletePageButton" class="deleteButton" type="button" value="delete" />
 	</fieldset>
 </div>
 <div class="editfield" id="meta">
@@ -33,8 +40,9 @@
 	</fieldset>
 	<fieldset class="RightGroupBox">
 		<legend>Neu erstellen:</legend>
-		<input name="Text1" class="fullSizeControl" type="text" />
-		<input id="createButton" type="button" value="create" />
+		<input id="createMenuEntryButton" class="createButton" type="button" value="create" />
+		<input id="editMenuEntryButton" class="editButton" type="button" value="edit" />
+		<input id="deleteMenuEntryButton" class="deleteButton" type="button" value="delete" />
 	</fieldset>
 	<fieldset class="RightGroupBox" style="top:60px;">
 		<legend>Absatz-Anker Link:</legend>
@@ -42,6 +50,9 @@
 			<option></option>
 		</select>
 	</fieldset>
+</div>
+<div class="editfield" id="contentCreate">
+	<input id="createParagraphButton" class="createButton" type="button" value="Neuen Absatz erstellen" />
 </div>
 <div class="editfield" id="admincontent">
 </div>

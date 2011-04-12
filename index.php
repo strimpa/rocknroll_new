@@ -3,7 +3,7 @@
 
 <head>
 <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-<link href="mainstyles.css" rel="stylesheet" type="text/css" />
+<link href="/mainstyles.css" rel="stylesheet" type="text/css" />
 </head>
 
 <body>
@@ -24,7 +24,7 @@
 	</div>
 //-->
 
-		<object id="flash1" data="images/Navi.swf" type="application/x-shockwave-flash" width="140" height="440">
+		<object id="flash1" data="/images/Navi.swf" type="application/x-shockwave-flash" width="140" height="440">
 			<param name="movie" value="images/Navi.swf" />
 			<param name="wmode" value="transparent" />
 		</object>
@@ -32,18 +32,18 @@
 </div>
 
 <!-- Header and deco //-->
-<div id="header" class="redbordered"><img alt="" src="images/layout/BG_02.jpg" /></div>
-<div id="contentLeftOverlap"><img alt="" src="images/layout/BG_04.jpg" /></div>
-<div id="Deco01"><img alt="" src="images/layout/Deco_08.png" /></div>
+<div id="header" class="redbordered"><img alt="" src="/images/layout/BG_02.jpg" /></div>
+<div id="contentLeftOverlap"><img alt="" src="/images/layout/BG_04.jpg" /></div>
+<div id="Deco01"><img alt="" src="/images/layout/Deco_08.png" /></div>
 <div id="articleTitle">
 	
-	<object id="flash2" data="images/ArticleTitle.swf" height="200" type="application/x-shockwave-flash" width="200">
+<!-- 	<object id="flash2" data="/images/ArticleTitle.swf" height="200" type="application/x-shockwave-flash" width="200">
 		<param name="movie" value="images/ArticleTitle.swf" />
 		<param name="flashvars" value="titleString=Gunnar" />
 		<param name="allowScriptAccess" value="sameDomain" />
 		<param name="wmode" value="transparent" />
 	</object>
-	
+	//-->
 </div>
 
 <!-- Content //-->

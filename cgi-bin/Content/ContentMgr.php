@@ -52,7 +52,10 @@ class ContentMgr
 	{
 //		print ("current content:".FilenameFromUrl()."\n");
 //		print ("num content:".count($this->content)."\n");
-		$content = $this->contentFactory->CreateContentPages(FilenameFromUrl());
+		$currId = FilenameFromUrl();
+		if($currId=="")
+			$currId = "index";
+		$content = $this->contentFactory->CreateContentPages($currId);
 		if(NULL!=$content)
 			$content->Render();
 		else

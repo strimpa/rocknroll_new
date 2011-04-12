@@ -81,7 +81,7 @@ class Verbindung
 				if($index>0)
 					$reqString .= " AND ";
 				$value = preg_replace("/%20/", " ", $value);
-				$reqString .= $key." LIKE '".$value."'";
+				$reqString .= $key." REGEXP '".$value."'";
 			}
 		}
 		
@@ -98,14 +98,50 @@ class Verbindung
 		{
 			while($reihe = mysql_fetch_assoc($result))
 			{
+//				$keys = array_keys($reihe);
+//				foreach ($keys as $key)
+//	        		print("<!-- key:".$key." //-->\n");
 				array_push($backGabe, $reihe);
 			}
 		}
 		return $backGabe;
 	}
 
+	public function DropTableContent($table, $requirements = NULL)
+	{
+		$backGabe = array();
+		$this->verbinde();
+		
+		$reqString = "";
+		if(is_array($requirements))
+		{
+			$index = 0;
+			foreach($requirements as $key => $value)
+			{
+				if($index>0)
+					$reqString .= " AND ";
+				$value = preg_replace("/%20/", " ", $value);
+				$reqString .= $key." LIKE '".$value."'";
+			}
+		}
+		
+		// UPDATE  `rocknroll`.`submenus` SET  `links` =  'The first entry,The second entry,The third entry' WHERE  `submenus`.`id` =1;
+		$sql = 'DELETE FROM `rocknroll`.`'.$table.'`';
+        
+		if($reqString != "")
+		{
+			$sql .= ' WHERE '.$reqString;
+		}
+		$sql .= ';';
+        print("<!-- sql:".$sql." //-->\n");
+		$result = mysql_query($sql);
+		print "<!-- Errors: ".mysql_error()."//-->";
+		return array($result);
+	}
+
 	public function SetTableContent($table, $fields, $requirements = NULL, $values = NULL)
 	{
+        PrintHtmlComment("SetTableContent begin");
 		$backGabe = array();
 		$this->verbinde();
 		
@@ -137,19 +173,13 @@ class Verbindung
 			$sql .= ' WHERE '.$reqString;
 		}
 		$sql .= ';';
-//        print("<!-- sql:".$sql." //-->\n");
+        print("<!-- sql:".$sql." //-->\n");
 		$result = mysql_query($sql);
-		if($result && mysql_num_rows($result)>0)
-		{
-			while($reihe = mysql_fetch_assoc($result))
-			{
-				array_push($backGabe, $reihe);
-			}
-		}
-		return $backGabe;
+		print "<!-- Errors: ".mysql_error()."//-->";
+		return $result;
 	}
-
-	public function InsertTableContent($table, $fields, $requirements = NULL)
+	
+	public function InsertTableContent($table, $fields=NULL, $requirements = NULL)
 	{
 		$backGabe = array();
 		$this->verbinde();
@@ -168,24 +198,29 @@ class Verbindung
 		}
 		
 		// UPDATE  `rocknroll`.`submenus` SET  `links` =  'The first entry,The second entry,The third entry' WHERE  `submenus`.`id` =1;
-		$sql = 'INSERT INTO `rocknroll`.`'.$table;
-        $sql .= '` ('; 
-        for($fieldIndex = 0; $fieldIndex<count($fields);$fieldIndex++)
-        {
-        	if($fieldIndex>0)
-        		$sql .= ",";
-        	$keys = array_keys($fields);
-        	$sql .= "`".$keys[$fieldIndex]."`";
-        }
-        $sql .= ') VALUES ('; 
-        for($fieldIndex= 0; $fieldIndex<count($fields);$fieldIndex++)
-        {
-        	if($fieldIndex>0)
-        		$sql .= ",";
-        	$values = array_values($fields);
-        	$sql .= "'".$values [$fieldIndex]."'";
-        }
-        
+		$sql = 'INSERT INTO `rocknroll`.`'.$table.'` (';
+		if(is_array($fields) && count($fields)>0)
+		{
+	        for($fieldIndex = 0; $fieldIndex<count($fields);$fieldIndex++)
+	        {
+	        	if($fieldIndex>0)
+	        		$sql .= ",";
+	        	$keys = array_keys($fields);
+	        	$sql .= "`".$keys[$fieldIndex]."`";
+	        }
+		}
+		$sql .= ') VALUES ('; 
+		if(is_array($fields) && count($fields)>0)
+		{
+	        for($fieldIndex= 0; $fieldIndex<count($fields);$fieldIndex++)
+	        {
+	        	if($fieldIndex>0)
+	        		$sql .= ",";
+	        	$values = array_values($fields);
+	        	$sql .= "'".$values [$fieldIndex]."'";
+	        }
+	        
+		}
 		$sql .= ');';
         print("<!-- sql:".$sql." //-->\n");
 		$result = mysql_query($sql);

@@ -43,27 +43,33 @@ class ContentFactory
 	public function CreateParagraph($paraResult)
 	{
 		$p = NULL;
+		PrintHtmlComment("type:".$paraResult["type"]);
 		switch($paraResult["type"])
 		{
 			case iParagraph::eTYPE_PIC_RIGHT:
 				$p = new PicPara(iParagraph::eTYPE_PIC_RIGHT);
-			break;
+				$p->Init($paraResult["title"], $paraResult["meta"], $paraResult["content"]);
+				break;
 			case iParagraph::eTYPE_PIC_LEFT:
 				$p = new PicPara(iParagraph::eTYPE_PIC_LEFT);
-			break;
+				$p->Init($paraResult["title"], $paraResult["meta"], $paraResult["content"]);
+				break;
+			case iParagraph::eTYPE_TABLE:
+				$p = new TablePara();
+				$p->Init($paraResult["title"], $paraResult["meta"], NULL);
+				break;
 			default:
 			break;
 		}
-		$p->Init($paraResult["title"], $paraResult["meta"], $paraResult["content"]);
 		return $p;
 	}
 
 	public function CreateContentPages($id)
 	{
-		print ("content id:".$id."\n");
+		PrintHtmlComment("content id:".$id);
 		$dbConn = Aufenthalt::GetInstance()->GetConn();
 		$result = $dbConn->GetContent($id);
-		print("Content count:".count($result));
+		PrintHtmlComment("Content count:".count($result));
 		foreach($result as $page)
 		{
 			// inital create
@@ -80,6 +86,9 @@ class ContentFactory
 			$paraIndeces = explode(",",$page["paragraphs"]);
 			foreach($paraIndeces as $index)
 			{
+				if($index == "")
+					continue;
+				PrintHtmlComment("one paragraph:".$index);
 				$paragraph = $dbConn->GetParagraph($index);
 				$article->AddParagraph($this->CreateParagraph($paragraph));
 			}

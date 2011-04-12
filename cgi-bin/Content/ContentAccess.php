@@ -16,6 +16,8 @@
 		{
 			case "paragraphs":
 			{
+				if(!isset($_POST["identifier"]) || $_POST["identifier"]=="")
+					return;
 				$contentDiv = $builder->AddTag("div");
 				$factory = ContentMgr::GetInstance()->GetFactory();
 				$p = $factory->CreateContentPages($_POST["identifier"]);

@@ -1,4 +1,12 @@
-﻿/*
+/*
+** Fonts
+*/
+@font-face {
+	font-family: brush_font;
+	src: url('/images/Artbrush.ttf');
+}
+
+/*
 ** Main tags
 */
 body {
@@ -54,11 +62,12 @@ body {
 #articleTitle
 {
 	position:absolute;
-	left:480px;
+	left:520px;
 	color:GrayText;
 	top:0px;
 	z-index:10;
-	font-family:"Lucida Sans", "Lucida Sans Regular", "Lucida Grande", "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
+	font-family:brush_font;
+	font-size:30px;
 }
 
 .paragraph
@@ -83,8 +92,9 @@ body {
 	height:22px;
 	margin-left:40px;
 	color:#71A1D1;
-	font-family:"Brush Script Std Medium";
-	background-image:url('images/layout/NewWebsiteLayout4_18.png')
+	font-size:20px;
+	font-family:brush_font;
+	background-image:url('/images/layout/NewWebsiteLayout4_18.png')
 }
 
 .picFrame
@@ -140,6 +150,10 @@ a:hover{
 	top:115px;
 	z-index:3;
 }
+
+/*
+** Navi
+*/
 
 #secNavi01
 {
@@ -209,6 +223,40 @@ a:hover{
 	top:280px;
 }
 
+/*
+** Table formatting
+*/
+
+.tableCellFontFancy
+{
+	font-family:brush-font;
+}
+.tableCellFontNormal
+{
+	z-index:10;
+	font-family:"Lucida Sans", "Lucida Sans Regular", "Lucida Grande", "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
+}
+.eventDate
+{
+	font-size:30px;
+	font-family:brush_font;
+	background:url('/images/images/Elements_09.png') no-repeat;
+	overflow:visible;
+	width:50px;
+}
+.extendable
+{
+	height:0px;
+	overflow:hidden;
+}
+.eventTitle
+{
+	font-size:20px;
+}
+.tableTonedBG
+{
+	background-color:#073869;
+}
 /*
 ** classes
 */
