@@ -2,7 +2,8 @@
 
 RewriteEngine On
 RewriteRule ^index/([a-zA-Z0-9\/]*)$ index.php?$1
-RewriteRule ^([a-zA-Z0-9\/]*)DBAccess/([a-zA-Z0-9\/]*)$ $1DBAccess.php?$2
-RewriteRule ^ContentAccess/([a-zA-Z0-9\/]*)$ ContentAccess.php?$1
+#RewriteRule ^([a-zA-Z0-9\/]*)DBAccess/([a-zA-Z0-9\/]*)$ $1DBAccess.php?$2
+RewriteRule ^DBAccess/([a-zA-Z0-9\/\:\=\%]*)$ DBAccess.php?$1
+#RewriteRule ^ContentAccess/([a-zA-Z0-9\/]*)$ ContentAccess.php?$1
 #RewriteRule ^([a-zA-Z0-9^/]+)/([a-zA-Z0-9^/]*)$ $1.php?$2
 #RewriteRule ^([^/]+)$ index.php?$1

@@ -54,7 +54,7 @@
 			if(isset($params['selector']))
 				$selector = $params['selector'];
 //			PrintHtmlComment('$_POST[id]:'.$_POST['id']);
-			$result = Aufenthalt::GetInstance()->GetConn()->GetTableContent($query, $selector, $_POST);
+			$result = Aufenthalt::GetInstance()->GetConn()->GetTableContent($query, $selector, $_POST, isset($params['regexp']));
 		}
 		
 		if(!is_bool($result))
@@ -67,6 +67,7 @@
 			$currRow = NULL;
 			$rootElem = $doc->createElement($query);
 			$doc->appendChild($rootElem);
+			$print = "";
 			foreach($result as $row)
 			{
 				$currRow = $doc->createElement("row");
@@ -84,6 +85,7 @@
 						$col = $doc->createElement($tagName);
 						$importdoc = new DOMDocument();
 						$importdoc->loadXML("<balls>".$row[$fieldName]."</balls>");
+						$print = $row[$fieldName];
 						$text = $doc->importNode($importdoc->firstChild, true);
 		//				$text = $doc->createTextNode($row[$fieldName]);
 						$col->nodeValue = $text->nodeValue;
@@ -98,6 +100,7 @@
 			$output = $doc->saveXML();
 	//		$output = preg_replace("/[\n\r]/", "", $output);
 			print $output;
+//			PrintHtmlComment($print);
 		}
 	}
 	else

@@ -60,7 +60,7 @@ class Verbindung
 	**   Content
 	***********************************************************************************/
 
-	public function GetTableContent($table, $fields, $requirements = NULL)
+	public function GetTableContent($table, $fields, $requirements = NULL, $useRegExp = FALSE)
 	{
 		$backGabe = array();
 		$this->verbinde();
@@ -81,7 +81,10 @@ class Verbindung
 				if($index>0)
 					$reqString .= " AND ";
 				$value = preg_replace("/%20/", " ", $value);
-				$reqString .= $key." REGEXP '".$value."'";
+				if($useRegExp)
+					$reqString .= $key." REGEXP '".$value."'";
+				else
+					$reqString .= $key." LIKE '".$value."'";
 			}
 		}
 		

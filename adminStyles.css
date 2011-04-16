@@ -51,6 +51,11 @@ body {
 .deleteButton
 {
 	border:1px solid red;
+	width:50px;
+}
+.editButton
+{
+	width:50px;
 }
 
 .LeftGroupBox
@@ -126,10 +131,19 @@ body {
 
 
 /*overrides*/
-
-.paragraph
+.adminTableDiv
+{
+	overflow:auto;
+	width:600px;
+}
+.adminTable
+{
+	width:700px;
+}	
+.adminParagraph
 {
 	left:10px;
 	border:1px solid white;
 	width:600px;
+	overflow:auto;
 }

@@ -28,7 +28,7 @@ function FilenameFromUrl(&$params=NULL)
 		$paramTuple = explode(":", $oneParam);
 		if(count($paramTuple)>1)
 		{
-			PrintHtmlComment($paramTuple[0]." =>". $paramTuple[1]);
+//			PrintHtmlComment($paramTuple[0]." =>". $paramTuple[1]);
 			$params[$paramTuple[0]] = $paramTuple[1];
 		}
 		else

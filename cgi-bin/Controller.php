@@ -11,9 +11,9 @@ class DBController
 		$this->meineVerbindung = new Verbindung($this, "verbindung");
 	}
 	
-	public function GetTableContent($table, $fields, $requirements = NULL)
+	public function GetTableContent($table, $fields, $requirements = NULL, $useRegExp = FALSE)
 	{
-		return $this->meineVerbindung->GetTableContent($table, $fields, $requirements);
+		return $this->meineVerbindung->GetTableContent($table, $fields, $requirements, $useRegExp);
 	}
 	public function SetTableContent($table, $fields, $requirements = NULL, $values = NULL)
 	{
@@ -34,8 +34,7 @@ class DBController
 	
 	public function GetMenu($idval)
 	{
-		$re = "^".$idval."$";
-		$result = $this->meineVerbindung->GetTableContent("submenus", "*", array("id"=>$re));
+		$result = $this->meineVerbindung->GetTableContent("submenus", "*", array("id"=>$idval), FALSE);
 		assert(count($result)==1);
 		$result= $result[0];
 		return $result;
@@ -43,8 +42,7 @@ class DBController
 
 	public function GetParagraph($idval)
 	{
-		$re = "^".$idval."$";
-		$result = $this->meineVerbindung->GetTableContent("paragraphs", "*", array("id"=>$re));
+		$result = $this->meineVerbindung->GetTableContent("paragraphs", "*", array("id"=>$idval), FALSE);
 		assert(count($result)==1);
 		$result= $result[0];
 		return $result;
@@ -52,8 +50,7 @@ class DBController
 	
 	public function GetPicData($picID)
 	{
-		$re = "^".$picID."$";
-		$result = $this->meineVerbindung->GetTableContent("pictures", "*", array("id"=>$re));
+		$result = $this->meineVerbindung->GetTableContent("pictures", "*", array("id"=>$picID), FALSE);
 		assert(count($result)==1);
 		$result= $result[0];
 		return $result;

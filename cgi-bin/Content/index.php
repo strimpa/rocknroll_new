@@ -53,6 +53,9 @@
 </div>
 <div class="editfield" id="contentCreate">
 	<input id="createParagraphButton" class="createButton" type="button" value="Neuen Absatz erstellen" />
+	Bestehenden Absatz einfuegen:<select id="insertParagraphSelect" class="fullSizeControl">
+			<option></option>
+	</select>
 </div>
 <div class="editfield" id="admincontent">
 </div>
