@@ -1,0 +1,313 @@
+//var DataDescription =
+ 
+//{
+//	controlType:null,
+//	dataType:null
+//}
+
+/********************************************************************************************
+ *  Controls
+ ********************************************************************************************/
+var DataEntity = function(n, h, d)
+{
+	this.name = n;
+	this.helpString = h;
+	this.staticPresetData = d;
+	this.control = null;
+};
+DataEntity.prototype.createControl = function(doc, presetValues)
+{
+}
+DataEntity.prototype.init = function()
+{
+}
+DataEntity.prototype.create = function(doc, presetValues)
+{
+	var controlDiv = doc.createElement("div");
+	var label = doc.createElement("div");
+	label.setAttribute("class", "creationLabel");
+	label.innerHTML = this.name;
+	controlDiv.appendChild(label);
+	
+	this.createControl(doc, presetValues);
+	if(null!=this.control)
+		controlDiv.appendChild(this.control);
+	
+	var helpIcon = doc.createElement("img");
+	helpIcon.setAttribute("class", "helpIcon");
+	helpIcon.setAttribute("src", "../../images/images/question_mark.jpg");
+	helpIcon.setAttribute("title", this.helpString);
+	controlDiv.appendChild(helpIcon);
+	
+	this.init();
+	
+	return controlDiv;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+var TextField = function(n, h, d)
+{
+	// contructor
+	DataEntity.call(this, n, h, d);
+}
+TextField.prototype = new DataEntity;
+TextField.prototype.createControl = function(doc, presetValues)
+{
+	this.control =  doc.createElement("input");
+	this.control.setAttribute("type", "text");
+	this.control.setAttribute("id", this.name+"_edit");
+	this.control.setAttribute("class", "creationControl");
+	if(null!=presetValues && null!=presetValues[this.name])
+	{
+		this.control.value = presetValues[this.name];
+	}
+}
+
+TextField.prototype.getData = function(data)
+{
+	data[this.name] = this.control.value;
+}
+////////////////////////////////////////////////////////////////////////////////////////
+var ComboBox = function(n, h, d)
+{
+	// contructor
+	DataEntity.call(this, n, h, d);
+}
+ComboBox.prototype = new DataEntity;
+ComboBox.prototype.createControl = function(doc, presetValues)
+{
+	this.control =  doc.createElement("select");
+	this.control.setAttribute("id", this.name+"_edit");
+	this.control.setAttribute("class", "creationControl");
+	if(null!=this.staticPresetData)
+	{
+		var entries = this.staticPresetData.split(",");
+		for(e in entries)
+		{
+			optn = document.createElement("OPTION");
+			optn.textContent = entries[e];
+			this.control.appendChild(optn);
+		}
+	}
+	if(null!=presetValues && null!=presetValues[this.name])
+	{
+		var entries = presetValues[this.name].split(",");
+		for(e in entries)
+		{
+			optn = document.createElement("OPTION");
+			optn.textContent = entries[e];
+			this.control.appendChild(optn);
+		}
+	}
+}
+
+ComboBox.prototype.getData = function(data)
+{
+	data[this.name] = this.control.value;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+var Spinner = function(n, h, d)
+{
+	// contructor
+	DataEntity.call(this, n, h, d);
+}
+Spinner.prototype = new DataEntity;
+Spinner.prototype.createControl = function(doc, presetValues)
+{
+	this.control =  doc.createElement("input");
+	this.control.setAttribute("type", "text");
+	var myId = this.name+"_edit";
+	this.control.setAttribute("id", myId);
+	this.control.setAttribute("class", "creationControl");
+//	if(null!=this.staticPresetData)
+//	{
+//		var entries = this.staticPresetData.split(",");
+//		for(e in entries)
+//		{
+//			optn = document.createElement("OPTION");
+//			optn.textContent = entries[e];
+//			this.control.appendChild(optn);
+//		}
+//	}
+	this.control.setAttribute("value","");
+	if(null!=presetValues && null!=presetValues[this.name])
+	{
+		this.control.setAttribute("value", presetValues[this.name]);
+	}
+}
+Spinner.prototype.init = function()
+{
+	$(this.control).spinner();
+	if($(this.control).spinner("value")=="")
+		$(this.control).spinner("value", 300);
+}
+
+Spinner.prototype.getData = function(data)
+{
+	data[this.name] = this.control.value;
+}
+
+/********************************************************************************************
+ *  Group
+ ********************************************************************************************/
+
+var Group = function(n, h) 
+{
+	// contructor
+	DataEntity.call(this, n, h);
+	this.controls = [];
+};
+Group.prototype = new DataEntity;
+Group.prototype.init = function()
+{
+};
+Group.prototype.create = function(doc, presetValues)
+{
+	this.control = doc.createElement("fieldset");
+	this.control.setAttribute("id", this.name+"_edit");
+	var boxLegend = doc.createElement("legend");
+	boxLegend.innerHTML = this.helpString;
+	this.control.appendChild(boxLegend);
+	for(d in this.controls)
+	{
+		this.control.appendChild(this.controls[d].create(doc, presetValues));
+	}
+	
+	this.init();
+	
+	return this.control;
+};
+
+Group.prototype.getData = function(data)
+{
+	for(d in this.controls)
+	{
+		this.controls[d].getData(data);
+	}
+};
+
+/********************************************************************************************
+ *  Dialog
+ ********************************************************************************************/
+var Dialog = function(n, h) 
+{
+	// contructor
+	Group.call(this, n, h);
+};
+Dialog.prototype = new Group;
+function close()
+{
+	$("#creationBg").remove();
+	$(".creationBox").remove();
+}
+Dialog.prototype.createDialog = function(doc, callback, presetValues)
+{
+	var bg = doc.createElement("div");
+	bg.setAttribute("id","creationBg");
+	var holder = doc.createElement("div");
+	holder.setAttribute("class","creationBox");
+
+	var childControls = this.create(doc, presetValues);
+	holder.appendChild(childControls);
+	
+	this.confirm = function()
+	{
+		callback();
+		close();
+	}
+
+	var createButton = doc.createElement("input");
+	createButton.setAttribute("type", "button");
+	createButton.setAttribute("style", "float:right;");
+	createButton.setAttribute("value", "Create");
+	holder.appendChild(createButton);
+	$(createButton).click(this.confirm);
+	
+	var cancelButton = doc.createElement("input");
+	cancelButton.setAttribute("type", "button");
+	cancelButton.setAttribute("style", "float:left;");
+	cancelButton.setAttribute("value", "Cancel");
+	holder.appendChild(cancelButton);
+	$(cancelButton).click(close);
+
+	$("body").append(bg);
+	$("body").append(holder);
+	var newLeft = $(window).width()/2 - parseInt($(".creationBox").css("width"))/2;
+	var newTop = $(window).height()/2 - parseInt($(".creationBox").css("height"))/2;
+	$(".creationBox").css("left", newLeft);
+	$(".creationBox").css("top", newTop);
+};
+
+/********************************************************************************************
+ *  Uses
+ ********************************************************************************************/
+
+var PageCreationDialog = new Dialog("PageCreationDialog", "Neuen Inhalt einfuegen");
+PageCreationDialog.controls = new Array(
+		new TextField("identifier", "Der Titel in Menu falls gewuenscht."),
+		new TextField("title", 		"Die Ueberschrift fuer die Seite.")
+);
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+var SubMenuCreationDialog = new Dialog("SubMenuCreationDialog", "Neuen Menueintrag einfuegen");
+SubMenuCreationDialog.controls = new Array(
+		new TextField("title", "Der Titel der im Menu angezeigt wird."),
+		new ComboBox("url",  "Der Textanker-link auf das der Eintrag verweist.")
+);
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+var ParagraphCreationDialog = new Dialog("ParagraphCreationDialog", "Neuen Absatz erstellen");
+var PicTextGroup = new Group("picTextGroup", "Absatz spezifische Inhalte");
+PicTextGroup.controls = new Array(
+		new TextField("picUrl", "Verwendetes Bild."),
+		new TextField("picTitle", "Untertitel des verwendeten Bildes."),
+		new TextField("content",  "Der Inhaltstext.")
+);
+var TableGroup = new Group("tableGroup", "Absatz spezifische Inhalte");
+TableGroup.controls = new Array(
+		new ComboBox("table", "Die verwendete Tabelle.", " ,events, links"),
+		new ComboBox("category",  "Kategorie oder Monat.")
+);
+ParagraphCreationDialog.controls = new Array(
+		new TextField("title", "Der Titel des Absatzes."),
+		new ComboBox("type",  "Typ des verwendeten Layouts."),
+		new Spinner("height", "Hoehe des Absatz."),
+		PicTextGroup,
+		TableGroup
+);
+function toggleGroup()
+{
+	var index = $("#type_edit").attr("selectedIndex"); 
+	if(index==2)
+	{
+		$("#picTextGroup_edit").css("visibility", "hidden");
+		$("#tableGroup_edit").css("visibility", "visible");
+	}
+	else
+	{
+		$("#picTextGroup_edit").css("visibility", "visible");
+		$("#tableGroup_edit").css("visibility", "hidden");
+	}
+}
+function getCategoryCallback(result)
+{
+	$(TableGroup.controls[1].control).empty();
+	
+	$(result).find("category").each(function(){
+		optn = document.createElement("OPTION");
+		optn.textContent = $(this).text();
+//		this.control.appendChild(optn);
+		$(TableGroup.controls[1].control).append(optn);
+	});
+}
+ParagraphCreationDialog.init = function()
+{
+	$(this.controls[1].control).change(toggleGroup);
+};
+TableGroup.init = function()
+{
+	this.control.setAttribute("style", "visibility:hidden;");
+	$(this.controls[0].control).change(function(){
+		var table = $(this).attr("value");
+		$.fn.loadContent(table, getCategoryCallback, null, "data", {selector:"DISTINCT category"});
+	});
+}

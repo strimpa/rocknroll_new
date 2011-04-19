@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<table name="events">
+	<row>
+		<data class="eventDate tableCellFontFancy" rowspan="2" type="date">date</data>
+		<data class="eventType tableCellFontFancy" rowspan="2" type="picIndex">type</data>
+		<data class="eventTitle tableCellFontNormal" type="string">title</data>
+		<data class="eventVenue tableCellFontNormal" type="string">venue</data>
+		<data class="eventShowMore tableCellFontFancy" type="empty"></data>
+	</row>
+	<row class="extendable tableTonedBG">
+		<data class="eventMisc extendable" type="date">
+			<div class="extendable">
+				<div class="eventDescription tableCellFontNormal" type="string">description</div>
+				<div class="eventLocation tableCellFontNormal" type="geo">location</div>
+				<div class="eventTime tableCellFontNormal" type="time">time</div>
+				<div class="eventMisc tableCellFontNormal" type="string">misc</div>
+			</div>
+		</data>
+	</row>
+</table>
