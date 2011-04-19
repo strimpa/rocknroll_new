@@ -8,7 +8,7 @@
 	
 //	PrintHtmlComment("fuckin DBAccess!");
 	
-	$pattern = '/(pages|submenus|paragraphs|events|links|pictures)/';
+	$pattern = '/(pages|submenus|paragraphs|events|links|pictures|navigation)/';
 	if(0!=preg_match($pattern, $query, $matches, PREG_OFFSET_CAPTURE))
 	{
 		if(isset($params["write"]) && $params["write"]==true)

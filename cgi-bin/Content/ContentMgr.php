@@ -11,6 +11,7 @@ class ContentMgr
 //	private $content;
 	private $contentFactory;
 	private static $instance;
+	private $navi;
 	
 	private function ContentMgr()
 	{
@@ -52,6 +53,20 @@ class ContentMgr
 	{
 //		print ("current content:".FilenameFromUrl()."\n");
 //		print ("num content:".count($this->content)."\n");
+		$this->navi = $this->contentFactory->CreateMainNavi();
+		if(NULL!=$this->navi)
+		{
+			PrintHtmlComment("Navigation should render here!");
+			$this->navi->Render();
+		}
+		else
+		{
+			PrintHtmlComment("Error creating navigation!");
+			print "Error creating navigation!";
+		}
+
+		PrintHtmlComment("WTF?!");
+		
 		$currId = FilenameFromUrl();
 		if($currId=="")
 			$currId = "index";

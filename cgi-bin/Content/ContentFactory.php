@@ -1,6 +1,7 @@
 <?php
 
 include("ContentPage.php");
+include("MainNavi.php");
 
 class ContentFactory
 {
@@ -62,6 +63,22 @@ class ContentFactory
 			break;
 		}
 		return $p;
+	}
+	
+	public function &CreateMainNavi()
+	{
+		$dbConn = Aufenthalt::GetInstance()->GetConn();
+		$result = $dbConn->GetNavi();
+		$theMenu = new MainNavi();
+		$titlesAndLinks = array();
+		foreach($result as $entry)
+		{
+			// Menu entries
+			$pageIdentifier = $dbConn->GetPageIdentifier($entry["pageRef"]);
+			$titlesAndLinks[$entry['title']] = $pageIdentifier['identifier'];
+		}
+		$theMenu->SetTitles($titlesAndLinks);
+		return $theMenu;
 	}
 
 	public function CreateContentPages($id)

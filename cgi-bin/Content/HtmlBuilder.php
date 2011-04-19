@@ -15,7 +15,7 @@ class HtmlBuilder
 	
 	public function &Reset()
 	{
-//		print "Creating a HTML BUILDER!\n";
+		PrintHtmlComment("Creating a new HTML BUILDER!");
 		$this->doc = new DOMDocument();
 		return $this->doc;
 	}
@@ -94,6 +94,7 @@ class HtmlBuilder
 
 	public function Render()
 	{
+		PrintHtmlComment("render that bugger!");
 	    print $this->doc->C14N();
     }
 }

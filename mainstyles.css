@@ -24,6 +24,15 @@ body {
 	left:10px;
 	z-index:3;
 }
+.mainNaviEntry
+{
+	height:30px;
+	width:125px;
+	font-family:brush_font;
+	background-image:url('/images/layout/Navi.png');
+	padding-left:10px;
+	padding-top:20px;
+}
 
 #menu
 {

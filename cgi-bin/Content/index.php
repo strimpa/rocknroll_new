@@ -24,7 +24,7 @@
 		<select id="pagesDropDown" class="fullSizeControl">
 			<option></option>
 		</select>
-		<input id="pageTitle" class="fullSizeControl" type="text" readonly="true"/>
+		<input id="pageTitle" class="fullSizeControl" type="text" value="dummy" readonly="true" />
 	</fieldset>
 	<fieldset class="RightGroupBox">
 		<legend>Neu erstellen:</legend>

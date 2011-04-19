@@ -37,8 +37,6 @@ class ContentPage
 		if($this->isDirty)
 		{
 			$this->blob = $builder->Reset();
-
-	//		print("NAME:".$this->blob->nodeName."\n");
 			$this->menu->Render($this->blob);
 			$builder = ContentMgr::GetInstance()->GetBuilder();
 			$this->article->Render($this->blob);

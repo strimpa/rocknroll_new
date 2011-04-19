@@ -31,6 +31,17 @@ class DBController
 	{
 		return $this->meineVerbindung->GetTableContent("pages", "*", array("identifier"=>$id));
 	}
+	public function GetNavi()
+	{
+		return $this->meineVerbindung->GetTableContent("navigation", "*");
+	}
+	public function GetPageIdentifier($id)
+	{
+		$result = $this->meineVerbindung->GetTableContent("pages", array("identifier"), array("id"=>$id));
+		assert(count($result)==1);
+		$result= $result[0];
+		return $result;
+	}
 	
 	public function GetMenu($idval)
 	{

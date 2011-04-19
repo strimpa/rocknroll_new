@@ -51,11 +51,11 @@ body {
 .deleteButton
 {
 	border:1px solid red;
-	width:50px;
+	width:60px;
 }
 .editButton
 {
-	width:50px;
+	width:60px;
 }
 
 .LeftGroupBox
@@ -63,19 +63,19 @@ body {
 	position:absolute; 
 	left:0px;
 	top:5px; 
-	width:310px;
+	width:380px;
 }
 .RightGroupBox
 {
 	position:absolute; 
-	left:340px;
+	left:410px;
 	top:5px; 
-	width:270px;
+	width:200px;
 }
 
 .fullSizeControl
 {
-	width:150px;
+	width:140px;
 }
 
 .listBox
