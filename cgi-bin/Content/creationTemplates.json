@@ -245,8 +245,8 @@ Dialog.prototype.createDialog = function(doc, callback, presetValues)
 
 var PageCreationDialog = new Dialog("PageCreationDialog", "Neuen Inhalt einfuegen");
 PageCreationDialog.controls = new Array(
-		new TextField("identifier", "Der Titel in Menu falls gewuenscht."),
-		new TextField("title", 		"Die Ueberschrift fuer die Seite.")
+		new TextField("title", 		 "Die Ueberschrift fuer die Seite."),
+		new TextField("menuTitle", "Der Titel in Menu falls gewuenscht.")
 );
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 var SubMenuCreationDialog = new Dialog("SubMenuCreationDialog", "Neuen Menueintrag einfuegen");

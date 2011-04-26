@@ -43,9 +43,10 @@
 			{
 				$reqTuple = explode("=", $params["req"]);
 				$requirements = array($reqTuple[0]=>$reqTuple[1]);
-				PrintHtmlComment("edit:".$reqTuple[0].",".$reqTuple[1]);
-			}
+//				PrintHtmlComment("edit:".$reqTuple[0].",".$reqTuple[1]);
+				}
 			$result = Aufenthalt::GetInstance()->GetConn()->SetTableContent($query, array_keys($_POST), $requirements, array_values($_POST));
+			$result = Aufenthalt::GetInstance()->GetConn()->GetTableContent($query, array("id"), $requirements);
 		}
 		else
 		{

@@ -12,9 +12,9 @@ class Verbindung
 	private $db_name = 'rocknroll';
 	// User
 	// Domaingo: db85283
-	private $db_user = 'HR';
+	private $db_user = 'root';
 	// Passwort
-	private $db_pass = 'hr';
+	private $db_pass = '';
 	// server
 	private $con;
 	// instanz der Datenbank
@@ -144,7 +144,6 @@ class Verbindung
 
 	public function SetTableContent($table, $fields, $requirements = NULL, $values = NULL)
 	{
-        PrintHtmlComment("SetTableContent begin");
 		$backGabe = array();
 		$this->verbinde();
 		

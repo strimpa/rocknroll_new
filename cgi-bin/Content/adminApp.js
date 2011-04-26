@@ -47,7 +47,7 @@
 			$("#pagesDropDown").empty();
 			var optn = document.createElement("OPTION");
 		    $("#pagesDropDown").append(optn);
-		    $contentCache.find( 'identifier' ).each(function(index, value)
+		    $contentCache.find( 'title' ).each(function(index, value)
 		    {
 				optn = document.createElement("OPTION");
 				optn.textContent = $(this).text();
@@ -167,36 +167,52 @@
 		}
 		this.editContentHandler = function()
 		{
-			var oldIdentifier = $("#pagesDropDown").attr("value");
-			PageCreationDialog.createDialog(document, function()
+			var theTitle = $("#pagesDropDown").attr("value");
+			var selectedIndex = $("#pagesDropDown").attr("selectedIndex")-1;
+	    var pageId = $($contentCache.find( 'id' )[selectedIndex]).text();
+			$.fn.loadContent("navigation", function(naviResult)
 			{
-				var data = {};
-				PageCreationDialog.getData(data); 
-				var reqString = "identifier="+oldIdentifier;
-				var menuTitle = data['identifier'];
-				var pattern = /[^a-z^A-Z^_]/ig;
-				data['identifier'] = data['identifier'].replace(pattern, "_"); 
-				$.fn.loadContent("pages", function(result)
+		    var naviId = $(naviResult).find("id").text();
+				PageCreationDialog.createDialog(document, function()
 				{
-					alert(data['identifier']);
-					if(data['identifier'])
+					var data = {};
+					PageCreationDialog.getData(data);
+					var reqString = "id="+pageId;
+					var menuTitle = data['menuTitle'];
+					var pattern = /[^a-z^A-Z^_]/ig;
+	//				data['title'] = data['title'].replace(pattern, "_"); 
+					var pageData = {title:data['title']};
+					$.fn.loadContent("pages", function(result)
 					{
-						var thePageRef = $(result).find("max_id_").text();
-						var naviData = {title:menuTitle, pageRef:thePageRef};
-						$.fn.loadContent("navigation", contentEditHandler, naviData, "data", {write:true});
-					}
-					else
-						contentEditHandler(result);
-				}, data, "data", {edit:true, req:reqString});
-			}, {identifier:oldIdentifier, title:$("#pageTitle").attr("value")});
+						if(data['title'])
+						{
+							var thePageRef = $(result).find("id").text();
+							var naviData = {title:menuTitle};
+							var reqString = "id="+naviId;
+							$.fn.loadContent("navigation", contentEditHandler, naviData, "data", {write:true, req:reqString});
+						}
+						else
+							contentEditHandler(result);
+					}, pageData, "data", {edit:true, req:reqString});
+					var naviData = {title:menuTitle};
+					reqString = "pageRef="+pageId;
+					$.fn.loadContent("navigation", null, naviData, "data", {edit:true, req:reqString});
+				}, {title:theTitle, menuTitle:$("#pageTitle").attr("value")});
+			}, {pageRef:pageId}, "data");
 		}
 		this.deleteContentHandler = function()
 		{
 			var confirmation = confirm("Sind Sie sicher dass Sie den Inhalt loeschen wollen?");
 			if(!confirmation)
 				return;
-			var data = {identifier:$("#pagesDropDown").attr("value")};
-			$.fn.loadContent("pages", contentEditHandler, data, "data", {delete:true});
+			var selectedIndex = $("#pagesDropDown").attr("selectedIndex")-1;
+	    var pageId = $($contentCache.find( 'id' )[selectedIndex]).text();
+			var data = {id:pageId};
+			var navidata = {pageRef:pageId};
+			$.fn.loadContent("pages", function(result)
+			{
+				$.fn.loadContent("navigation", contentEditHandler, navidata, "data", {delete:true});
+			}, data, "data", {delete:true});
 		}
 
 		////////////////////////////////////////////////////////////////////////////////////////
