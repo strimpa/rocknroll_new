@@ -117,7 +117,6 @@
 			var myIndex = $($contentCache.find( 'id' )[selectedIndex]).text();
 			$.fn.loadContent("navigation", function(result)
 			{
-				output(result);
 				$("#pageTitle").attr("value", $(result).find( 'title' ).first().text());
 			}, {"pageRef":myIndex}, "xml");
 
@@ -140,7 +139,6 @@
 		}
 		function contentEditHandler(result)
 		{
-			output(result);
 			refreshPages(populateContentDropDown);
 		}
 		this.createContentHandler = function()
@@ -169,7 +167,7 @@
 		{
 			var theTitle = $("#pagesDropDown").attr("value");
 			var selectedIndex = $("#pagesDropDown").attr("selectedIndex")-1;
-	    var pageId = $($contentCache.find( 'id' )[selectedIndex]).text();
+			var pageId = $($contentCache.find( 'id' )[selectedIndex]).text();
 			$.fn.loadContent("navigation", function(naviResult)
 			{
 		    var naviId = $(naviResult).find("id").text();
@@ -184,19 +182,33 @@
 					var pageData = {title:data['title']};
 					$.fn.loadContent("pages", function(result)
 					{
-						if(data['title'])
+						// if existent - create, otherwise - delete
+						alert("menuTitle:"+data['menuTitle']);
+						if(data['menuTitle']!="")
 						{
-							var thePageRef = $(result).find("id").text();
-							var naviData = {title:menuTitle};
-							var reqString = "id="+naviId;
-							$.fn.loadContent("navigation", contentEditHandler, naviData, "data", {write:true, req:reqString});
+							// is navigation entry already existent?
+							var idTestData = {pageRef:pageId};
+							$.fn.loadContent("navigation", function(naviTestResult)
+							{
+								if($(naviTestResult).find("id").size()>0)
+								{
+									var naviData = {title:menuTitle};
+									var reqString = "pageRef="+pageId;
+									$.fn.loadContent("navigation", contentEditHandler, naviData, "data", {edit:true, req:reqString});
+								}
+								else
+								{
+									var naviData = {title:menuTitle, pageRef:pageId};
+									$.fn.loadContent("navigation", contentEditHandler, naviData, "data", {write:true});
+								}
+							}, idTestData, "data");
 						}
 						else
-							contentEditHandler(result);
+						{
+							var naviDelData = {pageRef:pageId};
+							$.fn.loadContent("navigation", contentEditHandler, naviDelData, "data", {delete:true});
+						}
 					}, pageData, "data", {edit:true, req:reqString});
-					var naviData = {title:menuTitle};
-					reqString = "pageRef="+pageId;
-					$.fn.loadContent("navigation", null, naviData, "data", {edit:true, req:reqString});
 				}, {title:theTitle, menuTitle:$("#pageTitle").attr("value")});
 			}, {pageRef:pageId}, "data");
 		}
@@ -242,7 +254,6 @@
 		}
 		function createMenuCallback(result)
 		{
-			output(result);
 			var selectedIndex = $("#pagesDropDown").attr("selectedIndex")-1;
 		    var menuRef = $($contentCache.find( 'menuRef' )[selectedIndex]).text();
 			output("Sub menu reference: "+menuRef);
@@ -406,7 +417,7 @@
 
 			optn = document.createElement("OPTION");
 		    $("#insertParagraphSelect").append(optn);
-		    output(response);
+		    //output(response);
 			$(response).find("row").each(function()
 		    {
 		    	var id = $(this).find( 'id').text();
@@ -438,6 +449,16 @@
 				metaObject[metaTuple[0]] = metaTuple[1];
 			}
 			return metaObject;
+		}
+		
+		function editTableTrigger(defaultData)
+		{
+			TableEntryDialog.createDialog(document, function()
+			{
+				var data = {}; 
+				TableEntryDialog.getData(data);
+				$.fn.loadContent(defaultData['table'], data, "data", {edit:true,req:("id="+defaultData['id'])});
+			}, defaultData);
 		}
 		
 		function renderPargraphHTML(contentDiv, paragraphData, paraIndex)
@@ -513,13 +534,13 @@
 			case "2":
 				if(metaData['table'])
 				{
+					var theTable = metaData['table'];
 					var tableDiv = document.createElement("div");
 					tableDiv.setAttribute("class", "adminTableDiv");
 					var table = document.createElement("table");
 					table.setAttribute("class", "adminTable");
 					$.fn.loadContent(metaData['table'], function(result)
 					{
-						output(result);
 						$(result).find("row").each(function()
 						{
 							var rowDiv = document.createElement("tr");
@@ -527,20 +548,16 @@
 							var editDiv = document.createElement("td");
 							editDiv.setAttribute("class", "editDiv");
 							editDiv.style.textAlign = "right";
-							var editButton = document.createElement("input");
-							editButton.setAttribute("type", "button");
-							editButton.setAttribute("value", "edit");
-							editButton.setAttribute("class", "editButton");
-							$(editButton).click(function()
-							{
-								
-							});
-							editDiv.appendChild(editButton);
-							var deleteButton = document.createElement("input");
-							deleteButton.setAttribute("type", "button");
-							deleteButton.setAttribute("value", "delete");
-							deleteButton.setAttribute("class", "deleteButton");
-							editDiv.appendChild(deleteButton);
+							var editEntryButton = document.createElement("input");
+							editEntryButton.setAttribute("type", "button");
+							editEntryButton.setAttribute("value", "edit");
+							editEntryButton.setAttribute("class", "editButton");
+							editDiv.appendChild(editEntryButton);
+							var deleteEntryButton = document.createElement("input");
+							deleteEntryButton.setAttribute("type", "button");
+							deleteEntryButton.setAttribute("value", "delete");
+							deleteEntryButton.setAttribute("class", "deleteButton");
+							editDiv.appendChild(deleteEntryButton);
 							rowDiv.appendChild(editDiv);
 							$(this).children().each(function()
 							{
@@ -550,6 +567,42 @@
 								rowDiv.appendChild(dataDiv);
 							});
 							table.appendChild(rowDiv);
+							// clck handlers
+							var defaultEditData = {
+								table:theTable,
+								id:$(this).find("id").text(),
+								category:$(this).find("category").text(),
+								title:$(this).find("title").text(),
+								date:$(this).find("date").text(),
+								description:$(this).find("description").text(),
+								venue:$(this).find("venue").text(),
+								time:$(this).find("time").text(),
+								misc:$(this).find("misc").text()
+							};
+							$(editEntryButton).click(function()
+							{
+								editTableTrigger(defaultEditData);
+							});
+							$(deleteEntryButton).click(function()
+							{
+								var selectedIndex = $("#pagesDropDown").attr("selectedIndex")-1;
+							    var paragraphString = $($contentCache.find( 'paragraphs' )[selectedIndex]).text();
+							    var pageIndex = $($contentCache.find( 'id' )[selectedIndex]).text();
+							    var paraArray = paragraphString.split(",");
+							    paraArray.splice(paraIndex, 1);
+							    for(p in paraArray)
+							    	if(paraArray[p]=="")
+							    		paraArray.splice(p, 1);
+								var pageData = {
+									paragraphs:paraArray.join(",")
+								};
+								alert("paraindex:"+paraIndex+", new para string:"+paraArray.join(","));
+								$.fn.loadContent("pages", function(result)
+								{
+									alert("Absatz erfolgreich geloescht.");
+									triggerParagraphCreation();
+								}, pageData, "data", {edit:true,req:("id="+pageIndex)});
+							});
 						});
 					}, {"category":metaData['category']}, "xml");
 					tableDiv.appendChild(table);
@@ -591,7 +644,6 @@
 				alert("paraindex:"+paraIndex+", new para string:"+paraArray.join(","));
 				$.fn.loadContent("pages", function(result)
 				{
-					output(result);
 					alert("Absatz erfolgreich geloescht.");
 					triggerParagraphCreation();
 				}, pageData, "data", {edit:true,req:("id="+pageIndex)});
@@ -600,7 +652,6 @@
 		}
 
 
-		var TableTypeStrings = ["Text mit Bild rechts","Text mit Bild links","Tabelle"];
 		function populateParagraphs()
 		{
 			$("#admincontent").empty();
@@ -622,7 +673,6 @@
 		    	$.fn.loadContent("paragraphs", function(result)
 		    	{
 		    		result = getXmlDocFromResponse(result);
-		    		output(result);
 					$(result).find("row").each(function()
 				    {
 //						alert("localParaIndex:"+$(this).find('id').text());
@@ -663,7 +713,6 @@
 			}
 			if(null==defaultData)
 				defaultData = {};
-			defaultData.type = TableTypeStrings.join(",");
 			ParagraphCreationDialog.createDialog(document, function()
 			{
 				var data = {}; 
@@ -679,7 +728,6 @@
 						picParams = {edit:true,req:"id="+picID};
 					$.fn.loadContent("pictures", function(result)
 					{
-						output(result);
 						var lastPicIndex = $(result).find("max_id_").text();
 						if(null!=picID)
 							lastPicIndex = picID;
@@ -695,7 +743,6 @@
 							paraParams = {edit:true,req:"id="+paraID};
 						$.fn.loadContent("paragraphs", function(result)
 						{
-							output(result);
 							var selectedIndex = $("#pagesDropDown").attr("selectedIndex")-1;
 						    var paragraphString = $($contentCache.find( 'paragraphs' )[selectedIndex]).text();
 						    var pageIndex = $($contentCache.find( 'id' )[selectedIndex]).text();
@@ -706,8 +753,7 @@
 							};
 							$.fn.loadContent("pages", function(result)
 							{
-								output(result);
-								alert("Content successfully created.");
+								output("Content successfully created.");
 								triggerParagraphCreation();
 							}, pageData, "data", {edit:true,req:("id="+pageIndex)});
 						}, paraData, "data", paraParams);
@@ -725,7 +771,6 @@
 			}
 			if(null==defaultData)
 				defaultData = {};
-			defaultData.type = TableTypeStrings.join(",");
 			var selectedIndex = $("#pagesDropDown").attr("selectedIndex")-1;
 		    var paragraphString = $($contentCache.find( 'paragraphs' )[selectedIndex]).text();
 		    var selectedNewValue = $("#insertParagraphSelect").attr("value");
@@ -747,7 +792,6 @@
 		    var pageIndex = $($contentCache.find( 'id' )[selectedIndex]).text();
 			$.fn.loadContent("pages", function(result)
 			{
-				output(result);
 				alert("Absatz eingefuegt.");
 				triggerParagraphCreation();
 			}, pageData, "data", {edit:true,req:("id="+pageIndex)});

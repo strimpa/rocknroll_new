@@ -4,14 +4,16 @@
 <head>
 <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
 <title>Adminbereich</title>
-<link href="../../mainStyles.css" rel="stylesheet" type="text/css" />
-<link href="../../adminStyles.css" rel="stylesheet" type="text/css" />
+<link href="../../css/mainStyles.css" rel="stylesheet" type="text/css" />
+<link href="../../css/adminStyles.css" rel="stylesheet" type="text/css" />
+<link href="../../css/dot-luv/jquery-ui-1.8.12.custom.css" rel="stylesheet" type="text/css" />
 
 <script type="text/javascript" src="../../script/jquery-1.5.1.min.js"></script>
 <script type="text/javascript" src="../../script/ui/jquery.ui.core.js"></script>
 <script type="text/javascript" src="../../script/ui/jquery.ui.widget.js"></script>
 <script type="text/javascript" src="../../script/ui/jquery.ui.button.js"></script>
 <script type="text/javascript" src="../../script/ui/jquery.ui.spinner.js"></script>
+<script type="text/javascript" src="../../script/ui/jquery.ui.datepicker.js"></script>
 <script type="text/javascript" src="creationTemplates.json"></script>
 <script type="text/javascript" src="adminApp.js"></script>
 </head>

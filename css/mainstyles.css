@@ -91,9 +91,11 @@ body {
 	z-index:5;
 */
 	padding:0px;
+}
+.paragraphContent
+{
 	overflow:auto;
 }
-
 .paragraphTitle
 {
 	text-align:left;

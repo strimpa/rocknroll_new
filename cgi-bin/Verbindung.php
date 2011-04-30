@@ -12,9 +12,9 @@ class Verbindung
 	private $db_name = 'rocknroll';
 	// User
 	// Domaingo: db85283
-	private $db_user = 'root';
+	private $db_user = 'HR';
 	// Passwort
-	private $db_pass = '';
+	private $db_pass = 'hr';
 	// server
 	private $con;
 	// instanz der Datenbank

@@ -5,7 +5,8 @@ interface iParagraph
 {
 	const eTYPE_PIC_RIGHT=0, eTYPE_PIC_LEFT=1, eTYPE_TABLE=2;
 	const PARAGRAPH_PADDING = 15;
-
+	const TITLE_HEIGHT = 60;
+	
 	public function InterpreteMetaData($data);
 	
 	public function Init($header, $meta, $content);
@@ -73,19 +74,24 @@ class PicPara implements iParagraph
 
 		$title = $builder->AddTag("p", "paragraph_title_".MakeSafeString($this->header), "paragraphTitle", $this->header);
 		$div->appendChild($title);
-		$content = $builder->AddTag("p", "paragraph_content_".MakeSafeString($this->header), "paragraphContent");
+		
+		$content = $builder->AddTag("div", "paragraph_content_".MakeSafeString($this->header), "paragraphContent");
+		$contentHeight = ($this->height-iParagraph::TITLE_HEIGHT);
+		$builder->AddStyle($content, "height:".$contentHeight."px;");
+		$text = $builder->AddTag("p", "paragraph_content_".MakeSafeString($this->header), "paragraphText");
 		$pic = $builder->AddImage($this->picUrl, $this->picAlign);
-		$div->appendChild($pic);
-		$div->appendChild($content);
+		$content->appendChild($pic);
+		$content->appendChild($text);
 		
 //		$importdoc = new DOMDocument();
 //		$importdoc->loadXML("<balls>".$this->content."</balls>");
 //		$doc = $builder->GetDoc();
 //		$text = $doc->importNode($importdoc->firstChild, true);
 		
-		$content->nodeValue = $this->content;
+		$text->nodeValue = $this->content;
 //		$builder->AddText($content, $this->content);//DitchQuotes(
 
+		$div->appendChild($content);
 		$parentNode->appendChild($div);
 		
 		$currentOffset += ($this->height + iParagraph::PARAGRAPH_PADDING);

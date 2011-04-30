@@ -30,11 +30,7 @@
 		}
 		else if(isset($params["delete"]) && $params["delete"]==true)
 		{
-			PrintHtmlComment("delete:".$_POST['identifier']);
-			if($query=="pages")
-			{
-				$result = Aufenthalt::GetInstance()->GetConn()->DropTableContent($query, $_POST);
-			}
+			$result = Aufenthalt::GetInstance()->GetConn()->DropTableContent($query, $_POST);
 		}
 		else if(isset($params["edit"]) && $params["edit"]==true)
 		{

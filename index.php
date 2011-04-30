@@ -3,7 +3,7 @@
 
 <head>
 <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-<link href="/mainstyles.css" rel="stylesheet" type="text/css" />
+<link href="/css/mainstyles.css" rel="stylesheet" type="text/css" />
 </head>
 
 <body>
