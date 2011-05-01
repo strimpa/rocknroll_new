@@ -21,7 +21,7 @@ DataEntity.prototype.createControl = function(doc, presetValues)
 DataEntity.prototype.init = function()
 {
 }
-DataEntity.prototype.create = function(doc, presetValues)
+DataEntity.prototype.create = function(doc, presetValues, presetOptions)
 {
 	var controlDiv = doc.createElement("div");
 	var label = doc.createElement("div");
@@ -29,14 +29,14 @@ DataEntity.prototype.create = function(doc, presetValues)
 	label.innerHTML = this.name;
 	controlDiv.appendChild(label);
 	
-	this.createControl(doc, presetValues);
+	this.createControl(doc, presetValues, presetOptions);
 	if(null!=this.control)
 		controlDiv.appendChild(this.control);
 	
 	var helpIcon = doc.createElement("img");
 	helpIcon.setAttribute("class", "helpIcon");
 	helpIcon.setAttribute("src", "../../images/images/question_mark.jpg");
-	helpIcon.setAttribute("title", this.helpString);
+	controlDiv.setAttribute("title", this.helpString);
 	controlDiv.appendChild(helpIcon);
 	
 	this.init();
@@ -68,17 +68,20 @@ TextField.prototype.getData = function(data)
 	data[this.name] = this.control.value;
 }
 ////////////////////////////////////////////////////////////////////////////////////////
-var ComboBox = function(n, h, d)
+var ComboBox = function(n, h, d, returnIndex)
 {
+	this.returnIndex = returnIndex;
 	// contructor
 	DataEntity.call(this, n, h, d);
 }
 ComboBox.prototype = new DataEntity;
-ComboBox.prototype.createControl = function(doc, presetValues)
+ComboBox.prototype.createControl = function(doc, presetValues, presetOptions)
 {
 	this.control =  doc.createElement("select");
 	this.control.setAttribute("id", this.name+"_edit");
 	this.control.setAttribute("class", "creationControl");
+	if(null!=presetOptions && null!=presetOptions[this.name])
+		this.staticPresetData = presetOptions[this.name];
 	if(null!=this.staticPresetData)
 	{
 		var entries = this.staticPresetData.split(",");
@@ -97,7 +100,10 @@ ComboBox.prototype.createControl = function(doc, presetValues)
 
 ComboBox.prototype.getData = function(data)
 {
-	data[this.name] = this.control.value;
+	if(this.returnIndex)
+		data[this.name] = this.control.selectedIndex;
+	else
+		data[this.name] = this.control.value;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -163,7 +169,7 @@ DateField.prototype.createControl = function(doc, presetValues)
 }
 DateField.prototype.init = function()
 {
-	$(this.control).datepicker();
+	$(this.control).datepicker({dateFormat:'yy-mm-dd'});
 //	if(this.control.getAttribute("value")=="")
 //		$(this.control).datepicker("value", 300);
 }
@@ -191,6 +197,8 @@ TimeField.prototype.createControl = function(doc, presetValues)
 	{
 		this.control.setAttribute("value", presetValues[this.name]);
 	}
+	else
+		this.control.setAttribute("value", "19:00:00");
 }
 TimeField.prototype.init = function()
 {
@@ -214,7 +222,7 @@ Group.prototype = new DataEntity;
 Group.prototype.init = function()
 {
 };
-Group.prototype.create = function(doc, presetValues)
+Group.prototype.create = function(doc, presetValues, presetOptions)
 {
 	this.control = doc.createElement("fieldset");
 	this.control.setAttribute("id", this.name+"_edit");
@@ -223,7 +231,7 @@ Group.prototype.create = function(doc, presetValues)
 	this.control.appendChild(boxLegend);
 	for(d in this.controls)
 	{
-		this.control.appendChild(this.controls[d].create(doc, presetValues));
+		this.control.appendChild(this.controls[d].create(doc, presetValues, presetOptions));
 	}
 	
 	this.init(presetValues);
@@ -253,14 +261,14 @@ function close()
 	$("#creationBg").remove();
 	$(".creationBox").remove();
 }
-Dialog.prototype.createDialog = function(doc, callback, presetValues)
+Dialog.prototype.createDialog = function(doc, callback, presetValues, presetOptions)
 {
 	var bg = doc.createElement("div");
 	bg.setAttribute("id","creationBg");
 	var holder = doc.createElement("div");
 	holder.setAttribute("class","creationBox");
 
-	var childControls = this.create(doc, presetValues);
+	var childControls = this.create(doc, presetValues, presetOptions);
 	holder.appendChild(childControls);
 	
 	this.confirm = function()
@@ -368,9 +376,10 @@ TableGroup.init = function()
 var TableEntryDialog = new Dialog("TableEntryDialog", "In Tabelle einfuegen.");
 TableEntryDialog.controls = new Array(
 		new ComboBox("category",  "Die Kategorie des Eintrages."),
+		new TextField("newCategory",  "Neue Kategorie erstellen. Ueberschreibt obige Auswahl."),
 		new TextField("title", "Der Titel des Eintrages."),
 		new DateField("date", "Das Datum des Events."),
-		new ComboBox("type",  "Typ der Veranstaltung.", "Ausstellung,Konzert,Jubilaeum"),
+		new ComboBox("type",  "Typ der Veranstaltung.", "Ausstellung,Konzert,Jubilaeum", true),
 		new TextField("description", "Beschreibung des Events."),
 		new TextField("venue", "Ort des Events."),
 		new TimeField("time", "Anfangszeit des Events."),

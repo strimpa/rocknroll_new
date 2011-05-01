@@ -237,7 +237,11 @@ a:hover{
 /*
 ** Table formatting
 */
-
+.contentTable
+{
+/*	border:1px solid black; */
+	width:600px;
+}
 .tableCellFontFancy
 {
 	font-family:brush-font;

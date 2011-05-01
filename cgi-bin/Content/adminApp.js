@@ -271,7 +271,8 @@
 		    {
 				allTitles.push($(this).text());
 		    });
-			var presetValues = {url:allTitles.join(",")};
+		    
+			var presetOptions = {url:allTitles.join(",")};
 			SubMenuCreationDialog.createDialog(document, function(){
 				// prepare data
 				/////////////////////////
@@ -293,7 +294,7 @@
 			    var menuRef = $($contentCache.find( 'menuRef' )[selectedIndex]).text();
 
 			    $.fn.loadContent("submenus", createMenuCallback, data, "data", {edit:true,req:("id="+menuRef)});
-			}, presetValues);
+			}, null, presetOptions);
 		}
 		this.editMenuEntryHandler = function()
 		{
@@ -304,10 +305,13 @@
 			}
 			var allTitles = [];
 			$("#paragraphDropDown").find( 'OPTION' ).each(function(index, value)
-		    {
+	    {
 				allTitles.push($(this).text());
-		    });
-			var presetValues = {url:allTitles.join(",")};
+	    });
+			var presetOptions = {url:allTitles.join(",")};
+			var index = $("#submenuEntries").attr("selectedIndex");
+			var selection = element("submenuEntries").children[index].innerHTML;
+			var presetValues = {title:selection, url:currSubMenuUrls[index]};
 			SubMenuCreationDialog.createDialog(document, function(){
 				// prepare data
 				/////////////////////////
@@ -320,16 +324,15 @@
 				}
 				var newdata = {}; 
 				SubMenuCreationDialog.getData(newdata);
-				entryData.push(newdata['title']);
-				urls.push(newdata['url']);
-				var data = {entries:entryData.join(","), links:urls.join(",")};
+				currSubMenuUrls[index] = newdata['url'];
+				var data = {entries:entryData.join(","), links:currSubMenuUrls.join(",")};
 
 				// Get menu id to update
 				var selectedIndex = $("#pagesDropDown").attr("selectedIndex")-1;
 			    var menuRef = $($contentCache.find( 'menuRef' )[selectedIndex]).text();
 
 			    $.fn.loadContent("submenus", createMenuCallback, data, "data", {edit:true,req:("id="+menuRef)});
-			}, presetValues);
+			}, presetValues, presetOptions);
 		}
 		this.selectParaForSubMenu = function()
 		{
@@ -457,16 +460,22 @@
 			{
 				var data = {}; 
 				TableEntryDialog.getData(data);
-				$.fn.loadContent(defaultData['table'], data, "data", {edit:true,req:("id="+defaultData['id'])});
+				var theId = defaultData['id'];
+				if(data['newCategory']!="")
+					data['category'] = data['newCategory'];
+				data.newCategory = null;	
+				if(null!=theId)
+					$.fn.loadContent(defaultData['table'], triggerParagraphCreation, data, "data", {edit:true,req:("id="+theId)});
+				else
+					$.fn.loadContent(defaultData['table'], triggerParagraphCreation, data, "data", {write:true});
 			}, defaultData);
 		}
 		
-		function renderPargraphHTML(contentDiv, paragraphData, paraIndex)
+		function renderPargraphHTML(paraDiv, paragraphData, paraIndex)
 		{
 			output(paragraphData.find("meta").text());
 			metaData = interpreteMetaData(paragraphData.find("meta").text());
 
-			var paraDiv = document.createElement("div");
 			paraDiv.setAttribute("class", "adminParagraph");
 			paraDiv.style.height = metaData['height'] + "px";
 //			heightobj.offset += parseInt(metaData['height']);
@@ -537,6 +546,18 @@
 					var theTable = metaData['table'];
 					var tableDiv = document.createElement("div");
 					tableDiv.setAttribute("class", "adminTableDiv");
+
+					var addEntryButton = document.createElement("input");
+					addEntryButton.setAttribute("type", "button");
+					addEntryButton.setAttribute("value", "Neu");
+					addEntryButton.setAttribute("class", "editButton");
+					tableDiv.appendChild(addEntryButton);
+
+					$(addEntryButton).click(function()
+					{
+						editTableTrigger({table:theTable});
+					});
+
 					var table = document.createElement("table");
 					table.setAttribute("class", "adminTable");
 					$.fn.loadContent(metaData['table'], function(result)
@@ -567,10 +588,11 @@
 								rowDiv.appendChild(dataDiv);
 							});
 							table.appendChild(rowDiv);
+							var eventId = $(this).find("id").text();
 							// clck handlers
 							var defaultEditData = {
 								table:theTable,
-								id:$(this).find("id").text(),
+								id:eventId,
 								category:$(this).find("category").text(),
 								title:$(this).find("title").text(),
 								date:$(this).find("date").text(),
@@ -585,23 +607,15 @@
 							});
 							$(deleteEntryButton).click(function()
 							{
-								var selectedIndex = $("#pagesDropDown").attr("selectedIndex")-1;
-							    var paragraphString = $($contentCache.find( 'paragraphs' )[selectedIndex]).text();
-							    var pageIndex = $($contentCache.find( 'id' )[selectedIndex]).text();
-							    var paraArray = paragraphString.split(",");
-							    paraArray.splice(paraIndex, 1);
-							    for(p in paraArray)
-							    	if(paraArray[p]=="")
-							    		paraArray.splice(p, 1);
-								var pageData = {
-									paragraphs:paraArray.join(",")
-								};
-								alert("paraindex:"+paraIndex+", new para string:"+paraArray.join(","));
-								$.fn.loadContent("pages", function(result)
+								var confirmation = confirm("Sind Sie sicher dass Sie den Eintrag loeschen wollen?");
+								if(confirmation)
 								{
-									alert("Absatz erfolgreich geloescht.");
-									triggerParagraphCreation();
-								}, pageData, "data", {edit:true,req:("id="+pageIndex)});
+									$.fn.loadContent(theTable, function(result)
+									{
+										alert("Eintrag erfolgreich geloescht.");
+										triggerParagraphCreation();
+									}, {id:eventId}, "data", {delete:true});
+								}
 							});
 						});
 					}, {"category":metaData['category']}, "xml");
@@ -648,7 +662,6 @@
 					triggerParagraphCreation();
 				}, pageData, "data", {edit:true,req:("id="+pageIndex)});
 			});
-			contentDiv.appendChild(paraDiv);
 		}
 
 
@@ -670,13 +683,15 @@
 
 		    for(paraIndex in paraArray)
 		    {
+					var paraDiv = document.createElement("div");
+					paraDiv.setAttribute("id", "paragraph_"+paraArray[paraIndex]);
 		    	$.fn.loadContent("paragraphs", function(result)
 		    	{
 		    		result = getXmlDocFromResponse(result);
-					$(result).find("row").each(function()
+						$(result).find("row").each(function()
 				    {
 //						alert("localParaIndex:"+$(this).find('id').text());
-						var localParaIndex = paraArray.indexOf($(this).find('id').text())+1;
+							var localParaIndex = paraArray.indexOf($(this).find('id').text());
 //				    	output("id:"+$(this).find('id').text());
 				    	$(this).find('title').each(function(index, value)
 					    {
@@ -687,9 +702,12 @@
 					    
 					    // paragraph itself
 					    var reverseIndex = paraArray.length-localParaIndex;
-					    renderPargraphHTML(contentDiv, $(this), reverseIndex);
+					    var myParagraphId = $(this).find("id").first().text();
+					    var myParagraph = element("paragraph_"+myParagraphId);
+					    renderPargraphHTML(myParagraph, $(this), localParaIndex);
 					});
 		    	}, {id:paraArray[paraIndex]}, "data");
+					contentDiv.appendChild(paraDiv);
 		    }
 			$("#admincontent").append(contentDiv);
 		}
@@ -759,6 +777,36 @@
 						}, paraData, "data", paraParams);
 					}, picdata, "data", picParams);
 				}
+				else
+				{
+					// Tabelle creation
+					var metaString = "height="+data['height']+";table="+data['table']+";category="+data['category'];
+					var paraData = {
+						title:data['title'],
+						type:TableTypeStrings.indexOf(data['type']),
+						content:data['content'],
+						meta:metaString
+					};
+					var paraParams = {write:true};
+					if(paraID!=null)
+						paraParams = {edit:true,req:"id="+paraID};
+					$.fn.loadContent("paragraphs", function(result)
+					{
+						var selectedIndex = $("#pagesDropDown").attr("selectedIndex")-1;
+					    var paragraphString = $($contentCache.find( 'paragraphs' )[selectedIndex]).text();
+					    var pageIndex = $($contentCache.find( 'id' )[selectedIndex]).text();
+						var lastParaIndex = $(result).find("max_id_").text();
+						paragraphString += ","+lastParaIndex;
+						var pageData = {
+							paragraphs:paragraphString
+						};
+						$.fn.loadContent("pages", function(result)
+						{
+							output("Content successfully created.");
+							triggerParagraphCreation();
+						}, pageData, "data", {edit:true,req:("id="+pageIndex)});
+					}, paraData, "data", paraParams);
+				}
 			}, defaultData);
 		}
 				
@@ -796,6 +844,7 @@
 				triggerParagraphCreation();
 			}, pageData, "data", {edit:true,req:("id="+pageIndex)});
 		}
+		
 		////////////////////////////////////////////////////////////////////////////////////////
 		// Entry point
 		////////////////////////////////////////////////////////////////////////////////////////

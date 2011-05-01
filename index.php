@@ -4,6 +4,8 @@
 <head>
 <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
 <link href="/css/mainstyles.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="/script/jquery-1.5.1.min.js"></script>
+<script type="text/javascript" src="/script/mainScript.js"></script>
 </head>
 
 <body>
@@ -51,6 +53,5 @@
 	require_once("cgi-bin/Content/ContentMgr.php");
 	ContentMgr::GetInstance()->RenderContent();
 ?>
-
 </body>
 </html>

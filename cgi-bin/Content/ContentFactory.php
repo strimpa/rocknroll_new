@@ -37,8 +37,11 @@ class ContentFactory
 	
 	public function AddMenuCallback($target, $params)
 	{
-		$mt = new MenuTuple($params[0], $params[1]);
-		$target->AddMenuEntry($mt);
+		if($params[0]!="")
+		{
+			$mt = new MenuTuple($params[0], $params[1]);
+			$target->AddMenuEntry($mt);
+		}
 	}
 
 	public function CreateParagraph($paraResult)

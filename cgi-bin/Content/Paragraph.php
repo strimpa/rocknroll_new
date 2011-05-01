@@ -72,8 +72,11 @@ class PicPara implements iParagraph
 		$div = $builder->AddTag("div", "paragraph_".MakeSafeString($this->header), "paragraph");
 		$builder->AddStyle($div, $this->CreateStyleString($currentOffset));
 
-		$title = $builder->AddTag("p", "paragraph_title_".MakeSafeString($this->header), "paragraphTitle", $this->header);
-		$div->appendChild($title);
+		if(""!=$this->header)
+		{
+			$title = $builder->AddTag("p", "paragraph_title_".MakeSafeString($this->header), "paragraphTitle", $this->header);
+			$div->appendChild($title);
+		}
 		
 		$content = $builder->AddTag("div", "paragraph_content_".MakeSafeString($this->header), "paragraphContent");
 		$contentHeight = ($this->height-iParagraph::TITLE_HEIGHT);
@@ -171,6 +174,16 @@ class TablePara implements iParagraph
 				$cs = $currRoot->getAttribute("colspan");
 				if(isset($cs) && $cs!="")
 					$myElement->setAttribute("colspan", $cs);
+
+				// randoms
+				if(preg_match("/eventShowMore/", $presetClass))
+				{
+					$infoElement = $doc->createElement("a");
+					$infoElement->nodeValue = "Info";
+//					$infoElement->setAttribute("href", "");
+					$infoElement->setAttribute("class", "infoDiv");
+					$myElement->appendChild($infoElement);
+				}
 					
 				$type = $currRoot->getAttribute("type");
 					
@@ -226,8 +239,11 @@ class TablePara implements iParagraph
 		$div = $builder->AddTag("div", "paragraph_".MakeSafeString($this->header), "paragraph");
 		$builder->AddStyle($div, $this->CreateStyleString($currentOffset));
 
-		$title = $builder->AddTag("p", "paragraph_title_".MakeSafeString($this->header), "paragraphTitle", $this->header);
-		$div->appendChild($title);
+		if(""!=$this->header)
+		{
+			$title = $builder->AddTag("p", "paragraph_title_".MakeSafeString($this->header), "paragraphTitle", $this->header);
+			$div->appendChild($title);
+		}
 		$content = $builder->AddTag("p", "paragraph_content_".MakeSafeString($this->header), "paragraphContent");
 		
 		$configXML = new DOMDocument();
@@ -242,6 +258,7 @@ class TablePara implements iParagraph
 		
 		$table = $doc->createElement("table");
 		$table->setAttribute("table-layout", "fixed");
+		$table->setAttribute("class", "contentTable");
 		foreach($dbResult as $data)
 		{
 			$this->RenderXMLNode($doc, $table, $root, $data);

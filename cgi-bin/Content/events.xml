@@ -9,7 +9,7 @@
 	</row>
 	<row class="extendable tableTonedBG">
 		<data class="eventDescription tableCellFontNormal" type="string">description</data>
-		<data class="eventMisc" type="date">
+		<data>
 			<div class="eventLocation tableCellFontNormal" type="geo">location</div>
 			<div class="eventTime tableCellFontNormal" type="time">time</div>
 			<div class="eventMisc tableCellFontNormal" type="string">misc</div>

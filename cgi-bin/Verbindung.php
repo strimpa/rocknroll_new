@@ -12,9 +12,9 @@ class Verbindung
 	private $db_name = 'rocknroll';
 	// User
 	// Domaingo: db85283
-	private $db_user = 'HR';
+	private $db_user = 'root';
 	// Passwort
-	private $db_pass = 'hr';
+	private $db_pass = '';
 	// server
 	private $con;
 	// instanz der Datenbank
@@ -165,6 +165,8 @@ class Verbindung
         $sql .= '` SET '; 
         for($fieldIndex = 0; $fieldIndex<count($fields);$fieldIndex++)
         {
+        	if('null'==$values[$fieldIndex])
+        		continue;
         	if($fieldIndex>0)
         		$sql .= ",";
         	$sql .= "`".$fields[$fieldIndex]."` = '".$values[$fieldIndex]."'";

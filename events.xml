@@ -7,8 +7,8 @@
 		<data class="eventVenue tableCellFontNormal" type="string">venue</data>
 		<data class="eventShowMore tableCellFontFancy" type="empty"></data>
 	</row>
-	<row class="extendable tableTonedBG">
-		<data class="eventMisc extendable" type="date">
+	<row class="tableTonedBG">
+		<data class="eventMisc" type="date" colspan="3">
 			<div class="extendable">
 				<div class="eventDescription tableCellFontNormal" type="string">description</div>
 				<div class="eventLocation tableCellFontNormal" type="geo">location</div>

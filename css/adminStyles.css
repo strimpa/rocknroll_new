@@ -133,7 +133,7 @@ body {
 /*overrides*/
 .adminTableDiv
 {
-	overflow:auto;
+	overflow:show;
 	width:600px;
 }
 .adminTable
