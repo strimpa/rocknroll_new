@@ -80,12 +80,13 @@
 						$fieldName = $keyArray[$colIndex];
 						$tagName = MakeSafeTagName($fieldName);
 						$col = $doc->createElement($tagName);
-						$importdoc = new DOMDocument();
-						$importdoc->loadXML("<balls>".$row[$fieldName]."</balls>");
-						$print = $row[$fieldName];
-						$text = $doc->importNode($importdoc->firstChild, true);
-		//				$text = $doc->createTextNode($row[$fieldName]);
-						$col->nodeValue = $text->nodeValue;
+//						$importdoc = new DOMDocument();
+//						$importdoc->loadXML("<balls>".$row[$fieldName]."</balls>");
+//						$print = $row[$fieldName];
+
+//						$text = $doc->importNode($importdoc->firstChild, true);
+//						$text = $doc->createTextNode($row[$fieldName]);
+						$col->nodeValue = $row[$fieldName];
 						$currRow->appendChild($col);
 					}
 		//			print("<test>".$currRow->nodeValue."</test>");
@@ -94,10 +95,10 @@
 				$rootElem->appendChild($currRow);
 			}
 		
-			$output = $doc->saveXML();
+			$output = $doc->C14N();
 	//		$output = preg_replace("/[\n\r]/", "", $output);
 			print $output;
-//			PrintHtmlComment($print);
+	//			PrintHtmlComment($print);
 		}
 	}
 	else

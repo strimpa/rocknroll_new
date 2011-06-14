@@ -29,9 +29,9 @@ body {
 	height:30px;
 	width:125px;
 	font-family:brush_font;
-	background-image:url('/images/layout/Navi.png');
+	background:url('/images/layout/Navi.png') no-repeat;
 	padding-left:10px;
-	padding-top:20px;
+	padding-top:15px;
 }
 
 #menu
@@ -55,7 +55,7 @@ body {
 {
 	position:absolute;
 	background-color:#01274C;
-	top:200px;
+	top:202px;
 	left:112px;
 	width:625px;
 	height:auto;
@@ -64,7 +64,7 @@ body {
 	padding-top:5px;
 	font-family:Arial, Helvetica, sans-serif;
 	font-size:12px;
-	color:#A3BADB;
+	color:#BBCCDB;
 	z-index:1;
 }
 
@@ -82,11 +82,11 @@ body {
 .paragraph
 {
 	font-family:"Lucida Sans", "Lucida Sans Regular", "Lucida Grande", "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
-	position:absolute;
+/*	position:absolute; 
 	left:68px;
 	width:620px;
 	top:0px;
-/*	
+	
 	border:thin black solid; 
 	z-index:5;
 */
@@ -237,6 +237,12 @@ a:hover{
 /*
 ** Table formatting
 */
+
+tr
+{
+	vertical-align:text-top;	
+}
+
 .contentTable
 {
 /*	border:1px solid black; */
@@ -258,6 +264,11 @@ a:hover{
 	background:url('/images/images/Elements_09.png') no-repeat;
 	overflow:visible;
 	width:50px;
+	vertical-align:top;
+}
+.eventType
+{
+	vertical-align:top;
 }
 .extendable
 {
@@ -272,6 +283,15 @@ a:hover{
 {
 	background-color:#073869;
 }
+
+.orderPersonTable
+{
+	border:none;
+}
+.orderPersonTableData
+{
+	border:1px solid #BBCCDB;
+}
 /*
 ** classes
 */
@@ -284,10 +304,15 @@ a:hover{
 {
 	position:absolute;
 	left:180px;
-	background:url("images/images/Elements_03.png") no-repeat;
+	background:url("/images/images/Elements_03.png") no-repeat;
 	padding:5px;
 	width:200px;
 	height:31px;
 	z-index:10;
 	font-family:"Lucida Sans", "Lucida Sans Regular", "Lucida Grande", "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
+}
+
+.errorText
+{
+	color:#FF0000;
 }

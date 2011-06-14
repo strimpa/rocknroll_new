@@ -31,7 +31,7 @@ class Article
 		{
 		    $para->Render($contentDiv, $currentOffset);
 		}	
-		$builder->AddStyle($contentDiv, ("height:".$currentOffset."px;"));
+//		$builder->AddStyle($contentDiv, ("height:".$currentOffset."px;"));
 	}
 	
 	public function Render(&$parentNode)

@@ -24,6 +24,7 @@ DataEntity.prototype.init = function()
 DataEntity.prototype.create = function(doc, presetValues, presetOptions)
 {
 	var controlDiv = doc.createElement("div");
+	controlDiv.setAttribute("class", "controlDiv");
 	var label = doc.createElement("div");
 	label.setAttribute("class", "creationLabel");
 	label.innerHTML = this.name;
@@ -35,7 +36,7 @@ DataEntity.prototype.create = function(doc, presetValues, presetOptions)
 	
 	var helpIcon = doc.createElement("img");
 	helpIcon.setAttribute("class", "helpIcon");
-	helpIcon.setAttribute("src", "../../images/images/question_mark.jpg");
+	helpIcon.setAttribute("src", "../../images/images/question_mark.png");
 	controlDiv.setAttribute("title", this.helpString);
 	controlDiv.appendChild(helpIcon);
 	
@@ -64,6 +65,28 @@ TextField.prototype.createControl = function(doc, presetValues)
 }
 
 TextField.prototype.getData = function(data)
+{
+	data[this.name] = this.control.value;
+}
+////////////////////////////////////////////////////////////////////////////////////////
+var TextArea = function(n, h, d)
+{
+	// contructor
+	DataEntity.call(this, n, h, d);
+}
+TextArea.prototype = new DataEntity;
+TextArea.prototype.createControl = function(doc, presetValues)
+{
+	this.control =  doc.createElement("textarea");
+	this.control.setAttribute("id", this.name+"_edit");
+	this.control.setAttribute("class", "creationControl");
+	if(null!=presetValues && null!=presetValues[this.name])
+	{
+		this.control.value = presetValues[this.name];
+	}
+}
+
+TextArea.prototype.getData = function(data)
 {
 	data[this.name] = this.control.value;
 }
@@ -320,7 +343,7 @@ var PicTextGroup = new Group("picTextGroup", "Absatz spezifische Inhalte");
 PicTextGroup.controls = new Array(
 		new TextField("picUrl", "Verwendetes Bild."),
 		new TextField("picTitle", "Untertitel des verwendeten Bildes."),
-		new TextField("content",  "Der Inhaltstext.")
+		new TextArea("content",  "Der Inhaltstext.")
 );
 var TableGroup = new Group("tableGroup", "Absatz spezifische Inhalte");
 TableGroup.controls = new Array(

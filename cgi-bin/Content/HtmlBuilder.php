@@ -15,14 +15,22 @@ class HtmlBuilder
 	
 	public function &Reset()
 	{
-		PrintHtmlComment("Creating a new HTML BUILDER!");
+		PrintHtmlComment("Creating a new DOMDocument!");
 		$this->doc = new DOMDocument();
+		if($this->doc==NULL)
+			Print("doc==NULL:");
 		return $this->doc;
 	}
 	
 	public function &GetDoc()
 	{
-		return $this->doc;
+		if(NULL==$this->doc)
+		{
+			$doc = $this->Reset();
+			return $doc;
+		}
+		else
+			return $this->doc;
 	}
 	public function &GetRoot()
 	{
@@ -47,7 +55,12 @@ class HtmlBuilder
 
 	public function AddTag($tag, $id=NULL, $class=NULL, $inhalt=NULL)
 	{
-	    $div = $this->doc->createElement( $tag );
+		if(NULL==$this->GetDoc())
+		{
+			Print("no doc!");
+			return NULL;
+		}
+	    $div = $this->GetDoc()->createElement( $tag );
 	    if(NULL!=$id)
 		    $div->setAttribute("id", $id);
 	    if(NULL!=$class)

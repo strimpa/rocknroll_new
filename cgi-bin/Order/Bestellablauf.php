@@ -32,23 +32,90 @@ class BestellAblauf{
 		}else return 1;
 	}
 	
-	function aktuellerBestellSchritt(){
+	function InsertPostVars(&$text)
+	{
+		$pattern = "/%%Preis\((\d+)\)%%/";
+		$text = preg_replace_callback($pattern, "GetPrice", $text);
+		$pattern = "/%%ServerVar\(([^\)]+)\)%%/";
+		$text = preg_replace_callback($pattern, "GetServerVars", $text);
+		$pattern = "/<([^\s]+)\s.+id=\"([^\"]+)\"[^>]+>/";
+		$text = preg_replace_callback($pattern, "GetPostVarValue", $text);
+		//		printf(" %4.2f &euro; ", $_SESSION['aufenthalt']->aktuellerBestellAblauf->preise[9]);
+	}
+	
+	function importHTML($filename, &$parentNode)
+	{
+		PrintHtmlComment("Loading ".$filename);
+		$importdoc = new DOMDocument();
+		$thePath = pathinfo(__FILE__,PATHINFO_DIRNAME);
+		$htmlString = file_get_contents($thePath."/".$filename);
+		$this->InsertPostVars($htmlString);
+		if($importdoc->loadHTML($htmlString))//$thePath."/".$filename))//"<balls>".$this->content."</balls>");
+		{
+			$doc = $parentNode->ownerDocument;
+			$text = $doc->importNode($importdoc->documentElement, true);
+			$parentNode->appendChild($text);
+		}
+	}
+	
+	function addResetButton(&$parentNode)
+	{
+		$text = 
+		'<FORM METHOD="POST" action="%%ServerVar(REQUEST_URI)%%" onReset="return confirm(\"Do you really want to reset the form?\")">
+		<input type="hidden" name="resetBestellung" id="resetBestellung" value="true" />
+	 	<input style="width:200px; height:25px; color:#FF0000" TYPE=SUBMIT VALUE="Bestellung neu starten." />
+	 	</FORM>';
+		$this->addTextNode($text, $parentNode);
+	}
+
+	function addTextNode($text, &$parentNode)
+	{
+		$importdoc = new DOMDocument();
+		$this->InsertPostVars($text);
+		if($importdoc->loadHTML($text))
+		{
+			$doc = $parentNode->ownerDocument;
+			$textNode = $doc->importNode($importdoc->documentElement, true);
+			$parentNode->appendChild($textNode);
+		}
+	}
+	
+	function addErrorText($errorText, &$parentNode)
+	{
+		$importdoc = new DOMDocument();
+		$doc = $parentNode->ownerDocument;
+		$errorTextHolder = $doc->createElement("ul");
+		$errorTextHolder->setAttribute("class", "errorText");
+		if($importdoc->loadHTML($errorText))
+		{
+			$textNode = $doc->importNode($importdoc->documentElement, true);
+			$errorTextHolder->appendChild($textNode);
+		}
+		$parentNode->appendChild($errorTextHolder);
+	}
+	
+	function aktuellerBestellSchritt(&$parentNode)
+	{
 	/*******************************************************************/
 	// nach dritter Bestätigung ist die Flagvariable vorhanden und auf s
 	/*******************************************************************/
-		if(!$this->bestellungAufgegeben && isset($_POST['formFilled']) && $_POST['formFilled'] == "s"){
-			$schreibenErfolgreich =  $this->gibDatenInDb();
+		if(!$this->bestellungAufgegeben && isset($_POST['formFilled']) && $_POST['formFilled'] == "s")
+		{
+			$errorText =  $this->gibDatenInDb();
 		// Daten erfolgreich in db geschrieben
-			if($schreibenErfolgreich){
+			if($errorText==""){
 				$this->bestellungAufgegeben=true;
-				require_once("onlineShop/endKopf.htm");
-				$this->aufenthalt->aktuellerNutzer->printUserShort();
+				$this->importHTML("endKopf.htm", $parentNode);
+				$this->aufenthalt->GetUser()->printUserShort();
 				$this->aktuelleBestellung->zeigeBestellungen($this);
-				require_once("onlineShop/endFuss.htm");
+				$this->importHTML("endFuss.htm", $parentNode);
 		// Fehler beim schreiben der Daten
 			} else {
-				require_once("onlineShop/registrierFormKopf.htm");
-				require_once("onlineShop/registrierForm.php");
+				$this->addErrorText($errorText,$parentNode);
+				$this->importHTML("confirmForm.htm", $parentNode);
+				$this->addTextNode($this->aufenthalt->GetUser()->printUserShort(), $parentNode);
+				$this->addTextNode($this->aktuelleBestellung->zeigeBestellungen($this), $parentNode);
+				$this->importHTML("confirmFormFuss.htm", $parentNode);
 			}
 			
 	/*******************************************************************/
@@ -58,18 +125,18 @@ class BestellAblauf{
 			$ausgabePuffer = $this->pruefeFormElemente(0);
 	// Eingaben vollständig
 			if($ausgabePuffer == ""){
-				$this->aufenthalt->aktuellerNutzer->registriereMich();
-				require_once("onlineShop/confirmForm.htm");
-				$this->aufenthalt->aktuellerNutzer->printUserShort();
-				$this->aktuelleBestellung->zeigeBestellungen($this);
-				require_once("onlineShop/confirmFormFuss.htm");
+				$this->aufenthalt->GetUser()->registriereMich();
+				$this->importHTML("confirmForm.htm", $parentNode);
+				$this->addTextNode($this->aufenthalt->GetUser()->printUserShort(), $parentNode);
+				$this->addTextNode($this->aktuelleBestellung->zeigeBestellungen($this), $parentNode);
+				$this->importHTML("confirmFormFuss.htm", $parentNode);
 			} else {
 	// Eingaben nicht vollständig
-				require_once("onlineShop/registrierFormKopf.htm");
-				print "<P><b><font face=\"Arial\" color=\"#FF0000\" size=\"2\">Angaben nicht vollständig:<br>".
-				$ausgabePuffer."</font></b></P>";
+				$this->importHTML("registrierFormKopf.htm", $parentNode);
+				$ausgabePuffer = "Angaben nicht vollständig:".$ausgabePuffer; 
+				$this->addErrorText($ausgabePuffer,$parentNode);
 				$this->aktuelleBestellung->zeigeBestellungen($this);
-				require_once("onlineShop/registrierForm.php");
+				$this->importHTML("registrierForm.htm", $parentNode);
 			}
 	/*******************************************************************/
 	// nach erster Bestätigung ist die Flagvariable vorhanden und auf j
@@ -77,24 +144,33 @@ class BestellAblauf{
 		} else if(!$this->bestellungAufgegeben && isset($_POST['formFilled']) && $_POST['formFilled'] == "j"){
 			$ausgabePuffer = $this->pruefeFormElemente(1);
 	// Eingaben vollständig
-			if($ausgabePuffer == ""){
-				require_once("onlineShop/registrierFormKopf.htm");
+			if($ausgabePuffer == "")
+			{
+				$this->importHTML("registrierFormKopf.htm", $parentNode);
 				$this->gibBestellungAuf();
-				require_once("onlineShop/registrierForm.php");
-				//$this->aufenthalt->aktuellerNutzer->printRegForm();
+				$this->addTextNode($this->aktuelleBestellung->zeigeBestellungen($this), $parentNode);
+				$this->importHTML("registrierForm.htm", $parentNode);
 	// Eingaben nicht vollständig
 			} else {
-				require_once("onlineShop/bestellFormKopf.htm");
-				print "<font color=\"#FF0000\">".$ausgabePuffer."</font>";
-				require_once("onlineShop/bestellForm.php");
+				$this->importHTML("bestellFormKopf.htm", $parentNode);
+				$this->addErrorText($ausgabePuffer,$parentNode);
+				$this->importHTML("bestellForm.php", $parentNode);
 			} 
 	/*******************************************************************/
 	// erster Aufruf
 	/*******************************************************************/
 		} else {
 			$this->bestellungAufgegeben = false;
-			require_once("onlineShop/bestellFormKopf.htm");
-			require_once("onlineShop/bestellForm.php");
+			$this->importHTML("bestellFormKopf.htm", $parentNode);
+			if(isset($_POST['resetBestellung']))
+			{
+				$this->aktuelleBestellung = NULL;
+			}
+			else if(NULL!=$this->aktuelleBestellung)
+			{
+				$this->addResetButton($parentNode);
+			}
+			$this->importHTML("bestellForm.php", $parentNode);
 		}
 	}
 	
@@ -104,26 +180,18 @@ class BestellAblauf{
 		 print $this->aktuelleBestellung->zeigeBestellungen($this);
 	}
 	
-	function gibBestellungAuf(){
+	function gibBestellungAuf()
+	{
+		$orderflags = array(8);
+		foreach(Bestellung::$ids as $id)
+			array_push($orderflags, isset($_POST[$id]));
 		$this->aktuelleBestellung = new Bestellung(
-		array(
-			($_POST['Bestelltyp_Abo']=="ON"?true:false),
-			($_POST['Bestelltyp_Einzelheft']=="ON"?true:false),
-			($_POST['Bestelltyp_Probeheft']=="ON"?true:false),
-			($_POST['Bestelltyp_klProbepaket']=="ON"?true:false),
-			($_POST['Bestelltyp_grProbepaket']=="ON"?true:false),
-			($_POST['Bestelltyp_ProbepaketMitAbo']=="ON"?true:false),
-			($_POST['Bestelltyp_ProbepaketMitLexikon']=="ON"?true:false),
-			($_POST['Bestelltyp_Lexikon']=="ON"?true:false) ),
-		array($_POST['AboAbAusgabe']==""?"":$_POST['AboAbAusgabe'], 
-			($_POST['EinzelheftAusgabeNr']==""?"":$_POST['EinzelheftAusgabeNr'])
-			),
+		$orderflags,
+		array($_POST['AboAbAusgabe'],$_POST['EinzelheftAusgabeNr']),
 		$_POST['destination'],
 		date("Y-m-d"),
 		$_POST['Sonstiges'],
 		$this->preise );
-
-		print $this->aktuelleBestellung->zeigeBestellungen($this);
 	}
 
 	function pruefeFormElemente($formNummer){
@@ -133,67 +201,71 @@ class BestellAblauf{
 		$ausgabenPruefString = "/[\d\s,]/";
 		switch($formNummer){
 			case 0:
-					if($_POST['anrede'] == "") $rueckGabe.="Bitte füllen Sie das Anredefeld aus.<br>";
-					if($_POST['Nachname'] == "") $rueckGabe.="Bitte füllen Sie das Nachnamefeld aus.<br>";
-					if($_POST['Postadresse'] == "") $rueckGabe.="Bitte füllen Sie das Postadressenfeld aus.<br>";
-					if($_POST['Ort'] == "") $rueckGabe.="Bitte füllen Sie das Ortsfeld aus.<br>";
+					if($_POST['anrede'] == "" || 0!=preg_match("/Bitte/", $_POST['anrede'])) 
+						$rueckGabe.="<li>Bitte füllen Sie das Anredefeld aus.</li>";
+					if($_POST['Nachname'] == "") $rueckGabe.="<li>Bitte füllen Sie das Nachnamefeld aus.</li>";
+					if($_POST['Postadresse'] == "") $rueckGabe.="<li>Bitte füllen Sie das Postadressenfeld aus.</li>";
+					if($_POST['Ort'] == "") $rueckGabe.="<li>Bitte füllen Sie das Ortsfeld aus.</li>";
 					$emailRichtig = preg_match($emailPruefString, $_POST['EMail']);
-					if(!$emailRichtig) $rueckGabe.="Bitte geben Sie eine g&uuml;ltige E-Mail Adresse ein.<br>";
+					if(!$emailRichtig) $rueckGabe.="<li>Bitte geben Sie eine gültige E-Mail Adresse ein.</li>";
 					if($_POST['Land'] == "germany")$this->aktuelleBestellung->destination="inland";
 					else if($_POST['Land'] == "sonstigesEU")$this->aktuelleBestellung->destination="euausland";
 					else if($_POST['Land'] == "sonstiges")$this->aktuelleBestellung->destination="noneuausland";
 
 					if(	$_POST['bezahlung']=="lastschrift"){
-						if($_POST['Bankinstitut'] == "" ) $rueckGabe.="Bitte geben Sie das Bankinstitut ein.<br>";
+						if($_POST['Bankinstitut'] == "" ) $rueckGabe.="<li>Bitte geben Sie das Bankinstitut ein.</li>";
 						$ktnrRichtig = preg_match($nummernPruefString, $_POST['Kontonummer']);
-						if(!$ktnrRichtig) $rueckGabe.="Bitte geben Sie nur Nummern in das Kontonummerfeld ein.<br>";
+						if(!$ktnrRichtig) $rueckGabe.="<li>Bitte geben Sie nur Nummern in das Kontonummerfeld ein.</li>";
 						$blzRichtig = preg_match($nummernPruefString, $_POST['Bankleitzahl']);
-						if(!$blzRichtig) $rueckGabe.="Bitte geben Sie nur Nummern in das Bankleitzahlfeld ein.<br>";
+						if(!$blzRichtig) $rueckGabe.="<li>Bitte geben Sie nur Nummern in das Bankleitzahlfeld ein.</li>";
 					}
 				break;
 			case 1:
-				if($_POST['Bestelltyp_Probeheft'].
-				$_POST['Bestelltyp_Einzelheft'].
-				$_POST['Bestelltyp_Abo'].
-				$_POST['Bestelltyp_Probepaket'].
-				$_POST['Bestelltyp_klProbepaket'].
-				$_POST['Bestelltyp_grProbepaket'].
-				$_POST['Bestelltyp_Lexikon'] == "") $rueckGabe.="Bitte füllen Sie mindestens ein Bestellfeld aus.<br>";
+				$allkeys = array(	'Bestelltyp_Probeheft', 
+									'Bestelltyp_Einzelheft', 
+									'Bestelltyp_Abo', 
+									'Bestelltyp_Probepaket', 
+									'Bestelltyp_klProbepaket',
+									'Bestelltyp_grProbepaket',
+									'Bestelltyp_Lexikon'
+				);
+				$anythingSet = false;
+				foreach($allkeys as $key)
+				{
+					if(isset($_POST[$key]))
+					{
+						$anythingSet = true;
+						break;
+					}
+				}
+				if(!$anythingSet)
+					$rueckGabe.="<li>Bitte füllen Sie mindestens ein Bestellfeld aus.</li>";
 				
 				if(	($_POST['EinzelheftAusgabeNr']!="" && !preg_match($ausgabenPruefString, $_POST['EinzelheftAusgabeNr'])) ||
 					($_POST['AboAbAusgabe']!="" && !preg_match($ausgabenPruefString, $_POST['AboAbAusgabe'])) )
-					$rueckGabe.="Bitte geben Sie in das Feld für die Eingabe der gewünschten Heftausgaben nur Zahlen ein und trennen diese NUR mit Kommas oder Leerzeichen.<br>";
-				
+					$rueckGabe.="<li>Bitte geben Sie in das Feld für die Eingabe der gewünschten Heftausgaben nur Zahlen ein und trennen diese NUR mit Kommas oder Leerzeichen.</li>";
 				break;
 			}
 		return $rueckGabe;
 	}
 	
-	function gibDatenInDb(){
-		$rueckgabe=true;
+	function gibDatenInDb()
+	{
+		$rueckgabe="";
 		/***********************************************************
-		**        Verbindung zur Datenbank               **
+		**        User in Datenbank schreiben               **
 		***********************************************************/
-		$rueckgabe = $this->aufenthalt->meineVerbindung->verbinde();
-		if(!$rueckgabe){
-			print "Keine erfolgreiche Verbindung zur DB.<br>";
-			} else {
-			/***********************************************************
-			**        User in Datenbank schreiben               **
-			***********************************************************/
-			$userInDb = $this->aufenthalt->meineVerbindung->gibUserInDB($this->aufenthalt->aktuellerNutzer);
-				if(!$userInDb){
-					print "Keine erfolgreiche Verbindung zur DB bei der Speicherung des Benutzers.<br>";
-					$rueckgabe=false;
-					} else {
-			/***********************************************************
-			**        Bestellung in Datenbank schreiben               **
-			***********************************************************/
-				$bestellungErfolgreich = $this->aufenthalt->meineVerbindung->gibBestellungInDB($this->aufenthalt->aktuellerNutzer, $this->aktuelleBestellung);
-				if(!$bestellungErfolgreich){
-					$rueckgabe=false;
-					print "Keine erfolgreiche Verbindung zur DB bei der Speicherung der Bestellung.<br>";
-					}
+		$errors = $this->aufenthalt->GetConn()->gibUserInDB($this->aufenthalt->GetUser());
+		if($errors!=""){
+			$rueckgabe= "Keine erfolgreiche Verbindung zur DB bei der Speicherung des Benutzers.<br>".$errors;
+		} else {
+		/***********************************************************
+		**        Bestellung in Datenbank schreiben               **
+		***********************************************************/
+			$errors = $this->aufenthalt->GetConn()->gibBestellungInDB($this->aufenthalt->GetUser(), $this->aktuelleBestellung);
+			if($errors!="")
+			{
+				$rueckgabe="Keine erfolgreiche Verbindung zur DB bei der Speicherung der Bestellung.<br>".$errors;
 			}
 		}
 		return $rueckgabe;

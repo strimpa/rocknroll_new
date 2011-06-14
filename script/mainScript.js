@@ -29,9 +29,35 @@
 		});
 	}
 	
+	function createPaymentEvents()
+	{
+		$("div#bankDetails").css("visibility", "hidden");
+		$("div#transferDetails").css("visibility", "hidden");
+		
+		$("input#lastschrift").click(function(){
+			$("div#bankDetails").css("visibility", "visible");
+			$("div#transferDetails").css("visibility", "hidden");
+		});
+		$("input#ueberweisung").click(function(){
+			$("div#bankDetails").css("visibility", "hidden");
+			$("div#transferDetails").css("visibility", "visible");
+		});
+	}
+	
 	function createEvents()
 	{
 		linkInfoDivs();
+		
+		$("div.radiolabel").click(function()
+		{
+			var theInput = $(this).find("input");
+			if(theInput.attr("checked"))
+				theInput.removeAttr("checked");
+			else
+				theInput.attr("checked", "true");
+		});
+		
+		createPaymentEvents();
 	}
 	
 	////////////////////////////////////////////////////////////////////////////////////////

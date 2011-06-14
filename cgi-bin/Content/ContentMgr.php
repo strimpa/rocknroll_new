@@ -1,9 +1,9 @@
 <?php
 
-include("HtmlBuilder.php");
-include("/../Utils.php");
-include("/../Aufenthalt.php");
-include("ContentFactory.php");
+include('HtmlBuilder.php');
+include(dirname(__FILE__) . '/../Utils.php');
+include(dirname(__FILE__) . '/../Aufenthalt.php');
+include('ContentFactory.php');
 
 class ContentMgr
 {
@@ -15,22 +15,31 @@ class ContentMgr
 	
 	private function ContentMgr()
 	{
-		$this->htmlBuilder = new HtmlBuilder();
 		$this->contentFactory = new ContentFactory();
+		$this->Init();
 	}
 	
 	private function Init()
 	{
-//		$this->content = array();
-//		print("count($this->content):".count($this->content));
+		$this->htmlBuilder = new HtmlBuilder();
 	}
 	
 	public static function &GetInstance()
 	{
 		if(!isset(self::$instance))
 		{
-//			print 'New ContentMgr instance!!!\n';
-			self::$instance = new ContentMgr();
+//			$_SESSION['ContentMgr'] = NULL;
+			if(!isset($_SESSION['ContentMgr']))
+			{
+//				PrintHtmlComment('New ContentMgr instance!!!');
+				self::$instance = new ContentMgr();
+				$_SESSION['ContentMgr'] = self::$instance;
+			}
+			else
+			{
+				self::$instance = $_SESSION['ContentMgr'];
+//				PrintHtmlComment("session manager.");
+			}
 			self::$instance->Init();
 		}
 		return self::$instance;

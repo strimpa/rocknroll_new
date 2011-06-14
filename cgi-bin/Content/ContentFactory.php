@@ -62,6 +62,10 @@ class ContentFactory
 				$p = new TablePara();
 				$p->Init($paraResult["title"], $paraResult["meta"], NULL);
 				break;
+			case iParagraph::eTYPE_ORDER:
+				$p = new OrderPara();
+				$p->Init($paraResult["title"], $paraResult["meta"], NULL);
+				break;
 			default:
 			break;
 		}

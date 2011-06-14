@@ -66,6 +66,15 @@ class DBController
 		$result= $result[0];
 		return $result;
 	}
+	
+	public function gibUserInDB($user)
+	{
+		return $this->meineVerbindung->gibUserInDB($user);
+	}
+	public function gibBestellungInDB(&$user, &$aktuelleBestellung)
+	{
+		return $this->meineVerbindung->gibBestellungInDB($user, $aktuelleBestellung);
+	}
 }
 
 ?>

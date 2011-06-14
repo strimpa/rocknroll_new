@@ -5,7 +5,7 @@
 require_once("Benutzer.php");
 require_once("Linkausgabe.php");
 require_once("Order/Bestellablauf.php");
-require_once("COntroller.php");
+require_once("Controller.php");
 
 class Aufenthalt
 {
@@ -29,7 +29,17 @@ class Aufenthalt
 	{
 		if(!isset(self::$instance))
 		{
-			self::$instance = new Aufenthalt();
+			if(!isset($_SESSION['Aufenthalt']))
+			{
+//				PrintHtmlComment('New Aufenthalt instance!!!');
+				self::$instance = new Aufenthalt();
+				$_SESSION['Aufenthalt'] = self::$instance;
+			}
+			else
+			{
+				self::$instance = $_SESSION['Aufenthalt'];
+//				PrintHtmlComment("session Aufenthalt.");
+			}
 		}
 		return self::$instance;
 	}
@@ -39,9 +49,20 @@ class Aufenthalt
 		return $this->dbConn;
 	}
 
-	function neuerBestellAblauf()
+	function &GetAblauf()
 	{
-		$this->aktuellerBestellAblauf = new BestellAblauf($this);
+		if(NULL==$this->aktuellerBestellAblauf)
+		{
+			PrintHtmlComment("Creating new Ablauf");
+			$this->aktuellerBestellAblauf = new BestellAblauf($this);
+		}
+	
+		return $this->aktuellerBestellAblauf;
+	}
+	
+	function &GetUser()
+	{
+		return $this->aktuellerNutzer;
 	}
 }
 ?>

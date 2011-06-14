@@ -12,9 +12,9 @@ class Verbindung
 	private $db_name = 'rocknroll';
 	// User
 	// Domaingo: db85283
-	private $db_user = 'root';
+	private $db_user = 'HR';
 	// Passwort
-	private $db_pass = '';
+	private $db_pass = 'hr';
 	// server
 	private $con;
 	// instanz der Datenbank
@@ -129,7 +129,7 @@ class Verbindung
 		}
 		
 		// UPDATE  `rocknroll`.`submenus` SET  `links` =  'The first entry,The second entry,The third entry' WHERE  `submenus`.`id` =1;
-		$sql = 'DELETE FROM `rocknroll`.`'.$table.'`';
+		$sql = "DELETE FROM `$table`";
         
 		if($reqString != "")
 		{
@@ -161,8 +161,7 @@ class Verbindung
 		}
 		
 		// UPDATE  `rocknroll`.`submenus` SET  `links` =  'The first entry,The second entry,The third entry' WHERE  `submenus`.`id` =1;
-		$sql = 'UPDATE `rocknroll`.`'.$table;
-        $sql .= '` SET '; 
+		$sql = "UPDATE `$table` SET "; 
         for($fieldIndex = 0; $fieldIndex<count($fields);$fieldIndex++)
         {
         	if('null'==$values[$fieldIndex])
@@ -202,25 +201,30 @@ class Verbindung
 		}
 		
 		// UPDATE  `rocknroll`.`submenus` SET  `links` =  'The first entry,The second entry,The third entry' WHERE  `submenus`.`id` =1;
-		$sql = 'INSERT INTO `rocknroll`.`'.$table.'` (';
+		$sql = "INSERT INTO `$table` (";
 		if(is_array($fields) && count($fields)>0)
 		{
+	        $keys = array_keys($fields);
+	        $values = array_values($fields);
 	        for($fieldIndex = 0; $fieldIndex<count($fields);$fieldIndex++)
 	        {
+	        	if('null'==$values[$fieldIndex])
+	        		continue;
 	        	if($fieldIndex>0)
 	        		$sql .= ",";
-	        	$keys = array_keys($fields);
 	        	$sql .= "`".$keys[$fieldIndex]."`";
 	        }
 		}
 		$sql .= ') VALUES ('; 
 		if(is_array($fields) && count($fields)>0)
 		{
-	        for($fieldIndex= 0; $fieldIndex<count($fields);$fieldIndex++)
+	        $values = array_values($fields);
+			for($fieldIndex= 0; $fieldIndex<count($fields);$fieldIndex++)
 	        {
+	        	if('null'==$values[$fieldIndex])
+	        		continue;
 	        	if($fieldIndex>0)
 	        		$sql .= ",";
-	        	$values = array_values($fields);
 	        	$sql .= "'".$values [$fieldIndex]."'";
 	        }
 	        
@@ -346,7 +350,7 @@ class Verbindung
 	}
 	
 	function gibUserInDB($user){
-		$rueckGabe = true;
+		$rueckGabe = "";
 		$abbruch=false;
 		// namen der Tabellenspalten
 		$kundenNamensArray = array("kundenNr", "anrede", "vorname" , "nachname" , "adresse" , "ort" , "plz" , "land" , 
@@ -367,7 +371,8 @@ class Verbindung
 			($user->bankInstitut == "" ? NULL : $user->bankInstitut),
 			($user->blz == "" ? NULL : $user->blz),
 			($user->ktnr == "" ? NULL : $user->ktnr));
-		if(!$abbruch){
+		if(!$abbruch)
+		{
 		/**************************************************************
 		*          Userdaten
 		**************************************************************/
@@ -394,17 +399,17 @@ class Verbindung
 			//Ergebnis		
 			$result = mysql_query($sql);
 			//echo mysql_affected_rows();
-			if(!$result){
-				$rueckGabe=false;
-				print 
-				"<P><font face=\"Arial\" size=\"2\"><font color=\"#EBD5D5\">".
-				"Es Konnte nicht in die Kunden-Datenbank geschrieben werden, bitte versuchen Sie es sp�ter ".
-				"noch einmal und/oder berichten sie bitte den Fehler:<br></font> <a href=\"mailto:schreib@gunnardroege.de\">Mail an Webmaster</a><br>".
-				"<font color=\"#EBD5D5\">Vielen Dank f�r Ihr Verst�ndnis.<br>".
-				"gefundene Eintr�ge: $num_results</font></font>";
+			if(!$result)
+			{
+				$rueckGabe="".
+				"Es Konnte nicht in die Kunden-Datenbank geschrieben werden, bitte versuchen Sie es sp&auml;ter ".
+				"noch einmal und/oder berichten sie bitte den Fehler:<br> <a href=\"mailto:schreib@gunnardroege.de\">Mail an Webmaster</a><br>".
+				"Vielen Dank f&uuml;r Ihr Verst&auml;ndnis.<br>".mysql_error();
 			}
-		} else{
-		 $rueckGabe=false;
+		} 
+		else
+		{
+			$rueckGabe="Keine Verbindung.";
 		}
 		return $rueckGabe;
 	}
@@ -414,8 +419,9 @@ class Verbindung
 	**   Bestellung
 	***********************************************************************************/
 	
-	function gibBestellungInDB($user, $aktuelleBestellung){
-		$rueckGabe = true;
+	function gibBestellungInDB($user, $aktuelleBestellung)
+	{
+		$rueckGabe = "";
 		$abbruch=false;
 		$bestellNamensArray = array("schonKunde", "nachNameBesteller", "kundenNrBesteller", "bestellungen", "kommentar", "bestellDatum");
 		$bestellAusGabeArray = array(	
@@ -454,30 +460,21 @@ class Verbindung
 			$result = mysql_query($sql);
 			//printf ("Ver�nderte Datens�tze: %d\n", mysql_affected_rows());
 			if(!$result){
-				$rueckGabe=false;
+				$rueckGabe="Nicht erfolgreich beim schreiben der Datensaetze.";
 			} 
 		} else {
-			$rueckGabe=false;
-			print 	
-				"<P><font face=\"Arial\" size=\"2\"><font color=\"#EBD5D5\">".
+			$rueckGabe="<P>".
 				"Es Konnte nicht in die Bestell-Datenbank geschrieben werden, bitte versuchen Sie es sp�ter ".
-				"noch einmal und/oder berichten sie bitte den Fehler:<br></font> <a href=\"mailto:schreib@gunnardroege.de\">Mail an Webmaster</a><br>".
-				"<font color=\"#EBD5D5\">Vielen Dank f�r Ihr Verst�ndnis.<br>".
-				"gefundene Eintr�ge: $num_results</font>".
+				"noch einmal und/oder berichten sie bitte den Fehler:<br> <a href=\"mailto:schreib@gunnardroege.de\">Mail an Webmaster</a><br>".
+				"Vielen Dank f�r Ihr Verst�ndnis.<br>".
 				($user->Abonnent == "ja" ? $user->Abonnent : "nein").
 				($user->nachName == "" ? $abbruch=true : $user->nachName).
 				($user->kundenNummer == "" ? NULL : $user->kundenNummer).
 				($user->gibBestellung(0) == "" ? $abbruch=true : $user->gibBestellung(0)).
 				($user->gibBestellung(1) == "" ? NULL : $user->gibBestellung(1)).
-				($user->gibBestellung(2) == "" ? NULL : $user->gibBestellung(2))."</font>";
-
+				($user->gibBestellung(2) == "" ? NULL : $user->gibBestellung(2))."";
 			}
 		return $rueckGabe;
-	}
-	
-	function melden(){
-		print "Hallo!";
-		
 	}
 	
 	function registriereAdmin(){
@@ -490,10 +487,10 @@ class Verbindung
         . ' LIKE \'' . $_POST['adminPasswort'] . '\' LIMIT 0, 30'; 
 		$result = mysql_query($sql);
 		if(mysql_num_rows($result)<1){
-			print "<P><font face=\"Arial\" size=\"2\"><font color=\"#EBD5D5\">".
+			print "".
 			"<br>Nachname: ".$_POST['adminName'].
             "<br>Sie konnten nicht erfolreich authetifiziert werden".
-			"<font color=\"#EBD5D5\">Vielen Dank f�r Ihr Verst�ndnis.</font></font>";
+			"Vielen Dank f�r Ihr Verst�ndnis.";
 			 $rueckGabe = false;
 		 }
 		return $rueckGabe;

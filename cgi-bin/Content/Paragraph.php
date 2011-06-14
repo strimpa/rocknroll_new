@@ -3,7 +3,7 @@
 
 interface iParagraph
 {
-	const eTYPE_PIC_RIGHT=0, eTYPE_PIC_LEFT=1, eTYPE_TABLE=2;
+	const eTYPE_PIC_RIGHT=0, eTYPE_PIC_LEFT=1, eTYPE_TABLE=2, eTYPE_ORDER=3;
 	const PARAGRAPH_PADDING = 15;
 	const TITLE_HEIGHT = 60;
 	
@@ -86,14 +86,12 @@ class PicPara implements iParagraph
 		$content->appendChild($pic);
 		$content->appendChild($text);
 		
-//		$importdoc = new DOMDocument();
-//		$importdoc->loadXML("<balls>".$this->content."</balls>");
-//		$doc = $builder->GetDoc();
-//		$text = $doc->importNode($importdoc->firstChild, true);
+		$importdoc = new DOMDocument();
+		$importdoc->loadXML("<balls>".$this->content."</balls>");
+		$doc = $builder->GetDoc();
+		$text = $doc->importNode($importdoc->firstChild, true);
 		
-		$text->nodeValue = $this->content;
-//		$builder->AddText($content, $this->content);//DitchQuotes(
-
+		$content->appendChild($text);
 		$div->appendChild($content);
 		$parentNode->appendChild($div);
 		
@@ -273,6 +271,20 @@ class TablePara implements iParagraph
 		$parentNode->appendChild($div);
 		
 		$currentOffset += ($this->height + iParagraph::PARAGRAPH_PADDING);
+	}
+}
+
+class OrderPara implements iParagraph
+{
+	public function InterpreteMetaData($data)
+	{}
+	
+	public function Init($header, $meta, $content)
+	{}
+
+	public function Render(&$parentNode, &$currentOffset)
+	{
+		Aufenthalt::GetInstance()->GetAblauf()->aktuellerBestellSchritt($parentNode);
 	}
 }
 ?>

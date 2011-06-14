@@ -125,8 +125,9 @@ body {
 }
 .helpIcon
 {
-	width:20px;
-	height:20px;
+	vertical-align:bottom;
+	width:25px;
+	height:25px;
 }
 
 
@@ -146,4 +147,10 @@ body {
 	border:1px solid white;
 	width:600px;
 	overflow:auto;
+}
+
+#content_edit
+{
+	width:500px;
+	height:300px;
 }

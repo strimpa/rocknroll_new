@@ -147,12 +147,13 @@
 			{
 				var data = {};
 				PageCreationDialog.getData(data);
-				var menuTitle = data['identifier'];
+				var menuTitle = data['menuTitle'];
 				var pattern = /[^a-z^A-Z^_]/ig;
-				data['identifier'] = data['identifier'].replace(pattern, "_"); 
+				var pageData = {title:data['title']};
+				pageData['identifier'] = menuTitle.replace(pattern, "_"); 
 				$.fn.loadContent("pages", function(result)
 				{
-					if(data['identifier'])
+					if(pageData['identifier'])
 					{
 						var thePageRef = $(result).find("max_id_").text();
 						var naviData = {title:menuTitle, pageRef:thePageRef};
@@ -160,7 +161,7 @@
 					}
 					else
 						contentEditHandler(result);
-				}, data, "data", {write:true});
+				}, pageData, "data", {write:true});
 			});
 		}
 		this.editContentHandler = function()
@@ -170,7 +171,7 @@
 			var pageId = $($contentCache.find( 'id' )[selectedIndex]).text();
 			$.fn.loadContent("navigation", function(naviResult)
 			{
-		    var naviId = $(naviResult).find("id").text();
+				var naviId = $(naviResult).find("id").text();
 				PageCreationDialog.createDialog(document, function()
 				{
 					var data = {};
@@ -507,7 +508,7 @@
 			var paraContent = "";
 			var picID = -1;
 			// image
-			if(metaData['image'])
+			if(null!=metaData['image'])
 			{
 				var imgDiv = document.createElement("div");
 //				var classString = "";
@@ -527,6 +528,7 @@
 				paraDiv.appendChild(imgDiv);
 			}
 //			alert(paragraphData.find("content").context);
+			output("got here");
 			switch(type)
 			{
 			case "0":
@@ -534,10 +536,11 @@
 				// title
 				var textDiv = document.createElement("div");
 				textDiv.setAttribute("class", "paragraphContent");
-//				var xmldoc = paragraphData.find("content");
-//				var node = document.importNode(paragraphData.find("content"), true);
-				paraContent = paragraphData.find("content").text();
-				textDiv.textContent = paraContent;
+				//var node = document.importNode(xmldoc, true);
+				paraContent = paragraphData.find("content");
+				paraContent.wrap('<div />');
+				paraContent = paraContent.text();
+				$(textDiv).html(paraContent);
 				paraDiv.appendChild(textDiv);
 				break;
 			case "2":

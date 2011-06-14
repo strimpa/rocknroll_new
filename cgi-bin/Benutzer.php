@@ -28,6 +28,46 @@ class Benutzer
 	var $kommentar;
 	var $bestellDatum;
 	
+	function GetMember($id)
+	{
+		switch (strtolower($id))
+		{
+		case "kundennr":
+			return $this->kundenNummer;
+			break;
+		case "anrede":
+			return $this->anrede;
+			break;
+		case "nachname":
+			return $this->nachName;
+			break;
+		case "vorname":
+			return $this->vorName;
+			break;
+		case "postadresse":
+			return $this->adresse;
+			break;
+		case "postleitzahl":
+			return $this->postleitzahl;
+			break;
+		case "ort":
+			return $this->ort;
+			break;
+		case "land":
+			return $this->land;
+			break;
+		case "telefon":
+			return $this->telHome;
+			break;
+		case "email":
+			return $this->eMail;
+			break;
+		default:
+			return '';
+			break;
+		}
+	}
+	
 	function Benutzer($args){
 		if(!is_array($args)){
 			//echo "Deklaration ohne Werte";
@@ -59,65 +99,65 @@ class Benutzer
 
 	
 	function printUserShort(){
-		print "
+		return "
 		<table border=\"0\" cellspacing=\"2\" cellpadding=\"2\" width=\"600px\">
-                <TR bgcolor=\"#EBD5D5\">
-                  <TD colspan=\"2\"><font size=\"2\" face=\"Arial\" color=\"black\" ><strong>Pers&ouml;nliche Daten:</strong></font></TD>
+                <TR bgcolor=\"#666699\">
+                  <TD colspan=\"2\"><strong>Pers&ouml;nliche Daten:</strong></TD>
                 </TR>
                 <TR bgcolor=\"#336699\">
-                  <TD width=\"200\" ALIGN=\"right\" class=\"normalFont\">vorheriger Abonnent</TD>
-                  <TD class=\"normalFont\">$this->Abonnent</TD>
+                  <TD width=\"200\" ALIGN=\"right\">vorheriger Abonnent</TD>
+                  <TD>$this->Abonnent</TD>
                 </TR>
                 <TR bgcolor=\"#336699\">
-                  <TD ALIGN=\"right\" class=\"normalFont\">Anrede</TD>
-                  <TD class=\"normalFont\">$this->anrede</TD>
+                  <TD ALIGN=\"right\">Anrede</TD>
+                  <TD>$this->anrede</TD>
                 </TR>
                 <TR bgcolor=\"#336699\">
-                  <TD ALIGN=\"right\" class=\"normalFont\"> Vorname</TD>
-                  <TD class=\"normalFont\">$this->vorName
+                  <TD ALIGN=\"right\"> Vorname</TD>
+                  <TD>$this->vorName
                   </TD>
                 </TR>
                 <TR bgcolor=\"#336699\">
-                  <TD ALIGN=\"right\" class=\"normalFont\"> Nachname </TD>
-                  <TD class=\"normalFont\">$this->nachName
+                  <TD ALIGN=\"right\"> Nachname </TD>
+                  <TD>$this->nachName
                   </TD>
                 </TR>
                 <tr bgcolor=\"#336699\">
-                  <TD ALIGN=\"right\" class=\"normalFont\"> Adresse </TD>
-                  <TD class=\"normalFont\">$this->adresse
+                  <TD ALIGN=\"right\"> Adresse </TD>
+                  <TD>$this->adresse
                   </TD>
                 </tr>
                 <tr bgcolor=\"#336699\">
-                  <TD ALIGN=\"right\" class=\"normalFont\"> Postleitzahl</TD>
-                  <TD class=\"normalFont\">$this->postleitzahl
+                  <TD ALIGN=\"right\"> Postleitzahl</TD>
+                  <TD>$this->postleitzahl
                   </TD>
                 </tr>
                 <tr bgcolor=\"#336699\">
-                  <TD ALIGN=\"right\" class=\"normalFont\"> Stadt </TD>
-                  <TD class=\"normalFont\">$this->ort
+                  <TD ALIGN=\"right\"> Stadt </TD>
+                  <TD>$this->ort
                   </TD>
                 </tr>
                 <tr bgcolor=\"#336699\">
-                  <TD ALIGN=\"right\" class=\"normalFont\"> Land </TD>
-                  <TD class=\"normalFont\">$this->land
+                  <TD ALIGN=\"right\"> Land </TD>
+                  <TD>$this->land
 				   </TD>
                 </tr>
                 <TR bgcolor=\"#336699\">
-                  <TD ALIGN=\"right\" class=\"normalFont\"> Telefon</TD>
-                  <TD class=\"normalFont\">$this->telHome
+                  <TD ALIGN=\"right\"> Telefon</TD>
+                  <TD>$this->telHome
                   </TD>
                 </TR>
                 <TR bgcolor=\"#336699\">
-                  <TD ALIGN=\"right\" class=\"normalFont\"> E-mail</TD>
-                  <TD class=\"normalFont\">$this->eMail
+                  <TD ALIGN=\"right\"> E-mail</TD>
+                  <TD>$this->eMail
                   </TD>
                 </TR>
-                <TR bgcolor=\"#EBD5D5\">
-                  <TD class=\"normalFont\" colspan=\"2\"><font size=\"2\" face=\"Arial\" color=\"black\" ><strong>Zahlungsart:</strong></font></TD>
+                <TR bgcolor=\"#666699\">
+                  <TD colspan=\"2\"><strong>Zahlungsart:</strong></TD>
                 </TR>
                 <TR bgcolor=\"#336699\">
-                  <TD ALIGN=\"right\" valign=\"top\" class=\"normalFont\">gew�hlte Methode:</TD>
-                  <TD class=\"normalFont\">
+                  <TD ALIGN=\"right\" valign=\"top\">gew�hlte Methode:</TD>
+                  <TD>
 				";
 				if(	$this->bezahlung=="lastschrift") {
 					print "
@@ -145,7 +185,7 @@ class Benutzer
 				print "
                   </TD>
                 </TR>
-            </TABLE><p></p><p></p>";
+            </TABLE>";
 	}
 
 	
@@ -179,13 +219,5 @@ class Benutzer
 	
 	function logOut(){
 	}
-	
-	function getName(){
-		print "mein Name ist ".$this->Name;
-	}
-	function melden(){
-		print "Hallo!";
-	}
-	
 }
 ?>
