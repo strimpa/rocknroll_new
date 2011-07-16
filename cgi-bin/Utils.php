@@ -159,4 +159,11 @@ function GetPostVarValue($matches)
 	return $newString;
 }
 
+function IsXmlString($subject)
+{
+	$isXML = preg_match('/[<>]+/i', $subject);
+//	print("THE SUBJECT: $subject is xml? $isXML\n");
+	return $isXML;
+}
+
 ?>

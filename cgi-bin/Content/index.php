@@ -14,6 +14,9 @@
 <script type="text/javascript" src="../../script/ui/jquery.ui.button.js"></script>
 <script type="text/javascript" src="../../script/ui/jquery.ui.spinner.js"></script>
 <script type="text/javascript" src="../../script/ui/jquery.ui.datepicker.js"></script>
+
+<script type="text/javascript" src="../../script/tiny_mce/jquery.tinymce.js"></script>
+
 <script type="text/javascript" src="creationTemplates.json"></script>
 <script type="text/javascript" src="adminApp.js"></script>
 </head>
@@ -26,7 +29,8 @@
 		<select id="pagesDropDown" class="fullSizeControl">
 			<option></option>
 		</select>
-		<input id="pageTitle" class="fullSizeControl" type="text" value="dummy" readonly="true" />
+		<input id="pageTitle" class="fullSizeControl" type="text" value="" readonly="true" />
+		<input id="menuPriority" class="shortControl" type="text" value="" readonly="true" />
 	</fieldset>
 	<fieldset class="RightGroupBox">
 		<legend>Neu erstellen:</legend>

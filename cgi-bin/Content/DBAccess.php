@@ -80,13 +80,33 @@
 						$fieldName = $keyArray[$colIndex];
 						$tagName = MakeSafeTagName($fieldName);
 						$col = $doc->createElement($tagName);
-//						$importdoc = new DOMDocument();
-//						$importdoc->loadXML("<balls>".$row[$fieldName]."</balls>");
+
+/*
+						$importdoc = new DOMDocument();
+						$importdoc->loadXML($row[$fieldName]);
 //						$print = $row[$fieldName];
 
-//						$text = $doc->importNode($importdoc->firstChild, true);
+						$text = $doc->importNode($importdoc->firstChild, true);
 //						$text = $doc->createTextNode($row[$fieldName]);
-						$col->nodeValue = $row[$fieldName];
+ */
+
+						$text = "";
+						if(IsXmlString($row[$fieldName]))
+						{
+//							$importdoc = new DOMDocument();
+							$decodedString = utf8_encode(html_entity_decode($row[$fieldName]));
+//							PrintHtmlComment("encoded string:".$decodedString);
+//							$importdoc->loadXML($decodedString); //htmlspecialchars_decode()
+//							$text = $doc->importNode($importdoc->firstChild, true);
+//							$col->appendChild($text);
+//"<![CDATA[$row[$fieldName]]]>"
+							$text = $doc->createTextNode(htmlentities($row[$fieldName]));
+							$col->appendChild($text);
+						} 
+						else
+						{
+							$col->nodeValue = $row[$fieldName];
+						}
 						$currRow->appendChild($col);
 					}
 		//			print("<test>".$currRow->nodeValue."</test>");

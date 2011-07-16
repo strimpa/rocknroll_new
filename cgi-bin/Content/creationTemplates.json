@@ -18,7 +18,7 @@ var DataEntity = function(n, h, d)
 DataEntity.prototype.createControl = function(doc, presetValues)
 {
 }
-DataEntity.prototype.init = function()
+DataEntity.prototype.init = function(presetValues)
 {
 }
 DataEntity.prototype.create = function(doc, presetValues, presetOptions)
@@ -40,10 +40,11 @@ DataEntity.prototype.create = function(doc, presetValues, presetOptions)
 	controlDiv.setAttribute("title", this.helpString);
 	controlDiv.appendChild(helpIcon);
 	
-	this.init();
-	
 	return controlDiv;
 }
+DataEntity.prototype.destroy = function()
+{
+};
 
 ////////////////////////////////////////////////////////////////////////////////////////
 var TextField = function(n, h, d)
@@ -143,26 +144,24 @@ Spinner.prototype.createControl = function(doc, presetValues)
 	var myId = this.name+"_edit";
 	this.control.setAttribute("id", myId);
 	this.control.setAttribute("class", "creationControl");
-//	if(null!=this.staticPresetData)
-//	{
-//		var entries = this.staticPresetData.split(",");
-//		for(e in entries)
-//		{
-//			optn = document.createElement("OPTION");
-//			optn.textContent = entries[e];
-//			this.control.appendChild(optn);
-//		}
-//	}
 	this.control.setAttribute("value","");
 	if(null!=presetValues && null!=presetValues[this.name])
 	{
 		this.control.setAttribute("value", presetValues[this.name]);
 	}
 }
-Spinner.prototype.init = function()
+Spinner.prototype.init = function(presetValues)
 {
 	$(this.control).spinner();
-	if(this.control.getAttribute("value")=="")
+	if(null!=presetValues && null!=presetValues[this.name])
+	{
+		$(this.control).spinner("value", presetValues[this.name]);
+	}
+	else if(null!=this.staticPresetData)
+	{
+		$(this.control).spinner("value", this.staticPresetData);
+	}
+	else if(this.control.getAttribute("value")=="")
 		$(this.control).spinner("value", 300);
 }
 
@@ -231,6 +230,107 @@ TimeField.prototype.getData = function(data)
 {
 	data[this.name] = this.control.value;
 }
+
+////////////////////////////////////////////////////////////////////////////////////////
+var WYSIWYGField = function(n, h, d)
+{
+	// contructor
+	DataEntity.call(this, n, h, d);
+}
+WYSIWYGField.prototype = new DataEntity;
+WYSIWYGField.prototype.createControl = function(doc, presetValues)
+{
+//	if(null!=$('textarea:tinymce'))
+//		$('textarea:tinymce').execCommand('mceRemoveControl',false, (this.name+"_edit") );
+//	if(this.control == null)
+	{
+		this.control = doc.createElement("textarea");
+	}
+	var myId = this.name+"_edit";
+	this.control.setAttribute("id", myId);
+}
+function createMce(on)
+{
+	on.tinymce({
+		// Location of TinyMCE script
+		script_url : '../../script/tiny_mce/tiny_mce.js',
+
+		// General options
+		theme : "advanced",
+
+		// Theme options
+		theme_advanced_toolbar_location : "top",
+		theme_advanced_toolbar_align : "left",
+		theme_advanced_statusbar_location : "bottom",
+		theme_advanced_resizing : true
+
+/*
+		plugins : "autolink,lists,pagebreak,style,layer,table,save,advhr,advimage,advlink,emotions,iespell,inlinepopups,insertdatetime,preview,media,searchreplace,print,contextmenu,paste,directionality,fullscreen,noneditable,visualchars,nonbreaking,xhtmlxtras,template,advlist",
+		theme_advanced_buttons1 : "save,newdocument,|,bold,italic,underline,strikethrough,|,justifyleft,justifycenter,justifyright,justifyfull,styleselect,formatselect,fontselect,fontsizeselect",
+		theme_advanced_buttons2 : "hr,removeformat,visualaid,|,sub,sup,|,charmap,emotions,iespell,media,advhr,|,print,|,ltr,rtl,|,fullscreen",
+
+		content_css : "rnr.localhost/css/mainStyles.css"
+
+		plugins : "autolink,lists,pagebreak,style,layer,table,save,advhr,advimage,advlink,emotions,iespell,inlinepopups,insertdatetime,preview,media,searchreplace,print,contextmenu,paste,directionality,fullscreen,noneditable,visualchars,nonbreaking,xhtmlxtras,template,advlist",
+		theme_advanced_buttons1 : "save,newdocument,|,bold,italic,underline,strikethrough,|,justifyleft,justifycenter,justifyright,justifyfull,styleselect,formatselect,fontselect,fontsizeselect",
+		theme_advanced_buttons2 : "cut,copy,paste,pastetext,pasteword,|,search,replace,|,bullist,numlist,|,outdent,indent,blockquote,|,undo,redo,|,link,unlink,anchor,image,cleanup,help,code,|,insertdate,inserttime,preview,|,forecolor,backcolor",
+		theme_advanced_buttons3 : "tablecontrols,|,hr,removeformat,visualaid,|,sub,sup,|,charmap,emotions,iespell,media,advhr,|,print,|,ltr,rtl,|,fullscreen",
+		theme_advanced_buttons4 : "insertlayer,moveforward,movebackward,absolute,|,styleprops,|,cite,abbr,acronym,del,ins,attribs,|,visualchars,nonbreaking,template,pagebreak",
+		// Example content CSS (should be your site CSS)
+
+		// Drop lists for link/image/media/template dialogs
+		template_external_list_url : "lists/template_list.js",
+		external_link_list_url : "lists/link_list.js",
+		external_image_list_url : "lists/image_list.js",
+		media_external_list_url : "lists/media_list.js",
+
+		// Replace values for the template plugin
+		template_replace_values : {
+			username : "Some User",
+			staffid : "991234"
+		},
+*/
+	});
+}
+WYSIWYGField.prototype.init = function(presetValues)
+{
+	var thevalue = "";
+	if(null!=presetValues && null!=presetValues[this.name])
+	{
+		thevalue = presetValues[this.name];
+	}
+	else if(null!=this.staticPresetData)
+	{
+		thevalue = this.staticPresetData;
+	}
+	if(thevalue!=null)
+	{
+		// taking the <div> off.
+		thevalue = $(thevalue).unwrap().html();
+	}
+	$(this.control).css("visibility", "visible");
+	createMce($(this.control));
+
+	//this.control.setAttribute("value", thevalue);
+	//$(selector).tinymce().setContent(thevalue);
+	$(this.control).html(thevalue);
+}
+
+WYSIWYGField.prototype.getData = function(data)
+{
+//	alert($(this.control).tinymce().getContent());
+	var wrapper = $("<div><div /></div>");
+	wrapper.children().first().append($(this.control).tinymce().getContent());
+	data[this.name] = wrapper.html();
+	alert(data[this.name]);
+}
+WYSIWYGField.prototype.destroy = function(presetValues)
+{
+//	$(this.control).tinymce().removeControl();
+//	$("#"+this.name+"_edit_parent").remove();
+//	alert("destroy editor");
+}
+
 /********************************************************************************************
  *  Group
  ********************************************************************************************/
@@ -242,8 +342,12 @@ var Group = function(n, h)
 	this.controls = [];
 };
 Group.prototype = new DataEntity;
-Group.prototype.init = function()
+Group.prototype.init = function(presetValues)
 {
+	for(d in this.controls)
+	{
+		this.controls[d].init(presetValues);
+	}
 };
 Group.prototype.create = function(doc, presetValues, presetOptions)
 {
@@ -257,8 +361,6 @@ Group.prototype.create = function(doc, presetValues, presetOptions)
 		this.control.appendChild(this.controls[d].create(doc, presetValues, presetOptions));
 	}
 	
-	this.init(presetValues);
-	
 	return this.control;
 };
 
@@ -269,23 +371,36 @@ Group.prototype.getData = function(data)
 		this.controls[d].getData(data);
 	}
 };
+Group.prototype.destroy = function()
+{
+	for(d in this.controls)
+	{
+		this.controls[d].destroy();
+	}
+};
 
 /********************************************************************************************
- *  Dialog
+ *  EditDialog
  ********************************************************************************************/
-var Dialog = function(n, h) 
+var EditDialog = function(n, h) 
 {
 	// contructor
 	Group.call(this, n, h);
 };
-Dialog.prototype = new Group;
-function close()
+EditDialog.prototype = new Group;
+EditDialog.prototype.createDialog = function(doc, callback, presetValues, presetOptions)
 {
-	$("#creationBg").remove();
-	$(".creationBox").remove();
-}
-Dialog.prototype.createDialog = function(doc, callback, presetValues, presetOptions)
-{
+	this.closeMe = function()
+	{
+		dialogInst.destroy();
+		removeDialog();
+	};
+	this.confirm = function()
+	{
+		callback();
+		dialogInst.closeMe();
+	};
+
 	var bg = doc.createElement("div");
 	bg.setAttribute("id","creationBg");
 	var holder = doc.createElement("div");
@@ -293,12 +408,6 @@ Dialog.prototype.createDialog = function(doc, callback, presetValues, presetOpti
 
 	var childControls = this.create(doc, presetValues, presetOptions);
 	holder.appendChild(childControls);
-	
-	this.confirm = function()
-	{
-		callback();
-		close();
-	}
 
 	var createButton = doc.createElement("input");
 	createButton.setAttribute("type", "button");
@@ -312,7 +421,8 @@ Dialog.prototype.createDialog = function(doc, callback, presetValues, presetOpti
 	cancelButton.setAttribute("style", "float:left;");
 	cancelButton.setAttribute("value", "Cancel");
 	holder.appendChild(cancelButton);
-	$(cancelButton).click(close);
+	var dialogInst = this;
+	$(cancelButton).click(this.closeMe);
 
 	$("body").append(bg);
 	$("body").append(holder);
@@ -320,30 +430,37 @@ Dialog.prototype.createDialog = function(doc, callback, presetValues, presetOpti
 	var newTop = $(window).height()/2 - parseInt($(".creationBox").css("height"))/2;
 	$(".creationBox").css("left", newLeft);
 	$(".creationBox").css("top", newTop);
+	this.init(presetValues);
+};
+function removeDialog()
+{
+	$("#creationBg").remove();
+	$(".creationBox").remove();
 };
 
 /********************************************************************************************
  *  Uses
  ********************************************************************************************/
 
-var PageCreationDialog = new Dialog("PageCreationDialog", "Neuen Inhalt einfuegen");
+var PageCreationDialog = new EditDialog("PageCreationDialog", "Neuen Inhalt einfuegen");
 PageCreationDialog.controls = new Array(
 		new TextField("title", 		 "Die Ueberschrift fuer die Seite."),
-		new TextField("menuTitle", "Der Titel in Menu falls gewuenscht.")
+		new TextField("menuTitle", "Der Titel im Menu falls gewuenscht."),
+		new Spinner("priority", "Die Reihenfolge im Menu.", 0)
 );
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
-var SubMenuCreationDialog = new Dialog("SubMenuCreationDialog", "Neuen Menueintrag einfuegen");
+var SubMenuCreationDialog = new EditDialog("SubMenuCreationDialog", "Neuen Menueintrag einfuegen");
 SubMenuCreationDialog.controls = new Array(
 		new TextField("title", "Der Titel der im Menu angezeigt wird."),
 		new ComboBox("url",  "Der Textanker-link auf das der Eintrag verweist.")
 );
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
-var ParagraphCreationDialog = new Dialog("ParagraphCreationDialog", "Neuen Absatz erstellen");
+var ParagraphCreationDialog = new EditDialog("ParagraphCreationDialog", "Neuen Absatz erstellen");
 var PicTextGroup = new Group("picTextGroup", "Absatz spezifische Inhalte");
 PicTextGroup.controls = new Array(
 		new TextField("picUrl", "Verwendetes Bild."),
 		new TextField("picTitle", "Untertitel des verwendeten Bildes."),
-		new TextArea("content",  "Der Inhaltstext.")
+		new WYSIWYGField("content",  "Der Inhaltstext.")
 );
 var TableGroup = new Group("tableGroup", "Absatz spezifische Inhalte");
 TableGroup.controls = new Array(
@@ -383,9 +500,10 @@ function getCategoryCallback(result)
 		$(TableGroup.controls[1].control).append(optn);
 	});
 }
-ParagraphCreationDialog.init = function()
+ParagraphCreationDialog.init = function(presetValues)
 {
 	$(this.controls[1].control).change(toggleGroup);
+	Group.prototype.init.call(this, presetValues);
 };
 TableGroup.init = function()
 {
@@ -396,7 +514,7 @@ TableGroup.init = function()
 	});
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
-var TableEntryDialog = new Dialog("TableEntryDialog", "In Tabelle einfuegen.");
+var TableEntryDialog = new EditDialog("TableEntryDialog", "In Tabelle einfuegen.");
 TableEntryDialog.controls = new Array(
 		new ComboBox("category",  "Die Kategorie des Eintrages."),
 		new TextField("newCategory",  "Neue Kategorie erstellen. Ueberschreibt obige Auswahl."),

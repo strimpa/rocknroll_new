@@ -23,6 +23,7 @@ body {
 	top:23px;
 	left:10px;
 	z-index:3;
+	font-size:20px;
 }
 .mainNaviEntry
 {
@@ -103,7 +104,7 @@ body {
 	height:22px;
 	margin-left:40px;
 	color:#71A1D1;
-	font-size:20px;
+	font-size:30px;
 	font-family:brush_font;
 	background-image:url('/images/layout/NewWebsiteLayout4_18.png')
 }

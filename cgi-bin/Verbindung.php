@@ -60,7 +60,7 @@ class Verbindung
 	**   Content
 	***********************************************************************************/
 
-	public function GetTableContent($table, $fields, $requirements = NULL, $useRegExp = FALSE)
+	public function GetTableContent($table, $fields, $requirements = NULL, $useRegExp = FALSE, $orderBy = NULL)
 	{
 		$backGabe = array();
 		$this->verbinde();
@@ -87,6 +87,11 @@ class Verbindung
 					$reqString .= $key." LIKE '".$value."'";
 			}
 		}
+		$orderByString = $orderBy;
+		if(is_array($orderBy))
+		{
+			$orderByString = join(',', $orderBy);
+		}
 		
 		$sql = 'SELECT '.$fieldString;
         $sql .= ' FROM `'.$table.'` '; 
@@ -94,6 +99,12 @@ class Verbindung
 		{
 			$sql .= ' WHERE '.$reqString;
 		}
+		
+		if($orderByString != "")
+		{
+			$sql .= ' ORDER BY '.$orderByString;
+		}
+		
 		$sql .= ';';
 //        print("<!-- sql:".$sql." //-->\n");
 		$result = mysql_query($sql);

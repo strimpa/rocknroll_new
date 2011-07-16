@@ -118,6 +118,7 @@
 			$.fn.loadContent("navigation", function(result)
 			{
 				$("#pageTitle").attr("value", $(result).find( 'title' ).first().text());
+				$("#menuPriority").attr("value", $(result).find( 'priority' ).first().text());
 			}, {"pageRef":myIndex}, "xml");
 
 			// trigger submenu creation			
@@ -148,6 +149,7 @@
 				var data = {};
 				PageCreationDialog.getData(data);
 				var menuTitle = data['menuTitle'];
+				var menuPriority = data['priority'];
 				var pattern = /[^a-z^A-Z^_]/ig;
 				var pageData = {title:data['title']};
 				pageData['identifier'] = menuTitle.replace(pattern, "_"); 
@@ -156,7 +158,7 @@
 					if(pageData['identifier'])
 					{
 						var thePageRef = $(result).find("max_id_").text();
-						var naviData = {title:menuTitle, pageRef:thePageRef};
+						var naviData = {title:menuTitle, pageRef:thePageRef, priority:menuPriority};
 						$.fn.loadContent("navigation", contentEditHandler, naviData, "data", {write:true});
 					}
 					else
@@ -172,19 +174,21 @@
 			$.fn.loadContent("navigation", function(naviResult)
 			{
 				var naviId = $(naviResult).find("id").text();
+				var menuPriority = $(naviResult).find("priority").text();
 				PageCreationDialog.createDialog(document, function()
 				{
 					var data = {};
 					PageCreationDialog.getData(data);
 					var reqString = "id="+pageId;
 					var menuTitle = data['menuTitle'];
+					var newMenuPriority = data['priority'];
 					var pattern = /[^a-z^A-Z^_]/ig;
 	//				data['title'] = data['title'].replace(pattern, "_"); 
 					var pageData = {title:data['title']};
 					$.fn.loadContent("pages", function(result)
 					{
 						// if existent - create, otherwise - delete
-						alert("menuTitle:"+data['menuTitle']);
+//						alert("menuTitle:"+data['menuTitle']);
 						if(data['menuTitle']!="")
 						{
 							// is navigation entry already existent?
@@ -193,13 +197,13 @@
 							{
 								if($(naviTestResult).find("id").size()>0)
 								{
-									var naviData = {title:menuTitle};
+									var naviData = {title:menuTitle, priority:newMenuPriority};
 									var reqString = "pageRef="+pageId;
 									$.fn.loadContent("navigation", contentEditHandler, naviData, "data", {edit:true, req:reqString});
 								}
 								else
 								{
-									var naviData = {title:menuTitle, pageRef:pageId};
+									var naviData = {title:menuTitle, pageRef:pageId, priority:menuPriority};
 									$.fn.loadContent("navigation", contentEditHandler, naviData, "data", {write:true});
 								}
 							}, idTestData, "data");
@@ -210,7 +214,7 @@
 							$.fn.loadContent("navigation", contentEditHandler, naviDelData, "data", {delete:true});
 						}
 					}, pageData, "data", {edit:true, req:reqString});
-				}, {title:theTitle, menuTitle:$("#pageTitle").attr("value")});
+				}, {title:theTitle, menuTitle:$("#pageTitle").attr("value"), priority:menuPriority});
 			}, {pageRef:pageId}, "data");
 		}
 		this.deleteContentHandler = function()
@@ -527,8 +531,6 @@
 				}, {"id":metaData['image']}, "xml");
 				paraDiv.appendChild(imgDiv);
 			}
-//			alert(paragraphData.find("content").context);
-			output("got here");
 			switch(type)
 			{
 			case "0":
@@ -537,10 +539,13 @@
 				var textDiv = document.createElement("div");
 				textDiv.setAttribute("class", "paragraphContent");
 				//var node = document.importNode(xmldoc, true);
-				paraContent = paragraphData.find("content");
-				paraContent.wrap('<div />');
-				paraContent = paraContent.text();
-				$(textDiv).html(paraContent);
+				textDiv.innerHTML = paragraphData.find("content").text();
+				paraContent = textDiv.textContent;
+				$(textDiv).html(textDiv.textContent);
+//				paraContent = paragraphData.find("content");
+				//paraContent.wrap('<div />');
+//				paraContent = paraContent.text();
+//				$(textDiv).append(paraContent);
 				paraDiv.appendChild(textDiv);
 				break;
 			case "2":
@@ -686,15 +691,15 @@
 
 		    for(paraIndex in paraArray)
 		    {
-					var paraDiv = document.createElement("div");
-					paraDiv.setAttribute("id", "paragraph_"+paraArray[paraIndex]);
+				var paraDiv = document.createElement("div");
+				paraDiv.setAttribute("id", "paragraph_"+paraArray[paraIndex]);
 		    	$.fn.loadContent("paragraphs", function(result)
 		    	{
 		    		result = getXmlDocFromResponse(result);
 						$(result).find("row").each(function()
 				    {
 //						alert("localParaIndex:"+$(this).find('id').text());
-							var localParaIndex = paraArray.indexOf($(this).find('id').text());
+						var localParaIndex = paraArray.indexOf($(this).find('id').text());
 //				    	output("id:"+$(this).find('id').text());
 				    	$(this).find('title').each(function(index, value)
 					    {

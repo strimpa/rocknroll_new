@@ -33,7 +33,7 @@ class DBController
 	}
 	public function GetNavi()
 	{
-		return $this->meineVerbindung->GetTableContent("navigation", "*");
+		return $this->meineVerbindung->GetTableContent("navigation", "*", NULL, NULL, "priority");
 	}
 	public function GetPageIdentifier($id)
 	{
