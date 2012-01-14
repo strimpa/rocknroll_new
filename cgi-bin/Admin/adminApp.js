@@ -21,7 +21,7 @@
 	{
 		element("outputDiv").innerHTML = text+"<br />"+element("outputDiv").innerHTML;
 	}
-	
+
 	/////////////////////////////////////////////////////////////////////////
 	// view
 	/////////////////////////////////////////////////////////////////////////
@@ -47,7 +47,7 @@
 			$("#pagesDropDown").empty();
 			var optn = document.createElement("OPTION");
 		    $("#pagesDropDown").append(optn);
-		    $contentCache.find( 'title' ).each(function(index, value)
+		    $contentCache.find( 'identifier' ).each(function(index, value)
 		    {
 				optn = document.createElement("OPTION");
 				optn.textContent = $(this).text();
@@ -151,8 +151,8 @@
 				var menuTitle = data['menuTitle'];
 				var menuPriority = data['priority'];
 				var pattern = /[^a-z^A-Z^_]/ig;
-				var pageData = {title:data['title']};
-				pageData['identifier'] = menuTitle.replace(pattern, "_"); 
+				var pageData = {title:menuTitle};
+				pageData['identifier'] = data['identifier'].replace(pattern, "_"); 
 				$.fn.loadContent("pages", function(result)
 				{
 					if(pageData['identifier'])
@@ -492,6 +492,7 @@
 			editParaButton.setAttribute("type", "button");
 			editParaButton.setAttribute("value", "edit");
 			editParaButton.setAttribute("class", "editButton");
+			editParaButton.setAttribute("disabled", "true");
 			editDiv.appendChild(editParaButton);
 			var deleteParaButton = document.createElement("input");
 			deleteParaButton.setAttribute("type", "button");
@@ -524,6 +525,7 @@
 					imageUrl = $(result).find("url").text();
 					img.setAttribute("src", imageUrl);
 					imgDiv.appendChild(img);
+					editParaButton.removeAttribute("disabled");
 					var txt = document.createElement("div");
 					imageTitle = $(result).find("title").text();
 					txt.textContent = imageTitle;
@@ -737,6 +739,7 @@
 				alert("Bitte waehlen Sie einen Artikel zum editieren!");
 				return;
 			}
+			var pictureID = picID;
 			if(null==defaultData)
 				defaultData = {};
 			ParagraphCreationDialog.createDialog(document, function()
@@ -748,42 +751,84 @@
 				if(data['type']!="Tabelle")
 				{
 					// Text and picture. Insert pic.
-					var picdata = {url:data['picUrl'], title:data['picTitle']};
-					var picParams = {write:true};
-					if(picID!=null)
-						picParams = {edit:true,req:"id="+picID};
-					$.fn.loadContent("pictures", function(result)
+					if(data['picUrl']!="")
 					{
-						var lastPicIndex = $(result).find("max_id_").text();
-						if(null!=picID)
-							lastPicIndex = picID;
-						var metaString = "height="+data['height']+";table="+data['table']+";category="+data['category']+";image="+lastPicIndex;
-						var paraData = {
-							title:data['title'],
-							type:TableTypeStrings.indexOf(data['type']),
-							content:data['content'],
-							meta:metaString
-						};
-						var paraParams = {write:true};
-						if(paraID!=null)
-							paraParams = {edit:true,req:"id="+paraID};
-						$.fn.loadContent("paragraphs", function(result)
+						// try to find pic in database
+						var picReadData = {"url":data['picUrl']};
+						$.fn.loadContent("pictures", function(result)
 						{
-							var selectedIndex = $("#pagesDropDown").attr("selectedIndex")-1;
-						    var paragraphString = $($contentCache.find( 'paragraphs' )[selectedIndex]).text();
-						    var pageIndex = $($contentCache.find( 'id' )[selectedIndex]).text();
-							var lastParaIndex = $(result).find("max_id_").text();
-							paragraphString += ","+lastParaIndex;
-							var pageData = {
-								paragraphs:paragraphString
-							};
-							$.fn.loadContent("pages", function(result)
+							// no picture found: insert!
+							var foundID = $(result).find("id").text();
+							if(""==foundID)
 							{
-								output("Content successfully created.");
-								triggerParagraphCreation();
-							}, pageData, "data", {edit:true,req:("id="+pageIndex)});
-						}, paraData, "data", paraParams);
-					}, picdata, "data", picParams);
+								var picWriteData = {"url":data['picUrl'],"title":data['picTitle']};
+								var picWriteParams = {write:true};
+								$.fn.loadContent("pictures", function(result)
+								{
+									var lastPicIndex = $(result).find("max_id_").text();
+									var metaString = "height="+data['height']+";table="+data['table']+";category="+data['category']+";image="+lastPicIndex;
+									var paraData = {
+										title:data['title'],
+										type:TableTypeStrings.indexOf(data['type']),
+										content:data['content'],
+										meta:metaString
+									};
+									var paraParams = {write:true};
+									if(paraID!=null)
+										paraParams = {edit:true,req:"id="+paraID};
+									$.fn.loadContent("paragraphs", function(result)
+									{
+										var selectedIndex = $("#pagesDropDown").attr("selectedIndex")-1;
+									    var paragraphString = $($contentCache.find( 'paragraphs' )[selectedIndex]).text();
+									    var pageIndex = $($contentCache.find( 'id' )[selectedIndex]).text();
+										var lastParaIndex = $(result).find("max_id_").text();
+										paragraphString += ","+lastParaIndex;
+										var pageData = {
+											paragraphs:paragraphString
+										};
+										$.fn.loadContent("pages", function(result)
+										{
+											output("Content successfully created.");
+											triggerParagraphCreation();
+										}, pageData, "data", {edit:true,req:("id="+pageIndex)});
+									}, paraData, "data", paraParams);
+								}, picWriteData, "data", picWriteParams);
+							}
+							else // picture found, just insert into paragraphs
+							{
+								var metaString = "height="+data['height']+";table="+data['table']+";category="+data['category']+";image="+foundID;
+								var paraData = {
+									title:data['title'],
+									type:TableTypeStrings.indexOf(data['type']),
+									content:data['content'],
+									meta:metaString
+								};
+								var paraParams = {write:true};
+								if(paraID!=null)
+									paraParams = {edit:true,req:"id="+paraID};
+								$.fn.loadContent("paragraphs", function(result)
+								{
+									var selectedIndex = $("#pagesDropDown").attr("selectedIndex")-1;
+								    var paragraphString = $($contentCache.find( 'paragraphs' )[selectedIndex]).text();
+								    var pageIndex = $($contentCache.find( 'id' )[selectedIndex]).text();
+									var lastParaIndex = $(result).find("max_id_").text();
+									paragraphString += ","+lastParaIndex;
+									var pageData = {
+										paragraphs:paragraphString
+									};
+									$.fn.loadContent("pages", function(result)
+									{
+										output("Content successfully created.");
+										triggerParagraphCreation();
+									}, pageData, "data", {edit:true,req:("id="+pageIndex)});
+								}, paraData, "data", paraParams);							
+							}
+						}, picReadData, "xml");
+					}
+					else // NO picture entered
+					{
+						
+					}
 				}
 				else
 				{

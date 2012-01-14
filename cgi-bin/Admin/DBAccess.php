@@ -8,7 +8,7 @@
 	
 //	PrintHtmlComment("fuckin DBAccess!");
 	
-	$pattern = '/(pages|submenus|paragraphs|events|links|pictures|navigation)/';
+	$pattern = '/(pages|submenus|paragraphs|events|links|pictures|navigation|folder)/';
 	if(0!=preg_match($pattern, $query, $matches, PREG_OFFSET_CAPTURE))
 	{
 		if(isset($params["write"]) && $params["write"]==true)
@@ -44,6 +44,10 @@
 			$result = Aufenthalt::GetInstance()->GetConn()->SetTableContent($query, array_keys($_POST), $requirements, array_values($_POST));
 			$result = Aufenthalt::GetInstance()->GetConn()->GetTableContent($query, array("id"), $requirements);
 		}
+		else if(isset($params["folder"]))
+		{
+			$result = GetFolderContent($_POST['assetFolder']);
+		}
 		else
 		{
 //			PrintHtmlComment("read!!");
@@ -58,7 +62,7 @@
 		{
 			$doc =  new DOMDocument(); //$imp->createDocument("", "", $dtd);
 			// Set other properties
-	//		$doc->encoding = 'UTF-8';
+			$doc->encoding = 'UTF-8';
 	//		$doc->standalone = false;
 			
 			$currRow = NULL;
@@ -94,8 +98,10 @@
 						if(IsXmlString($row[$fieldName]))
 						{
 //							$importdoc = new DOMDocument();
-							$decodedString = utf8_encode(html_entity_decode($row[$fieldName]));
-//							PrintHtmlComment("encoded string:".$decodedString);
+
+							//$decodedString = utf8_encode(html_entity_decode($row[$fieldName]));
+							$decodedString = utf8_encode($row[$fieldName]);
+							PrintHtmlComment("decoded string:".$row[$fieldName]);
 //							$importdoc->loadXML($decodedString); //htmlspecialchars_decode()
 //							$text = $doc->importNode($importdoc->firstChild, true);
 //							$col->appendChild($text);

@@ -37,11 +37,21 @@ class Article
 	public function Render(&$parentNode)
 	{
 		$builder = ContentMgr::GetInstance()->GetBuilder();
+
+		$parentNode->appendChild($builder->AddTag("div", "articleTitle", NULL, $this->title));
 		
-		$contentDiv = $builder->AddTag("div", "content", "redbordered");
-		$parentNode->appendChild($contentDiv);
+		$contentBGDiv = $builder->AddTag("div", "contentBG", "redbordered");
+		//\n<div id="contentLeftOverlap"><img alt="" src="/images/layout/BG_04.jpg" /></div>
+		$menuPicDiv = $builder->AddTag("div", "contentLeftOverlap");
+	    $pic = $builder->GetDoc()->createElement( "img" );
+		$pic->setAttribute("src", "/images/layout/BG_04.jpg");
+		$menuPicDiv->appendChild($pic);
+		$contentBGDiv->appendChild($menuPicDiv);
+		$parentNode->appendChild($contentBGDiv);
 		
-		$contentDiv->appendChild($builder->AddTag("div", "articleTitle", NULL, $this->title));
+		$contentDiv = $builder->AddTag("div", "content");
+		$contentBGDiv->appendChild($contentDiv);
+		
 		$this->RenderParagraphs($contentDiv);
 	}
 }

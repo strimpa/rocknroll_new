@@ -4,9 +4,10 @@
 <head>
 <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
 <title>Adminbereich</title>
-<link href="../../css/mainStyles.css" rel="stylesheet" type="text/css" />
+<link href="../../css/mainstyles.css" rel="stylesheet" type="text/css" />
 <link href="../../css/adminStyles.css" rel="stylesheet" type="text/css" />
 <link href="../../css/dot-luv/jquery-ui-1.8.12.custom.css" rel="stylesheet" type="text/css" />
+<link href="../../css/microgallery_style.css" rel="stylesheet" type="text/css" />
 
 <script type="text/javascript" src="../../script/jquery-1.5.1.min.js"></script>
 <script type="text/javascript" src="../../script/ui/jquery.ui.core.js"></script>
@@ -16,6 +17,7 @@
 <script type="text/javascript" src="../../script/ui/jquery.ui.datepicker.js"></script>
 
 <script type="text/javascript" src="../../script/tiny_mce/jquery.tinymce.js"></script>
+<!--<script type="text/javascript" src="../../script/jquery.microgallery.js"></script>-->
 
 <script type="text/javascript" src="creationTemplates.json"></script>
 <script type="text/javascript" src="adminApp.js"></script>

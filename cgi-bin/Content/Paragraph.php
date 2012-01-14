@@ -89,12 +89,15 @@ class PicPara implements iParagraph
 		if($this->content!="")
 		{
 			$importdoc = new DOMDocument();
-			$importdoc->loadHTML($this->content);
+			$importdoc->encoding = 'UTF-8';
+//			PrintHtmlComment("content:$this->content");
+			$importdoc->loadHTML('<?xml encoding="UTF-8">\n'.$this->content);
 			$doc = $builder->GetDoc();
 			
-			PrintHtmlComment($importdoc->C14N());
 			$node = $importdoc->getElementsByTagName("div")->item(0);
-			$text = $doc->importNode($node, true);
+			$text = FALSE;
+			if(null!=$node)
+				$text = $doc->importNode($node, true);
 			if(FALSE!=$text)
 				$content->appendChild($text);
 			else
@@ -147,7 +150,7 @@ class TablePara implements iParagraph
 		$this->InterpreteMetaData($meta);
 	}
 	
-	public function RenderXMLNode(&$doc, &$parent, &$currRoot, $resultArray)
+	public function RenderXMLNode(&$doc, &$parent, &$currRoot, $resultArray, &$hasPicAttached)
 	{
 		$myElement = NULL;
 		if(is_a($currRoot, "DOMElement"))
@@ -185,10 +188,10 @@ class TablePara implements iParagraph
 					$myElement->setAttribute("colspan", $cs);
 
 				// randoms
-				if(preg_match("/eventShowMore/", $presetClass))
+				if(!$hasPicAttached && preg_match("/eventShowMore/", $presetClass))
 				{
 					$infoElement = $doc->createElement("a");
-					$infoElement->nodeValue = "Info";
+					$infoElement->nodeValue = "More info";
 //					$infoElement->setAttribute("href", "");
 					$infoElement->setAttribute("class", "infoDiv");
 					$myElement->appendChild($infoElement);
@@ -215,13 +218,17 @@ class TablePara implements iParagraph
 						{
 							$myElement->nodeValue = $value;
 						}
-						else if($type=="picIndex")
+						else if($type=="pic" && $value!="")
 						{
 							$pic = $doc->createElement("img");
-							$index = intval($value);
-							PrintHtmlComment($this->eventTypePicPath.$this->eventTypePics[$index]);
-							$pic->setAttribute("src", $this->eventTypePicPath.$this->eventTypePics[$index]);
+							//$index = intval($value);
+							PrintHtmlComment($value);
+							//$pic->setAttribute("src", $this->eventTypePicPath.$this->eventTypePics[$index]);
+							$pic->setAttribute("src", $value);
+							$pic->setAttribute("class", "eventPic");
 							$myElement->appendChild($pic);
+							
+							$hasPicAttached = true;
 						}
 						else
 						{
@@ -236,7 +243,7 @@ class TablePara implements iParagraph
 				$childParent = $parent;
 				if(NULL!=$myElement)
 					$childParent = $myElement;
-				$this->RenderXMLNode($doc, $childParent, $child, $resultArray);
+				$this->RenderXMLNode($doc, $childParent, $child, $resultArray, $hasPicAttached);
 			}
 		}
 	}
@@ -270,7 +277,8 @@ class TablePara implements iParagraph
 		$table->setAttribute("class", "contentTable");
 		foreach($dbResult as $data)
 		{
-			$this->RenderXMLNode($doc, $table, $root, $data);
+			$hasPicAttached = false;
+			$this->RenderXMLNode($doc, $table, $root, $data, $hasPicAttached);
 		}
 		
 //		}catch ($e)

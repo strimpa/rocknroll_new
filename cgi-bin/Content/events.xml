@@ -2,7 +2,7 @@
 <table name="events">
 	<row>
 		<data class="eventDate tableCellFontFancy" rowspan="2" type="date">date</data>
-		<data class="eventType tableCellFontFancy" rowspan="2" type="string">type</data>
+		<data class="eventPic tableCellFontFancy" rowspan="2" type="pic">date</data>
 		<data class="eventTitle tableCellFontNormal" type="string">title</data>
 		<data class="eventVenue tableCellFontNormal" type="string">venue</data>
 		<data class="eventShowMore tableCellFontFancy" type="empty"></data>

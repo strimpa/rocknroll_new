@@ -3,7 +3,11 @@
 */
 @font-face {
 	font-family: brush_font;
-	src: url('/images/Artbrush.ttf');
+	src: url("/images/layout/REPOT___.eot");
+}
+@font-face {
+	font-family: brush_font;
+	src: url("/images/layout/REPOT___.TTF");
 }
 
 /*
@@ -50,34 +54,46 @@ body {
 	left:112px;
 	width:690px;
 	height:200px;
+	z-index:2;
 }
 
-#content
+#contentBG
 {
 	position:absolute;
 	background-color:#01274C;
 	top:202px;
 	left:112px;
-	width:625px;
-	height:auto;
-	padding-left:60px;
-	padding-right:5px;
-	padding-top:5px;
+	width:685px;
 	font-family:Arial, Helvetica, sans-serif;
 	font-size:12px;
 	color:#BBCCDB;
-	z-index:1;
+	z-index:1; 
+}
+
+#content
+{
+	margin-left:60px;
+	margin-top:5px;
+}
+
+#ploggerFrame
+{
+	border:none;
+	width:625px;
+	height:600px;
 }
 
 #articleTitle
 {
 	position:absolute;
-	left:520px;
-	color:GrayText;
-	top:0px;
+	left: 290px;
+	width:500px;
+	text-align:right;
+	top:163px;
 	z-index:10;
+	color:white;
 	font-family:brush_font;
-	font-size:30px;
+	font-size:35px;
 }
 
 .paragraph
@@ -91,6 +107,7 @@ body {
 	border:thin black solid; 
 	z-index:5;
 */
+	float:right;
 	padding:0px;
 }
 .paragraphContent
@@ -100,11 +117,13 @@ body {
 .paragraphTitle
 {
 	text-align:left;
-	padding:15px;
-	height:22px;
-	margin-left:40px;
-	color:#71A1D1;
-	font-size:30px;
+	padding-top:2px;
+	height:50px;
+	width:565px;
+	padding-left:40px;
+	margin-left: 20px;
+	color:#075AAC;
+	font-size:35px;
 	font-family:brush_font;
 	background-image:url('/images/layout/NewWebsiteLayout4_18.png')
 }
@@ -147,13 +166,15 @@ a:hover{
 
 #contentLeftOverlap
 {
-	position:absolute;
 	background-color:#003366;
-	top:200px;
-	left:112px;
 	width:55px;
 	height:200px;
+	float:left;
+/*	position:absolute;
+	top:200px;
+	left:112px;
 	z-index:2;
+	*/
 }
 #Deco01
 {
@@ -251,7 +272,7 @@ tr
 }
 .tableCellFontFancy
 {
-	font-family:brush-font;
+	font-family:brush_font;
 }
 .tableCellFontNormal
 {
@@ -262,23 +283,49 @@ tr
 {
 	font-size:30px;
 	font-family:brush_font;
-	background:url('/images/images/Elements_09.png') no-repeat;
+	background:url('/images/layout/Elements_09.png') no-repeat;
 	overflow:visible;
 	width:50px;
 	vertical-align:top;
+	padding-left: 10px;
 }
 .eventType
 {
 	vertical-align:top;
 }
+.eventPicTd
+{
+	border:1px solid #073869;
+}
 .extendable
 {
-	height:0px;
 	overflow:hidden;
 }
 .eventTitle
 {
 	font-size:20px;
+	width:300px;
+	padding-top: 10px;
+}
+.tableData
+{
+}
+.eventVenue
+{
+	width: 173px;
+}
+.eventShowMore
+{
+	font-size:15px;
+	width: 55px;
+}
+.eventPic
+{
+	width:80px;
+}
+.eventMisc
+{
+	vertical-align: top;
 }
 .tableTonedBG
 {
@@ -291,7 +338,7 @@ tr
 }
 .orderPersonTableData
 {
-	border:1px solid #BBCCDB;
+	border:2px solid #BBCCDB;
 }
 /*
 ** classes
@@ -305,7 +352,7 @@ tr
 {
 	position:absolute;
 	left:180px;
-	background:url("/images/images/Elements_03.png") no-repeat;
+	background:url("/images/layout/Elements_03.png") no-repeat;
 	padding:5px;
 	width:200px;
 	height:31px;

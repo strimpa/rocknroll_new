@@ -135,6 +135,40 @@ body {
 	height:25px;
 }
 
+#picUrl_edit
+{
+	width:80px;
+}
+
+.picBrowseHolder
+{
+	border:1px solid gray;
+}
+
+#folderBrowser
+{
+	position:absolute;
+	z-index:50;
+	background-color:white;
+	border:1px solid black;
+	width:300px;
+	height:300px;
+	overflow:scroll;
+}
+
+.folderBrowsePic
+{
+	width:80px;
+	margin:2px;
+	padding:2px;
+	border:1px solid black;
+}
+
+#uploadTarget
+{
+	width:400px;
+	height:400px;
+}
 
 /*overrides*/
 .adminTableDiv

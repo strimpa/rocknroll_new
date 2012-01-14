@@ -1,5 +1,6 @@
 <?php
 
+include 'globals.php';
 
 function MyHtmlSpecialVars_decode($string)
 {
@@ -46,7 +47,7 @@ function MakeSafeString($string)
 
 function MakeSafeTagName($string)
 {
-	return preg_replace("/[\s+()]/", "_", $string);
+	return preg_replace("/[\%\.\s+()]/", "_", $string);
 }
 
 function DitchQuotes($string)
@@ -164,6 +165,45 @@ function IsXmlString($subject)
 	$isXML = preg_match('/[<>]+/i', $subject);
 //	print("THE SUBJECT: $subject is xml? $isXML\n");
 	return $isXML;
+}
+
+function GetFolderContent($assetFolder)
+{
+	$default_dir = $_SERVER['DOCUMENT_ROOT'];
+	$suffix = "";
+	$extensions = array("*");
+	global $serverRoot;
+	switch($assetFolder)
+	{
+		case "images":
+		{
+			$suffix = $serverRoot."images/";
+			$extensions = array("jpg", "gif");
+		}
+	}
+	$default_dir = $default_dir.$suffix;
+	if(!($dp = opendir($default_dir))) 
+		die("Cannot open $default_dir.");
+	$fileList = array();
+	while($file = readdir($dp)) 
+	{
+		if(is_dir($file)) 
+		{
+			continue;
+		}
+		else if($file != '.' && $file != '..') 
+		{
+			$ext = substr($file, strrpos($file, '.') + 1);
+			if(FALSE !== array_search($ext, $extensions))
+			{
+				$safeFileName = MakeSafeTagName($file);
+				$fileList[$safeFileName] = "http://".$_SERVER['SERVER_NAME'].$suffix.$file;
+			}				
+		}
+	}
+	$retArray = array();
+	array_push($retArray, $fileList);
+	return $retArray;
 }
 
 ?>

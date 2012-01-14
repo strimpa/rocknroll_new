@@ -7,14 +7,15 @@ class Verbindung
 {
 	private $ablauf;
 	//MySQL Server oder Host
-	private $db_serv = 'localhost';
+	// mysql5.rock-around.de
+	private $db_serv = 'localhost';//'mysql5.rock-around.de';
 	// MySQL Datenbank Name
-	private $db_name = 'rocknroll';
+	private $db_name = 'rocknroll';//'db85283_2';
 	// User
-	// Domaingo: db85283
+	// Domaingo: db85283_2
 	private $db_user = 'HR';
 	// Passwort
-	private $db_pass = 'hr';
+	private $db_pass = 'hr';//'HoexNumi';
 	// server
 	private $con;
 	// instanz der Datenbank
@@ -29,10 +30,7 @@ class Verbindung
 	function Verbindung($derAblauf, $message)
 	{
 		$this->ablauf = &$derAblauf;
-		// Verbindung zum MySQL Server herstellen
-		$this->db = mysql_pconnect($this->db_serv, $this->db_user, $this->db_pass) or die('ERROR!');
-		mysql_select_db($this->db_name, $this->db) or die('Error connecting to database!');
-		
+		$this->verbinde();
 		
 		// MySQL Query mit der Syntax zum auslesen der Informationen einer
 		// gew�hlten MySQL Datenbank Tabelle
@@ -50,9 +48,10 @@ class Verbindung
 	
 	function verbinde()
 	{
-		$this->db = mysql_pconnect($this->db_serv, $this->db_user, $this->db_pass) or die('Fehler beim Verbinden zum Datenbankserver!');
+		$this->db = mysql_connect($this->db_serv, $this->db_user, $this->db_pass) or die('Fehler beim Verbinden zum Datenbankserver!');
 		// MySQL Datenbank w�hlen
 		mysql_select_db($this->db_name, $this->db) or die('Fehler beim Verbinden zur Datenbank!');
+		mysql_query("SET NAMES utf8", $this->db);
 		return true;
 	}
 	
@@ -189,7 +188,7 @@ class Verbindung
 		$sql .= ';';
         print("<!-- sql:".$sql." //-->\n");
 		$result = mysql_query($sql);
-		print "<!-- Errors: ".mysql_error()."//-->";
+//		print "<!-- Errors: ".mysql_error()."//-->";
 		return $result;
 	}
 	
@@ -241,9 +240,9 @@ class Verbindung
 	        
 		}
 		$sql .= ');';
-        print("<!-- sql:".$sql." //-->\n");
+//        print("<!-- sql:".$sql." //-->\n");
 		$result = mysql_query($sql);
-		print "<!-- Errors: ".mysql_error()."//-->";
+//		print "<!-- Errors: ".mysql_error()."//-->";
 		return array($result);
 	}
 

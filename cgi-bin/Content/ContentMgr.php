@@ -1,21 +1,20 @@
 <?php
 
-include('HtmlBuilder.php');
-include(dirname(__FILE__) . '/../Utils.php');
-include(dirname(__FILE__) . '/../Aufenthalt.php');
-include('ContentFactory.php');
+require_once('HtmlBuilder.php');
+require_once(dirname(__FILE__) . '/../Utils.php');
+require_once(dirname(__FILE__) . '/../Aufenthalt.php');
+require_once('ContentFactory.php');
 
 class ContentMgr
 {
 	private $htmlBuilder;
 //	private $content;
-	private $contentFactory;
 	private static $instance;
 	private $navi;
+	private $content;
 	
 	private function ContentMgr()
 	{
-		$this->contentFactory = new ContentFactory();
 		$this->Init();
 	}
 	
@@ -47,22 +46,27 @@ class ContentMgr
 	
 	public function Genesis()
 	{
+		$this->navi = ContentFactory::GetInstance()->CreateMainNavi();
+		$currId = FilenameFromUrl();
+		if($currId=="")
+			$currId = "index";
+		$this->content = ContentFactory::GetInstance()->CreateContentPages($currId);
 	}
 	
 	public function &GetBuilder()
 	{
 		return $this->htmlBuilder;
 	}
-	public function &GetFactory()
+	
+	public function RenderHeader()
 	{
-		return $this->contentFactory;
+		$this->content->RenderHeader();
 	}
 	
 	public function RenderContent()
 	{
 //		print ("current content:".FilenameFromUrl()."\n");
 //		print ("num content:".count($this->content)."\n");
-		$this->navi = $this->contentFactory->CreateMainNavi();
 		if(NULL!=$this->navi)
 		{
 			PrintHtmlComment("Navigation should render here!");
@@ -74,14 +78,8 @@ class ContentMgr
 			print "Error creating navigation!";
 		}
 
-		PrintHtmlComment("WTF?!");
-		
-		$currId = FilenameFromUrl();
-		if($currId=="")
-			$currId = "index";
-		$content = $this->contentFactory->CreateContentPages($currId);
-		if(NULL!=$content)
-			$content->Render();
+		if(NULL!=$this->content)
+			$this->content->Render();
 		else
 			print "Error creating content!";
 	}

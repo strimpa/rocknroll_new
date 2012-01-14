@@ -3,6 +3,7 @@
 //require_once("cgi-bin/Aufenthalt.php");
 require_once("cgi-bin/Content/ContentMgr.php");
 session_start();
+ContentMgr::GetInstance()->Genesis();
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -12,7 +13,9 @@ session_start();
 <link href="/css/mainstyles.css" rel="stylesheet" type="text/css" />
 <script type="text/javascript" src="/script/jquery-1.5.1.min.js"></script>
 <script type="text/javascript" src="/script/mainScript.js"></script>
-</head>
+<?php 
+	ContentMgr::GetInstance()->RenderHeader();
+?></head>
 
 <body>
 
@@ -41,7 +44,6 @@ session_start();
 
 <!-- Header and deco //-->
 <div id="header" class="redbordered"><img alt="" src="/images/layout/BG_02.jpg" /></div>
-<div id="contentLeftOverlap"><img alt="" src="/images/layout/BG_04.jpg" /></div>
 <div id="Deco01"><img alt="" src="/images/layout/Deco_08.png" /></div>
 <!--
 <div id="articleTitle">

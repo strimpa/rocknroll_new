@@ -5,7 +5,36 @@ include("MainNavi.php");
 
 class ContentFactory
 {
-	private function IterateOverFields($result, $fieldArray, $func, $target)
+	private static $instance;
+	
+	/**
+	 * 
+	 * Hide constructor
+	 */
+	private function ContentFactory()
+	{}
+	
+	public static function &GetInstance()
+	{
+		if(!isset(self::$instance))
+		{
+//			$_SESSION['ContentMgr'] = NULL;
+			if(!isset($_SESSION['ContentFactory']))
+			{
+//				PrintHtmlComment('New ContentMgr instance!!!');
+				self::$instance = new ContentFactory();
+				$_SESSION['ContentFactory'] = self::$instance;
+			}
+			else
+			{
+				self::$instance = $_SESSION['ContentFactory'];
+//				PrintHtmlComment("session manager.");
+			}
+		}
+		return self::$instance;
+	}
+	
+	public function IterateOverFields($result, $fieldArray, $func, $target)
 	{
 		$lastFieldEntryCount = NULL;
 		$newFields = array();
@@ -87,35 +116,21 @@ class ContentFactory
 		$theMenu->SetTitles($titlesAndLinks);
 		return $theMenu;
 	}
-
+	
 	public function CreateContentPages($id)
 	{
-		PrintHtmlComment("content id:".$id);
+//		PrintHtmlComment("content id:".$id);
 		$dbConn = Aufenthalt::GetInstance()->GetConn();
 		$result = $dbConn->GetContent($id);
-		PrintHtmlComment("Content count:".count($result));
-		foreach($result as $page)
+//		PrintHtmlComment("Content count:".count($result));
+		foreach($result as $pageData)
 		{
 			// inital create
-			$newPage = new ContentPage();
-			$pageSubMenu = $newPage->GetMenu();
-			
-			// Menu entries
-			$menuRef = $dbConn->GetMenu($page["menuRef"]);
-			$this->IterateOverFields($menuRef, array("entries","links"), 'AddMenuCallback', $pageSubMenu);
-			
-			// Article
-			$article = $newPage->GetArticle();
-			$article->SetTitle($page["title"]);
-			$paraIndeces = explode(",",$page["paragraphs"]);
-			foreach($paraIndeces as $index)
-			{
-				if($index == "")
-					continue;
-				PrintHtmlComment("one paragraph:".$index);
-				$paragraph = $dbConn->GetParagraph($index);
-				$article->AddParagraph($this->CreateParagraph($paragraph));
-			}
+			PrintHtmlComment("identifier: ".$pageData["identifier"]);
+			if($pageData["identifier"]=="plogger")
+				$newPage = new PloggerPage();
+			else
+				$newPage = new ContentPage($pageData);
 			
 			// add
 			return $newPage;

@@ -11,10 +11,9 @@
 	{
 		$(".infoDiv").each(function()
 		{
+			var extendableDiv = $(this).parent().parent().next().find("div.extendable").first();
 			$(this).click(function()
 			{
-				var extendableDiv = $(this).parent().parent().next().find("div.extendable").first();
-//				alert(extendableDiv.text());
 				if(extendableDiv.attr("extended")=="true")
 				{
 					extendableDiv.css("height", "0px");
@@ -26,6 +25,8 @@
 					extendableDiv.attr("extended", "true")
 				}
 			});
+			extendableDiv.css("height", "0px");
+			extendableDiv.attr("extended", "false")
 		});
 	}
 	
