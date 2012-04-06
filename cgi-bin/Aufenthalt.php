@@ -21,8 +21,8 @@ class Aufenthalt
 	private function Aufenthalt()
 	{
 		$this->dbConn = new DBCOntroller();
-		$this->aktuellerNutzer = new Benutzer($this);
-		$this->meineLinks = new Linkausgabe($this, 0);
+		$this->aktuellerNutzer = new Benutzer();
+		$this->meineLinks = new Linkausgabe(0);
 	}
 	
 	public static function &GetInstance()
@@ -63,6 +63,11 @@ class Aufenthalt
 	function &GetUser()
 	{
 		return $this->aktuellerNutzer;
+	}
+	
+	function &Links()
+	{
+		return $this->meineLinks;
 	}
 }
 ?>

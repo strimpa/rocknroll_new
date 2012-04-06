@@ -10,6 +10,8 @@
 		var holder = $('<div id="folderBrowser">');
 		holder.css("left", position.left);
 		holder.css("top", position.top);
+		var closeBar = $('<div id="closeBar" style="width:100%;"><img src="../../images/layout/closeButton.png" align="right" /></div>');
+		holder.append(closeBar);
 		$.fn.loadContent("folder", function(result)
 		{
 			$(result).find("row").first().children().each(function(){
@@ -17,6 +19,7 @@
 				pic.attr("class","folderBrowsePic"); 
 				pic.attr("src",$(this).text()); 
 				pic.click(function(){
+//					alert("url:"+$(this).attr("src"));
 					$("#picUrl_edit").attr("src", $(this).attr("src"));
 					holder.remove();
 				});
@@ -25,6 +28,9 @@
 //			$("#menuPriority").attr("value", $(result).find( 'priority' ).first().text());
 		}, {"assetFolder":rootFolder}, "xml");
 		$("body").append(holder);
+		$("#closeBar").click(function(){
+			$("#folderBrowser").remove();
+		});
 	}
 	
 	function destroyImageBrwoser()
@@ -66,7 +72,7 @@ DataEntity.prototype.create = function(doc, presetValues, presetOptions)
 	
 	var helpIcon = doc.createElement("img");
 	helpIcon.setAttribute("class", "helpIcon");
-	helpIcon.setAttribute("src", "../../images/images/question_mark.png");
+	helpIcon.setAttribute("src", "../../images/layout/question_mark.png");
 	controlDiv.setAttribute("title", this.helpString);
 	controlDiv.appendChild(helpIcon);
 	
@@ -341,11 +347,6 @@ WYSIWYGField.prototype.init = function(presetValues)
 	{
 		thevalue = this.staticPresetData;
 	}
-	if(thevalue!=null)
-	{
-		// taking the <div> off.
-		thevalue = $(thevalue).unwrap().html();
-	}
 	$(this.control).css("visibility", "visible");
 	createMce($(this.control));
 
@@ -384,7 +385,7 @@ PicBrowse.prototype.createControl = function(doc, presetValues)
 	var browseLink = doc.createElement("input");
 	browseLink.setAttribute("type", "button");
 	browseLink.setAttribute("id", "browseLink");
-	browseLink.setAttribute("value", "browse");
+	browseLink.setAttribute("value", "Vorhandene Bilder durchsuchen");
 	holder.appendChild(browseLink);
 
 	var uploadTarget = doc.createElement("iframe");
@@ -410,7 +411,7 @@ PicBrowse.prototype.createControl = function(doc, presetValues)
 	var uploadSubmit = doc.createElement("input");
 	uploadSubmit.setAttribute("type", "submit");
 	uploadSubmit.setAttribute("id", "uploadSubmit");
-	uploadSubmit.setAttribute("value", "OK");
+	uploadSubmit.setAttribute("value", "Neue Datei hochladen");
 	uploadForm.appendChild(uploadSubmit);
 
 	holder.appendChild(uploadTarget);
@@ -420,24 +421,40 @@ PicBrowse.prototype.createControl = function(doc, presetValues)
 	var myId = this.name+"_edit";
 	this.control.setAttribute("id", myId);
 	this.control.setAttribute("class", "creationControl");
-	this.control.setAttribute("src","");
+	this.control.setAttribute("src","/images/layout/noImageDummy.png");
 	if(null!=presetValues && null!=presetValues[this.name])
 	{
 		this.control.setAttribute("src", presetValues[this.name]);
 	}
 	holder.appendChild(this.control);
+
+	var picDelete = doc.createElement("input");
+	picDelete.setAttribute("type", "button");
+	picDelete.setAttribute("id", "picDelete");
+	picDelete.setAttribute("value", "Bild entfernen");
+	holder.appendChild(picDelete);
 		
 	return holder;
 }
-PicBrowse.prototype.init = function()
+PicBrowse.prototype.init = function(presetValues)
 {
 	$("#browseLink").click(function(){
 		showImageBrowser($(this).offset(), "images");
+	});
+	var controlScopePass = this.control; 
+	$("#picDelete").click(function(){
+		$(controlScopePass).attr("src", "/images/layout/noImageDummy.png");
 	});
 }
 
 PicBrowse.prototype.getData = function(data)
 {
+	if($(this.control).attr("src").indexOf("noImageDummy")!=-1)
+	{
+		data[this.name] = ""; 
+		return;
+	}
+	
 	data[this.name] = $(this.control).attr("src");
 }
 
@@ -542,6 +559,8 @@ EditDialog.prototype.createDialog = function(doc, callback, presetValues, preset
 	var newTop = 20;//$(window).height()/2 - parseInt($(".creationBox").css("height"))/2;
 	$(".creationBox").css("left", newLeft);
 	$(".creationBox").css("top", newTop);
+	
+	//Group.prototype.init.call(this, presetValues);
 	this.init(presetValues);
 };
 function removeDialog()
@@ -556,9 +575,9 @@ function removeDialog()
 
 var PageCreationDialog = new EditDialog("PageCreationDialog", "Neuen Inhalt einfuegen");
 PageCreationDialog.controls = new Array(
-		new TextField("identifier", 		 "Die Ueberschrift fuer die Seite."),
-		new TextField("menuTitle", "Der Titel im Menu falls gewuenscht."),
-		new Spinner("priority", "Die Reihenfolge im Menu.", 0)
+		new TextField("identifier", 	"Die Ueberschrift fuer die Seite."),
+		new TextField("menuTitle", 		"Der Titel im Menu falls gewuenscht."),
+		new Spinner("priority", 		"Die Reihenfolge im Menu.", 0)
 );
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 var SubMenuCreationDialog = new EditDialog("SubMenuCreationDialog", "Neuen Menueintrag einfuegen");
@@ -617,13 +636,14 @@ ParagraphCreationDialog.init = function(presetValues)
 	$(this.controls[1].control).change(toggleGroup);
 	Group.prototype.init.call(this, presetValues);
 };
-TableGroup.init = function()
+TableGroup.init = function(presetValues)
 {
 	this.control.setAttribute("style", "visibility:hidden;");
 	$(this.controls[0].control).change(function(){
 		var table = $(this).attr("value");
 		$.fn.loadContent(table, getCategoryCallback, null, "data", {selector:"DISTINCT category"});
 	});
+	Group.prototype.init.call(this, presetValues);
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 var TableEntryDialog = new EditDialog("TableEntryDialog", "In Tabelle einfuegen.");
@@ -631,7 +651,7 @@ TableEntryDialog.controls = new Array(
 		new ComboBox("category",  "Die Kategorie des Eintrages."),
 		new TextField("newCategory",  "Neue Kategorie erstellen. Ueberschreibt obige Auswahl."),
 		new TextField("title", "Der Titel des Eintrages."),
-		new PicBrowse("pic", "Event Bild"),
+		new PicBrowse("picUrl", "Event Bild"),
 		new DateField("date", "Das Datum des Events."),
 		new ComboBox("type",  "Typ der Veranstaltung.", "Ausstellung,Konzert,Jubilaeum", true),
 		new TextField("description", "Beschreibung des Events."),
@@ -649,4 +669,5 @@ TableEntryDialog.init = function(initData)
 			$(TableEntryDialog.controls[0].control).append(optn);
 		});
 	}, null, "data", {selector:"DISTINCT category"});
+	Group.prototype.init.call(this, initData);
 }

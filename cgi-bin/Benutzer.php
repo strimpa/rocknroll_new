@@ -24,7 +24,6 @@ class Benutzer
 	var $sessionNummer;
 	var $kundenNummer;
 	var $Abonnent;
-	var $aufenthalt;
 	var $kommentar;
 	var $bestellDatum;
 	
@@ -68,10 +67,9 @@ class Benutzer
 		}
 	}
 	
-	function Benutzer($args){
+	function Benutzer($args=NULL){
 		if(!is_array($args)){
 			//echo "Deklaration ohne Werte";
-			$this->aufenthalt = $args;
 			$this->nachName="";
 			$this->kundenNummer="";
 			$this->Abonnent=false;
@@ -79,7 +77,6 @@ class Benutzer
 			$this->kundenNummer=$args[0];
 			$this->nachName=$args[1];
 			$this->Abonnent=true;
-			$this->aufenthalt = "";
 		}
 		$this->vorName="";
 		$this->adresse="";

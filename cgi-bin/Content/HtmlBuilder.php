@@ -40,8 +40,7 @@ class HtmlBuilder
 	public function &AddMenuEntry($menuTuple, $index, $safePic=false)
 	{
 	    $link = $this->doc->createElement( 'a' );
-	    $anchorTarget = "#paragraph_".$menuTuple->url;
-	    $anchorTarget = preg_replace("/\s/", "_", $anchorTarget);
+	    $anchorTarget = "#paragraph_".MakeSafeString($menuTuple->url);
 	    $link->setAttribute("href", $anchorTarget);
 	    $ele = $this->doc->createElement( 'div' );
 	    $index = sprintf("%02d", $index+1);
@@ -51,6 +50,15 @@ class HtmlBuilder
 	    $ele->setAttribute("id", "secNavi".$index);
 	    $link->appendChild($ele);
 	    return $link;
+	}
+	
+	public function CreateImage($src, $altText=NULL)
+	{
+	    $pic = $this->GetDoc()->createElement( "img" );
+		$pic->setAttribute("src", $src);
+		if(NULL!=$altText)
+			$pic->setAttribute("alt", $altText);
+		return $pic;
 	}
 
 	public function AddTag($tag, $id=NULL, $class=NULL, $inhalt=NULL)
@@ -86,9 +94,14 @@ class HtmlBuilder
 	    		break;
 	    }
 
+		$picLink = $this->doc->createElement("a");
 	    $pic = $this->doc->createElement( "img" );
 	    $pic->setAttribute("src", $result["url"]);
-	    $picDiv->appendChild($pic);
+		$picLink->appendChild($pic);
+		$picLink->setAttribute("href", $result["url"]);
+		$picLink->setAttribute("target", "_blank");
+		$picLink->setAttribute("rel", "lightbox[articlePic]");
+	    $picDiv->appendChild($picLink);
 	    $title = $this->doc->createElement( "div" );
 	    $title->nodeValue = $result["title"];
 	    $picDiv->appendChild($title);
@@ -107,9 +120,22 @@ class HtmlBuilder
 
 	public function Render()
 	{
-		PrintHtmlComment("render that bugger!");
-	    print $this->doc->C14N();
+//		PrintHtmlComment("render that bugger! ".$this->doc->saveXML());
+	    print $this->doc->saveHTML();
     }
+    
+  //////////////////////////////////////////
+  
+    public function BuildFormForLink($value)
+    {
+    	$returnString = "<form method='post' action='#'>";
+    	$returnString .= "<input name='linkMenu' type='hidden' value='$value' />";
+    	$returnString .= "<input name='Submit' type='submit' value='$value' class='hiddenFormButton' />";
+    	$returnString .= "</form>";
+    	return $returnString;
+    }
+    
+      
 }
 
 ?>

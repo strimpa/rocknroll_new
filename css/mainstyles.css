@@ -63,7 +63,7 @@ body {
 	background-color:#01274C;
 	top:202px;
 	left:112px;
-	width:685px;
+	width:690px;
 	font-family:Arial, Helvetica, sans-serif;
 	font-size:12px;
 	color:#BBCCDB;
@@ -74,19 +74,20 @@ body {
 {
 	margin-left:60px;
 	margin-top:5px;
+	min-height: 300px;
 }
 
-#ploggerFrame
+#articleframe
 {
 	border:none;
 	width:625px;
-	height:600px;
+	height:1000px;
 }
 
 #articleTitle
 {
 	position:absolute;
-	left: 290px;
+	left: 270px;
 	width:500px;
 	text-align:right;
 	top:163px;
@@ -119,13 +120,39 @@ body {
 	text-align:left;
 	padding-top:2px;
 	height:50px;
-	width:565px;
 	padding-left:40px;
-	margin-left: 20px;
 	color:#075AAC;
 	font-size:35px;
+	margin:0px;
+	width:585px;
+	right:0px;
+}
+
+.paragraphTitleText
+{
 	font-family:brush_font;
-	background-image:url('/images/layout/NewWebsiteLayout4_18.png')
+	background:url('/images/layout/ArticleHeader.png') no-repeat right center;
+}
+
+.paragraphDeko1
+{
+	background:url('/images/layout/fifties01.gif') no-repeat center top;
+}
+.paragraphDeko2
+{
+	background-image:url('/images/layout/ParagraphDeko1.png') no-repeat center top;
+}
+.paragraphDeko3 
+{
+	background-image:url('/images/layout/ParagraphDeko1.png') no-repeat center top;
+}
+.paragraphDeko4
+{
+	background-image:url('/images/layout/ParagraphDeko1.png') no-repeat center top;
+}
+.paragraphDeko5
+{
+	background-image:url('/images/layout/ParagraphDeko1.png') no-repeat center top;
 }
 
 .picFrame
@@ -179,7 +206,7 @@ a:hover{
 #Deco01
 {
 	position:absolute;
-	left:730px;
+	left:550px;
 	top:115px;
 	z-index:3;
 }
@@ -260,15 +287,11 @@ a:hover{
 ** Table formatting
 */
 
-tr
-{
-	vertical-align:text-top;	
-}
 
 .contentTable
 {
 /*	border:1px solid black; */
-	width:600px;
+	width:625px;
 }
 .tableCellFontFancy
 {
@@ -281,21 +304,18 @@ tr
 }
 .eventDate
 {
-	font-size:30px;
+	font-size:22px;
 	font-family:brush_font;
 	background:url('/images/layout/Elements_09.png') no-repeat;
 	overflow:visible;
-	width:50px;
+	width:55px;
 	vertical-align:top;
+	padding: 0px;
 	padding-left: 10px;
 }
 .eventType
 {
 	vertical-align:top;
-}
-.eventPicTd
-{
-	border:1px solid #073869;
 }
 .extendable
 {
@@ -303,9 +323,9 @@ tr
 }
 .eventTitle
 {
-	font-size:20px;
+	font-size:15px;
 	width:300px;
-	padding-top: 10px;
+	padding-top:5px;
 }
 .tableData
 {
@@ -317,11 +337,14 @@ tr
 .eventShowMore
 {
 	font-size:15px;
-	width: 55px;
+	width: 60px;
 }
+
 .eventPic
 {
+	border:1px solid #073869;
 	width:80px;
+	float:left;
 }
 .eventMisc
 {
@@ -363,4 +386,11 @@ tr
 .errorText
 {
 	color:#FF0000;
+}
+
+.hiddenFormButton
+{
+	border:0px;
+	background-color:#01274C;
+	color:#71A1D1;
 }

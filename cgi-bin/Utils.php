@@ -37,12 +37,39 @@ function FilenameFromUrl(&$params=NULL)
 	}
 
 	$data = array_keys($params);
+	
 	return $data[0];//substr($_SERVER['REQUEST_URI'], $start+1, $end-$start-1);
+}
+
+function GetGETVars()
+{
+	$query = MyHtmlSpecialVars_decode($_SERVER['REQUEST_URI']);
+	$params = array();
+	$pathAndQueries = explode("?", $query);
+	if(count($pathAndQueries)<2)
+	{
+		return $params;
+	}
+		
+	$singleParams = explode("&", $pathAndQueries[1]);
+	foreach($singleParams as $oneParam)
+	{
+		$paramTuple = explode("=", $oneParam);
+		if(count($paramTuple)>1)
+		{
+			PrintHtmlComment($paramTuple[0]."=>". $paramTuple[1]);
+			$params[$paramTuple[0]] = $paramTuple[1];
+		}
+		else
+			$params[$oneParam] = true;
+	}
+
+	return $params;
 }
 
 function MakeSafeString($string)
 {
-	return preg_replace("/\s+/", "_", $string);
+	return preg_replace("/[^a-zA-Z0-9]+/", "_", $string);
 }
 
 function MakeSafeTagName($string)

@@ -17,6 +17,11 @@ body {
 	z-index:1;
 }
 
+.editDiv
+{
+	float:right;
+}
+
 #choice
 {
 	top:0px;
@@ -31,13 +36,13 @@ body {
 
 #contentCreate
 {
-	top:240px;
+	margin:5px;
 	height:20px;
 }
 
-#admincontent
+#contentHolder
 {
-	top:280px;
+	top:240px;
 }
 
 #outputDiv
@@ -61,6 +66,7 @@ body {
 
 .LeftGroupBox
 {
+	border: 1px solid darkGray;
 	position:absolute; 
 	left:0px;
 	top:5px; 
@@ -68,6 +74,7 @@ body {
 }
 .RightGroupBox
 {
+	border: 1px solid darkGray;
 	position:absolute; 
 	left:410px;
 	top:5px; 
@@ -81,6 +88,12 @@ body {
 .fullSizeControl
 {
 	width:140px;
+}
+
+.controlDiv
+{
+	border: 1px solid white;
+	padding: 5px;
 }
 
 .listBox
@@ -164,10 +177,15 @@ body {
 	border:1px solid black;
 }
 
+#closeBar
+{
+	background-color:grey;
+}
+
 #uploadTarget
 {
-	width:400px;
-	height:400px;
+	width:200px;
+	height:200px;
 }
 
 /*overrides*/
@@ -183,7 +201,7 @@ body {
 .adminParagraph
 {
 	left:10px;
-	border:1px solid white;
+	border:1px solid darkgray;
 	width:600px;
 	overflow:auto;
 }

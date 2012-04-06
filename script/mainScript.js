@@ -61,6 +61,37 @@
 		createPaymentEvents();
 	}
 	
+	function rotateSubNavi()
+	{
+		for(i=0;i<10;i++)
+		{
+			var naviElem = $("#secNavi0"+i);
+			if(null!=naviElem)
+			{
+				alert(naviElem);
+				var randNum = (Math.random()*10-5);
+				var oldCss = naviElem.css("-webkit-transform");
+				if("undefined"!=oldCss)
+				{
+					alert(oldCss+"+rotate("+randNum+"deg)");
+					naviElem.attr("-webkit-transform", oldCss+"+rotate("+randNum+"deg)");
+				}
+				oldCss = naviElem.css("-moz-transform");
+				if("undefined"!=oldCss)
+				{
+					alert(oldCss+"+rotate("+randNum+"deg)");
+					naviElem.attr("-moz-transform", oldCss+"+rotate("+randNum+"deg)");
+				}
+				oldCss = naviElem.css("transform");
+				if("undefined"!=oldCss)
+				{
+					alert(oldCss+"+rotate("+randNum+"deg)");
+					naviElem.attr("transform", oldCss+"+rotate("+randNum+"deg)");
+				}
+			}
+		}
+	}
+	
 	////////////////////////////////////////////////////////////////////////////////////////
 	// Entry point
 	////////////////////////////////////////////////////////////////////////////////////////

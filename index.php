@@ -10,14 +10,25 @@ ContentMgr::GetInstance()->Genesis();
 
 <head>
 <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+<?php 
+	ContentMgr::GetInstance()->RenderHeader();
+?>
 <link href="/css/mainstyles.css" rel="stylesheet" type="text/css" />
 <script type="text/javascript" src="/script/jquery-1.5.1.min.js"></script>
 <script type="text/javascript" src="/script/mainScript.js"></script>
-<?php 
-	ContentMgr::GetInstance()->RenderHeader();
-?></head>
+</head>
 
 <body>
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/de_DE/all.js#xfbml=1&appId=133353956731320";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
 
 <!-- Navigation //-->
 <!-- Navigation 		
@@ -44,7 +55,7 @@ ContentMgr::GetInstance()->Genesis();
 
 <!-- Header and deco //-->
 <div id="header" class="redbordered"><img alt="" src="/images/layout/BG_02.jpg" /></div>
-<div id="Deco01"><img alt="" src="/images/layout/Deco_08.png" /></div>
+<div id="Deco01"><img alt="" src="/images/layout/Deco.png" /></div>
 <!--
 <div id="articleTitle">
  	<object id="flash2" data="/images/ArticleTitle.swf" height="200" type="application/x-shockwave-flash" width="200">
@@ -60,5 +71,9 @@ ContentMgr::GetInstance()->Genesis();
 <?php 
 	ContentMgr::GetInstance()->RenderContent();
 ?>
+
+<div id="advertRight">
+	<SCRIPT charset="utf-8" type="text/javascript" src="http://ws.amazon.de/widgets/q?rt=tf_sw&ServiceVersion=20070822&MarketPlace=DE&ID=V20070822/DE/rockmaga-21/8002/ba8f7bfe-18ec-49cb-a596-3bc5b18a626e"> </SCRIPT> <NOSCRIPT><A HREF="http://ws.amazon.de/widgets/q?rt=tf_sw&ServiceVersion=20070822&MarketPlace=DE&ID=V20070822%2FDE%2Frockmaga-21%2F8002%2Fba8f7bfe-18ec-49cb-a596-3bc5b18a626e&Operation=NoScript">Amazon.de Widgets</A></NOSCRIPT>
+</div>	
 </body>
 </html>

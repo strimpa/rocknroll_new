@@ -280,10 +280,20 @@ class Verbindung
 		$this->verbinde();
 		$sql = "SELECT DISTINCT rubrik, beschreibung, link, anlegeDatum FROM links WHERE rubrik LIKE \"$rubrik\""; 
 		$result = mysql_query($sql);
-		print "Aufgetretene Fehler: ".mysql_error();
-	return $result;
+		if(!$result)
+			print "Aufgetretene Fehler: ".mysql_error();
+		return $result;
 	}
 
+	function getLinkSections(){
+		$this->verbinde();
+		$sql = "SELECT DISTINCT rubrik FROM links"; 
+		$result = mysql_query($sql);
+		if(!$result)
+			print "Aufgetretene Fehler: ".mysql_error();
+		return $result;
+	}
+	
 	function gibLinksAusFuerSuche($eingabe){
 		$this->verbinde();
 		print "Sucheingabe \"$eingabe\"";
@@ -293,15 +303,17 @@ class Verbindung
 			$sql = "SELECT DISTINCT `rubrik`,`beschreibung`,`link`,`anlegeDatum` FROM links WHERE LOCATE(\"".$eingabe."\", LCASE(beschreibung)) != 0 OR LOCATE(\"".$eingabe."\", LCASE(link)) != 0"; 
 			$result = mysql_query($sql);
 		}
-		print "Ausgabe: ".mysql_error();
-	return $result;
+		if(!$result)
+			print "Ausgabe: ".mysql_error();
+		return $result;
 	}
 
 	function gibLinksEin($rubrik, $beschreibung, $link, $anlegeDatum){
 		$this->verbinde();
 		$sql = "INSERT INTO `links`(rubrik,beschreibung,link,angelegtVon) VALUES ('$rubrik','$beschreibung','$link','$_POST[adminName]')"; 
 		$result = mysql_query($sql);
-		print "Aufgetretene Fehler: ".mysql_error();
+		if(!$result)
+			print "Aufgetretene Fehler: ".mysql_error();
 	return $result;
 	}
 
@@ -309,7 +321,8 @@ class Verbindung
 		$this->verbinde();
 		$sql = "SELECT DISTINCT erstAuswahl FROM " . $tabellenName; 
 		$result = mysql_query($sql);
-		//print "Aufgetretene Fehler: ".mysql_error();
+		if(!$result)
+			print "Aufgetretene Fehler: ".mysql_error();
 	return $result;
 	}
 
@@ -319,7 +332,8 @@ class Verbindung
 		$this->verbinde();
 		$sql = "SELECT $spalten FROM $tabellenName ".$whereKlausel; 
 		$result = mysql_query($sql);
-		print "Aufgetretene Fehler: ".mysql_error();
+		if(!$result)
+			print "Aufgetretene Fehler: ".mysql_error();
 	return $result;
 	}
 

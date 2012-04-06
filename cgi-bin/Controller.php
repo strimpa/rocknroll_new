@@ -10,6 +10,10 @@ class DBController
 	{
 		$this->meineVerbindung = new Verbindung($this, "verbindung");
 	}
+	public function &Conn()
+	{
+		return $this->meineVerbindung;
+	}
 	
 	public function GetTableContent($table, $fields, $requirements = NULL, $useRegExp = FALSE)
 	{
@@ -46,9 +50,10 @@ class DBController
 	public function GetMenu($idval)
 	{
 		$result = $this->meineVerbindung->GetTableContent("submenus", "*", array("id"=>$idval), FALSE);
-		assert(count($result)==1);
-		$result= $result[0];
-		return $result;
+		if(count($result)!=1)
+			return NULL;
+		else
+			return $result[0];
 	}
 
 	public function GetParagraph($idval)

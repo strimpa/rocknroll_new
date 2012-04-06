@@ -19,6 +19,8 @@
 <script type="text/javascript" src="../../script/tiny_mce/jquery.tinymce.js"></script>
 <!--<script type="text/javascript" src="../../script/jquery.microgallery.js"></script>-->
 
+<script type="text/javascript" src="../../script/DataTables-1.9.0/media/js/jquery.dataTables.js"></script>
+
 <script type="text/javascript" src="creationTemplates.json"></script>
 <script type="text/javascript" src="adminApp.js"></script>
 </head>
@@ -59,13 +61,16 @@
 		</select>
 	</fieldset>
 </div>
-<div class="editfield" id="contentCreate">
-	<input id="createParagraphButton" class="createButton" type="button" value="Neuen Absatz erstellen" />
-	Bestehenden Absatz einfuegen:<select id="insertParagraphSelect" class="fullSizeControl">
-			<option></option>
-	</select>
-</div>
-<div class="editfield" id="admincontent">
+
+<div class="editfield" id="contentHolder">
+	<div id="contentCreate">
+		<input id="createParagraphButton" class="createButton" type="button" value="Neuen Absatz erstellen" />
+		Bestehenden Absatz einfuegen:<select id="insertParagraphSelect" class="fullSizeControl">
+				<option></option>
+		</select>
+	</div>
+	<div id="admincontent">
+	</div>
 </div>
 
 <div class="editfield" id="outputDiv">

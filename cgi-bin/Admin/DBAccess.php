@@ -60,71 +60,108 @@
 		
 		if(!is_bool($result))
 		{
-			$doc =  new DOMDocument(); //$imp->createDocument("", "", $dtd);
-			// Set other properties
-			$doc->encoding = 'UTF-8';
-	//		$doc->standalone = false;
-			
-			$currRow = NULL;
-			$rootElem = $doc->createElement($query);
-			$doc->appendChild($rootElem);
-			$print = "";
-			foreach($result as $row)
+			if(isset($params["jsonArray"]))
 			{
-				$currRow = $doc->createElement("row");
-				if(is_bool($row))
+				$keyArray = array();
+				print "{\n\t".$params["jsonArray"].": [\n";
+				for($k=0;$k<count($result);$k++)
 				{
-					$currRow->nodeValue = $row;
-				}
-				else 
-				{
-					for($colIndex=0;$colIndex<count($row);$colIndex++)
+					$row = $result[$k];
+					print "\t[\n";
+					if(is_bool($row))
 					{
-						$keyArray = array_keys($row);
-						$fieldName = $keyArray[$colIndex];
-						$tagName = MakeSafeTagName($fieldName);
-						$col = $doc->createElement($tagName);
-
-/*
-						$importdoc = new DOMDocument();
-						$importdoc->loadXML($row[$fieldName]);
-//						$print = $row[$fieldName];
-
-						$text = $doc->importNode($importdoc->firstChild, true);
-//						$text = $doc->createTextNode($row[$fieldName]);
- */
-
-						$text = "";
-						if(IsXmlString($row[$fieldName]))
-						{
-//							$importdoc = new DOMDocument();
-
-							//$decodedString = utf8_encode(html_entity_decode($row[$fieldName]));
-							$decodedString = utf8_encode($row[$fieldName]);
-							PrintHtmlComment("decoded string:".$row[$fieldName]);
-//							$importdoc->loadXML($decodedString); //htmlspecialchars_decode()
-//							$text = $doc->importNode($importdoc->firstChild, true);
-//							$col->appendChild($text);
-//"<![CDATA[$row[$fieldName]]]>"
-							$text = $doc->createTextNode(htmlentities($row[$fieldName]));
-							$col->appendChild($text);
-						} 
-						else
-						{
-							$col->nodeValue = $row[$fieldName];
-						}
-						$currRow->appendChild($col);
+						Print "\t\t//".$row;
 					}
-		//			print("<test>".$currRow->nodeValue."</test>");
-		//			$doc->normalizeDocument();
-				}			
-				$rootElem->appendChild($currRow);
+					else 
+					{
+						for($colIndex=0;$colIndex<count($row);$colIndex++)
+						{
+							$keyArray = array_keys($row);
+							$fieldName = $keyArray[$colIndex];
+							$content = htmlentities(utf8_decode($row[$fieldName]));
+//							$tagName = MakeSafeTagName($fieldName);
+							print "\t\t\"$content\"";
+							if($colIndex<count($row)-1)
+								print ",";
+							print "\n";
+						}
+					}
+					print "\t]";
+					if($k<(count($result)-1))
+						print ",";
+					print "\n";
+				}
+				print "\t],\n\taoColumns : \n\t[\n";
+				foreach ($keyArray as $field)
+				{
+					print "\t\t{sTitle : \"$field\"},\n";
+				}
+				print "\t]\n";
+				print "}\n";
 			}
-		
-			$output = $doc->C14N();
-	//		$output = preg_replace("/[\n\r]/", "", $output);
-			print $output;
-	//			PrintHtmlComment($print);
+			else 
+			{
+				$doc =  new DOMDocument(); //$imp->createDocument("", "", $dtd);
+				// Set other properties
+				$doc->encoding = 'UTF-8';
+		//		$doc->standalone = false;
+				
+				$currRow = NULL;
+				$rootElem = $doc->createElement($query);
+				$doc->appendChild($rootElem);
+				$print = "";
+				foreach($result as $row)
+				{
+					$currRow = $doc->createElement("row");
+					if(is_bool($row))
+					{
+						$currRow->nodeValue = $row;
+					}
+					else 
+					{
+						for($colIndex=0;$colIndex<count($row);$colIndex++)
+						{
+							$keyArray = array_keys($row);
+							$fieldName = $keyArray[$colIndex];
+							$tagName = MakeSafeTagName($fieldName);
+							$col = $doc->createElement($tagName);
+	
+							if(IsXmlString($row[$fieldName]))
+							{
+								$importdoc = new DOMDocument();
+								$importdoc->encoding = 'UTF-8';
+								$importdoc->loadHTML('<?xml encoding="UTF-8">\n'.$row[$fieldName]);
+	//							PrintHtmlComment("Xml string after import:".$importdoc->C14N());
+								
+								$node = $importdoc->getElementsByTagName("div")->item(0);
+								$text = FALSE;
+								if(null!=$node)
+									$text = $doc->importNode($node, true);
+								if(FALSE!=$text)
+									$col->appendChild($text);
+								else
+								{
+									$text = $doc->createTextNode("Fehler beim Text laden!");
+									$col->appendChild($text);
+								}
+							} 
+							else
+							{
+								$col->nodeValue = htmlentities(utf8_decode($row[$fieldName]));
+							}
+							$currRow->appendChild($col);
+						}
+			//			print("<test>".$currRow->nodeValue."</test>");
+			//			$doc->normalizeDocument();
+					}			
+					$rootElem->appendChild($currRow);
+				}
+			
+				$output = $doc->saveXML();
+		//		$output = preg_replace("/[\n\r]/", "", $output);
+				print $output;
+		//			PrintHtmlComment($print);
+			}
 		}
 	}
 	else

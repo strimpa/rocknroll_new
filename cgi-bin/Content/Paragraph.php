@@ -47,7 +47,10 @@ class PicPara implements iParagraph
 	{
 		$dataAssoc = MetaString2Assoc($data);
 		$this->height = $dataAssoc["height"];
-		$this->picUrl = $dataAssoc["image"];
+		if(array_key_exists("image", $dataAssoc))
+			$this->picUrl = $dataAssoc["image"];
+		else
+			$this->picUrl = null;
 	}
 	
 	private function CreateStyleString($offset)
@@ -72,18 +75,27 @@ class PicPara implements iParagraph
 		$div = $builder->AddTag("div", "paragraph_".MakeSafeString($this->header), "paragraph");
 		$builder->AddStyle($div, $this->CreateStyleString($currentOffset));
 
+		$title = null;
 		if(""!=$this->header)
 		{
-			$title = $builder->AddTag("p", "paragraph_title_".MakeSafeString($this->header), "paragraphTitle", $this->header);
-			$div->appendChild($title);
+			$title = $builder->AddTag("p", "paragraph_title_".MakeSafeString($this->header), "paragraphTitle paragraphTitleText", $this->header);
 		}
+		else
+		{
+			$className = "paragraphTitle paragraphDeko".rand(1,5);
+			$title = $builder->AddTag("p", "paragraph_title_".MakeSafeString($this->header), $className);
+		}
+		$div->appendChild($title);
 		
 		$content = $builder->AddTag("div", "paragraph_content_".MakeSafeString($this->header), "paragraphContent");
 		$contentHeight = ($this->height-iParagraph::TITLE_HEIGHT);
 		$builder->AddStyle($content, "height:".$contentHeight."px;");
 		$text = $builder->AddTag("p", "paragraph_content_".MakeSafeString($this->header), "paragraphText");
-		$pic = $builder->AddImage($this->picUrl, $this->picAlign);
-		$content->appendChild($pic);
+		if(null!=$this->picUrl)
+		{
+			$pic = $builder->AddImage($this->picUrl, $this->picAlign);
+			$content->appendChild($pic);
+		}
 		$content->appendChild($text);
 		
 		if($this->content!="")
@@ -91,7 +103,9 @@ class PicPara implements iParagraph
 			$importdoc = new DOMDocument();
 			$importdoc->encoding = 'UTF-8';
 //			PrintHtmlComment("content:$this->content");
+//			PrintHtmlComment("Xml string before import:".$this->content);
 			$importdoc->loadHTML('<?xml encoding="UTF-8">\n'.$this->content);
+//			PrintHtmlComment("Xml string after import:".$importdoc->C14N());
 			$doc = $builder->GetDoc();
 			
 			$node = $importdoc->getElementsByTagName("div")->item(0);
@@ -105,10 +119,12 @@ class PicPara implements iParagraph
 				$text = $doc->createTextNode("Fehler beim Text laden!");
 				$content->appendChild($text);
 			}
+//			PrintHtmlComment("Xml string after welding:".$doc->saveXML($content));
 		}
 		$div->appendChild($content);
 		$parentNode->appendChild($div);
 		
+		$content->setAttribute("style", "height:".($this->height-40)."px;");
 		$currentOffset += ($this->height + iParagraph::PARAGRAPH_PADDING);
 	}
 }
@@ -210,8 +226,12 @@ class TablePara implements iParagraph
 						$value = $resultArray[$text];
 						if($type=="date")
 						{
-							$lastSlashIndex = strrpos($value, "-");
-							$value = substr($value, $lastSlashIndex+1);
+							$date = new DateTime($value);
+							$weekday = strftime("%A", strtotime($value));//$date->getTimestamp());
+							$value = $date->format('d').",".substr($weekday, 0, 3);
+//							$print ($weekday);
+//							$lastSlashIndex = strrpos($value, "-");
+//							$value = substr($value, $lastSlashIndex+1);
 							$myElement->nodeValue = $value;
 						}
 						else if($type=="geo")
@@ -220,13 +240,19 @@ class TablePara implements iParagraph
 						}
 						else if($type=="pic" && $value!="")
 						{
+							$picLink = $doc->createElement("a");
 							$pic = $doc->createElement("img");
 							//$index = intval($value);
 							PrintHtmlComment($value);
 							//$pic->setAttribute("src", $this->eventTypePicPath.$this->eventTypePics[$index]);
 							$pic->setAttribute("src", $value);
 							$pic->setAttribute("class", "eventPic");
-							$myElement->appendChild($pic);
+							
+							$picLink->appendChild($pic);
+							$picLink->setAttribute("href", $value);
+							$picLink->setAttribute("target", "_blank");
+							$picLink->setAttribute("rel", "lightbox[eventPic]");
+							$myElement->appendChild($picLink);
 							
 							$hasPicAttached = true;
 						}
@@ -257,10 +283,11 @@ class TablePara implements iParagraph
 
 		if(""!=$this->header)
 		{
-			$title = $builder->AddTag("p", "paragraph_title_".MakeSafeString($this->header), "paragraphTitle", $this->header);
+			$title = $builder->AddTag("p", "paragraph_title_".MakeSafeString($this->header), "paragraphTitle paragraphTitleText", $this->header);
+			$title->setAttribute("align", "right");
 			$div->appendChild($title);
 		}
-		$content = $builder->AddTag("p", "paragraph_content_".MakeSafeString($this->header), "paragraphContent");
+		$content = $builder->AddTag("div", "paragraph_content_".MakeSafeString($this->header), "paragraphContent");
 		
 		$configXML = new DOMDocument();
 		$configXML->load($this->tableType.".xml");
@@ -288,6 +315,8 @@ class TablePara implements iParagraph
 		$content->appendChild($table);
 		$div->appendChild($content);
 		$parentNode->appendChild($div);
+		
+		$content->setAttribute("style", ("height:".($this->height-40)."px;"));
 		
 		$currentOffset += ($this->height + iParagraph::PARAGRAPH_PADDING);
 	}

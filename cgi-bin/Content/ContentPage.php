@@ -14,10 +14,15 @@ class ContentPage
 	private $isDirty;
 	private static $doc;
 	
-	public function ContentPage($pageData)
+	public function ContentPage($pageData, $articleType=NULL, $url=NULL)
 	{
 		$this->menu = new SubMenu();
-		$this->article = new Article();
+		if(NULL!=$articleType)
+			$this->article = new DelegateArticle($articleType);
+		else if(NULL!=$url)
+			$this->article = new FrameArticle($url);
+		else
+			$this->article = new Article();
 		$this->isDirty = true;
 		
 		// Menu entries
@@ -49,7 +54,7 @@ class ContentPage
 	
 	public function RenderHeader()
 	{
-		/**/
+		return $this->article->RenderHeader();
 	}
 
 	public function Render()
@@ -67,7 +72,7 @@ class ContentPage
 	}
 	
 };
-
+/*
 class PloggerPage extends ContentPage
 {
 	private $menu;
@@ -101,6 +106,6 @@ class PloggerPage extends ContentPage
 		print "</div>";
 	}
 };
-
+*/
 
 ?>

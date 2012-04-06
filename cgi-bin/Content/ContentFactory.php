@@ -42,7 +42,7 @@ class ContentFactory
 		{
 //			$explodedArray = array();
 			$field = $result[$fields];
-			$explodedArray = explode(",", $field);
+			$explodedArray = explode("|", $field);
 			array_push($newFields, $explodedArray);
 		}
 		
@@ -126,11 +126,21 @@ class ContentFactory
 		foreach($result as $pageData)
 		{
 			// inital create
-			PrintHtmlComment("identifier: ".$pageData["identifier"]);
-			if($pageData["identifier"]=="plogger")
-				$newPage = new PloggerPage();
-			else
-				$newPage = new ContentPage($pageData);
+			$type = NULL;
+			$url = NULL;
+			switch($pageData["identifier"])
+			{
+				case "plogger":
+					$type = Article::DELEGATE_ARTICLE_PLOGGER;
+					break;
+				case "links":
+					$type = Article::DELEGATE_ARTICLE_LINKS;
+					break;
+				case "guestbook":
+					$url = "http://www.rock-around.de/system-cgi/guestbook/guestbook.php?action=view";
+					break;
+			} 
+			$newPage = new ContentPage($pageData, $type, $url);
 			
 			// add
 			return $newPage;

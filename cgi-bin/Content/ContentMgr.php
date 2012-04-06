@@ -48,6 +48,7 @@ class ContentMgr
 	{
 		$this->navi = ContentFactory::GetInstance()->CreateMainNavi();
 		$currId = FilenameFromUrl();
+		PrintHtmlComment("currId:$currId");
 		if($currId=="")
 			$currId = "index";
 		$this->content = ContentFactory::GetInstance()->CreateContentPages($currId);
