@@ -59,7 +59,7 @@ class Verbindung
 	**   Content
 	***********************************************************************************/
 
-	public function GetTableContent($table, $fields, $requirements = NULL, $useRegExp = FALSE, $orderBy = NULL)
+	public function GetTableContent($table, $fields, $requirements = NULL, $useRegExp = FALSE, $orderBy = NULL, $distinct=FALSE)
 	{
 		$backGabe = array();
 		$this->verbinde();
@@ -92,7 +92,10 @@ class Verbindung
 			$orderByString = join(',', $orderBy);
 		}
 		
-		$sql = 'SELECT '.$fieldString;
+		$sql = 'SELECT ';
+		if($distinct)
+			$sql .= "DISTINCT ";
+		$sql .= $fieldString;
         $sql .= ' FROM `'.$table.'` '; 
 		if($reqString != "")
 		{
@@ -119,6 +122,50 @@ class Verbindung
 		}
 		return $backGabe;
 	}
+
+	public function GetTableDef($table, $fields, $requirements = NULL)
+	{
+		$backGabe = array();
+		$this->verbinde();
+		
+		$fieldString = $fields;
+		if(is_array($fields))
+		{
+			$joinString = join("`,`", $fields);
+			$fieldString = "`".$joinString."`";
+		}
+
+		$reqString = "";
+		if(is_array($requirements))
+		{
+			$index = 0;
+			foreach($requirements as $key => $value)
+			{
+				if($index>0)
+					$reqString .= " AND ";
+				$value = preg_replace("/%20/", " ", $value);
+				$reqString .= $key." LIKE '".$value."'";
+			}
+		}
+		$sql = 'SELECT '.$fieldString;
+        $sql .= ' FROM `'.$table.'` '; 
+		if($reqString != "")
+		{
+			$sql .= ' WHERE '.$reqString;
+		}
+		
+		$sql .= ';';
+//        print("<!-- sql:".$sql." //-->\n");
+		$result = mysql_query($sql);
+		$fields = mysql_num_fields($result);
+		$rowArray = array();	
+		for ($i=0; $i < $fields; $i++)
+		{
+			$rowArray[mysql_field_name($result, $i)] = mysql_field_type($result, $i);
+		}
+		array_push($backGabe,$rowArray);
+		return $backGabe;
+	} 
 
 	public function DropTableContent($table, $requirements = NULL)
 	{
@@ -278,7 +325,7 @@ class Verbindung
 
 	function gibLinksAusFuerRubrik($rubrik){
 		$this->verbinde();
-		$sql = "SELECT DISTINCT rubrik, beschreibung, link, anlegeDatum FROM links WHERE rubrik LIKE \"$rubrik\""; 
+		$sql = "SELECT DISTINCT rubrik, beschreibung, url, anlegeDatum FROM links WHERE rubrik LIKE \"$rubrik\""; 
 		$result = mysql_query($sql);
 		if(!$result)
 			print "Aufgetretene Fehler: ".mysql_error();
@@ -297,10 +344,10 @@ class Verbindung
 	function gibLinksAusFuerSuche($eingabe){
 		$this->verbinde();
 		print "Sucheingabe \"$eingabe\"";
-		$sql = "SELECT DISTINCT `rubrik`,`beschreibung`,`link`,`anlegeDatum` FROM links WHERE LOCATE(\"".$eingabe."\", beschreibung) != 0 OR LOCATE(\"".$eingabe."\", link) != 0"; 
+		$sql = "SELECT DISTINCT `rubrik`,`beschreibung`,`url`,`anlegeDatum` FROM links WHERE LOCATE(\"".$eingabe."\", beschreibung) != 0 OR LOCATE(\"".$eingabe."\", url) != 0"; 
 		$result = mysql_query($sql);
 		if(mysql_num_rows($result)<1){
-			$sql = "SELECT DISTINCT `rubrik`,`beschreibung`,`link`,`anlegeDatum` FROM links WHERE LOCATE(\"".$eingabe."\", LCASE(beschreibung)) != 0 OR LOCATE(\"".$eingabe."\", LCASE(link)) != 0"; 
+			$sql = "SELECT DISTINCT `rubrik`,`beschreibung`,`url`,`anlegeDatum` FROM links WHERE LOCATE(\"".$eingabe."\", LCASE(beschreibung)) != 0 OR LOCATE(\"".$eingabe."\", LCASE(url)) != 0"; 
 			$result = mysql_query($sql);
 		}
 		if(!$result)
@@ -310,7 +357,7 @@ class Verbindung
 
 	function gibLinksEin($rubrik, $beschreibung, $link, $anlegeDatum){
 		$this->verbinde();
-		$sql = "INSERT INTO `links`(rubrik,beschreibung,link,angelegtVon) VALUES ('$rubrik','$beschreibung','$link','$_POST[adminName]')"; 
+		$sql = "INSERT INTO `links`(rubrik,beschreibung,url,angelegtVon) VALUES ('$rubrik','$beschreibung','$link','$_POST[adminName]')"; 
 		$result = mysql_query($sql);
 		if(!$result)
 			print "Aufgetretene Fehler: ".mysql_error();

@@ -15,9 +15,13 @@ class DBController
 		return $this->meineVerbindung;
 	}
 	
-	public function GetTableContent($table, $fields, $requirements = NULL, $useRegExp = FALSE)
+	public function GetTableContent($table, $fields, $requirements = NULL, $useRegExp = FALSE, $orderBy=NULL, $distinct=FALSE)
 	{
-		return $this->meineVerbindung->GetTableContent($table, $fields, $requirements, $useRegExp);
+		return $this->meineVerbindung->GetTableContent($table, $fields, $requirements, $useRegExp, $orderBy, $distinct);
+	}
+	public function GetTableDef($table, $fields, $requirements = NULL)
+	{
+		return $this->meineVerbindung->GetTableDef($table, count($fields)>0?$fields:"*", $requirements);
 	}
 	public function SetTableContent($table, $fields, $requirements = NULL, $values = NULL)
 	{

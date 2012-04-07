@@ -22,6 +22,288 @@
 		element("outputDiv").innerHTML = text+"<br />"+element("outputDiv").innerHTML;
 	}
 
+	function interpreteMetaData(metaString)
+	{
+		var items = metaString.split(";");
+		var metaObject = {};
+		for(i in items)
+		{
+			var metaTuple = items[i].split("=");
+			metaObject[metaTuple[0]] = metaTuple[1];
+		}
+		return metaObject;
+	}
+
+	/////////////////////////////////////////////////////////////////////////
+	// view
+	/////////////////////////////////////////////////////////////////////////
+	
+	var utils = 
+	{
+		RenderTable : function(tableName, requirements)
+		{
+			var table = document.createElement("table");
+			table.setAttribute("class", "adminTable");
+			$.fn.loadContent(tableName, function(result)
+			{
+				$(result).find("row").each(function()
+				{
+					var rowDiv = document.createElement("tr");
+
+					var editDiv = document.createElement("td");
+					editDiv.setAttribute("class", "editDiv");
+					var editEntryButton = document.createElement("input");
+					editEntryButton.setAttribute("type", "button");
+					editEntryButton.setAttribute("value", "edit");
+					editEntryButton.setAttribute("class", "editButton");
+					editDiv.appendChild(editEntryButton);
+					var deleteEntryButton = document.createElement("input");
+					deleteEntryButton.setAttribute("type", "button");
+					deleteEntryButton.setAttribute("value", "delete");
+					deleteEntryButton.setAttribute("class", "deleteButton");
+					editDiv.appendChild(deleteEntryButton);
+					rowDiv.appendChild(editDiv);
+					$(this).children().each(function()
+					{
+						var dataDiv = document.createElement("td");
+						dataDiv.textContent = $(this).text();
+//								rowDiv.setAttribute("class", "paragraphContent");
+						dataDiv.setAttribute("id", "td_"+$(this)[0].tagName);
+						rowDiv.appendChild(dataDiv);
+					});
+					table.appendChild(rowDiv);
+					var eventId = $(this).find("id").text();
+					// clck handlers
+					var defaultEditData = {
+						table:tableName,
+						id:eventId,
+						category:$(this).find("category").text(),
+						title:$(this).find("title").text(),
+						date:$(this).find("date").text(),
+						description:$(this).find("description").text(),
+						venue:$(this).find("venue").text(),
+						time:$(this).find("time").text(),
+						misc:$(this).find("misc").text()
+					};
+					$(editEntryButton).click(function()
+					{
+						editTableTrigger(defaultEditData);
+					});
+					$(deleteEntryButton).click(function()
+					{
+						var confirmation = confirm("Sind Sie sicher dass Sie den Eintrag loeschen wollen?");
+						if(confirmation)
+						{
+							$.fn.loadContent(theTable, function(result)
+							{
+								alert("Eintrag erfolgreich geloescht.");
+								triggerParagraphCreation();
+							}, {id:eventId}, "data", {del:true});
+						}
+					});
+				});
+			}, requirements, "xml");
+			
+			return table;
+		},
+		
+		renderPargraphHTML : function(paraDiv, paragraphData, paraIndex)
+		{
+			output(paragraphData.find("meta").text());
+			metaData = interpreteMetaData(paragraphData.find("meta").text());
+
+			paraDiv.setAttribute("class", "adminParagraph");
+			paraDiv.style.height = metaData['height'] + "px";
+//			heightobj.offset += parseInt(metaData['height']);
+			// title
+			var editDiv = document.createElement("div");
+			editDiv.setAttribute("class", "editDiv");
+			editDiv.style.textAlign = "right";
+			var editParaButton = document.createElement("input");
+			editParaButton.setAttribute("type", "button");
+			editParaButton.setAttribute("value", "edit");
+			editParaButton.setAttribute("class", "editButton");
+			editParaButton.setAttribute("disabled", "true");
+			editDiv.appendChild(editParaButton);
+			var deleteParaButton = document.createElement("input");
+			deleteParaButton.setAttribute("type", "button");
+			deleteParaButton.setAttribute("value", "delete "+paraIndex);
+			deleteParaButton.setAttribute("class", "deleteButton");
+			editDiv.appendChild(deleteParaButton);
+			var upParaButton = document.createElement("input");
+			upParaButton.setAttribute("type", "button");
+			upParaButton.setAttribute("value", "nach oben");
+			editDiv.appendChild(upParaButton);
+			var downParaButton = document.createElement("input");
+			downParaButton.setAttribute("type", "button");
+			downParaButton.setAttribute("value", "nach unten");
+			editDiv.appendChild(downParaButton);
+			paraDiv.appendChild(editDiv);
+			// title
+			var paraID = paragraphData.find("id").text();
+			var titleDiv = document.createElement("div");
+			titleDiv.setAttribute("class", "paragraphTitle");
+			titleDiv.textContent = paragraphData.find("title").text();
+			paraDiv.appendChild(titleDiv);
+			
+			var type = paragraphData.find("type").text()
+			var imageUrl = "";
+			var imageTitle = "";
+			var paraContent = "";
+			var picID = -1;
+			// image
+			if(null!=metaData['image'])
+			{
+				var imgDiv = document.createElement("div");
+//				var classString = "";
+				imgDiv.setAttribute("class", "picFrame picFrameLeft");
+				$.fn.loadContent("pictures", function(result)
+				{
+					picID = $(result).find("id").text();
+					var img = document.createElement("img");
+					imageUrl = $(result).find("url").text();
+					img.setAttribute("src", imageUrl);
+					imgDiv.appendChild(img);
+					editParaButton.removeAttribute("disabled");
+					var txt = document.createElement("div");
+					imageTitle = $(result).find("title").text();
+					txt.textContent = imageTitle;
+					imgDiv.appendChild(txt);
+				}, {"id":metaData['image']}, "xml");
+				paraDiv.appendChild(imgDiv);
+			}
+			else
+			{
+				editParaButton.removeAttribute("disabled");
+			}
+			switch(type)
+			{
+			case "0":
+			case "1":
+				// title
+				var textDiv = document.createElement("div");
+				textDiv.setAttribute("class", "paragraphContent");
+				var contentHtml = $(paragraphData.find("content").children().first());
+//				alert($(contentHtml).html());
+				$(textDiv).html(contentHtml);
+				paraContent = $(textDiv).html();
+				paraDiv.appendChild(textDiv);
+				break;
+			case "2":
+				if(metaData['table'])
+				{
+					var theTable = metaData['table'];
+					var tableDiv = document.createElement("div");
+					tableDiv.setAttribute("class", "adminTableDiv");
+
+					var addEntryButton = document.createElement("input");
+					addEntryButton.setAttribute("type", "button");
+					addEntryButton.setAttribute("value", "Neu");
+					addEntryButton.setAttribute("class", "editButton");
+					tableDiv.appendChild(addEntryButton);
+
+					$(addEntryButton).click(function()
+					{
+						editTableTrigger({table:theTable});
+					});
+					var table = utils.RenderTable(theTable);
+
+					tableDiv.appendChild(table);
+					paraDiv.appendChild(tableDiv);
+				}
+				break;
+			default:
+				break;
+			}
+			
+			// clck handlers
+			$(editParaButton).click(function()
+			{
+				var defaultData = {
+					title:titleDiv.textContent,
+					type:metaData['type'],
+					height:metaData['height'],
+					picUrl:imageUrl,
+					picTitle:imageTitle,
+					content:paraContent,
+					table:metaData['table'],
+					category:metaData['category'],
+				};
+				$.createParagraphHandler(defaultData, paraID, picID);
+			});
+			$(deleteParaButton).click(function()
+			{
+				var selectedIndex = $("#pagesDropDown").attr("selectedIndex")-1;
+			    var paragraphString = $($contentCache.find( 'paragraphs' )[selectedIndex]).text();
+			    var pageIndex = $($contentCache.find( 'id' )[selectedIndex]).text();
+			    var paraArray = paragraphString.split(",");
+			    paraArray.splice(paraIndex, 1);
+			    for(p in paraArray)
+			    	if(paraArray[p]=="")
+			    		paraArray.splice(p, 1);
+				var pageData = {
+					paragraphs:paraArray.join(",")
+				};
+//				alert("paraindex:"+paraIndex+", new para string:"+paraArray.join(","));
+				$.fn.loadContent("pages", function(result)
+				{
+					alert("Absatz erfolgreich geloescht.");
+					triggerParagraphCreation();
+				}, pageData, "data", {edit:true,req:("id="+pageIndex)});
+			});
+			$(upParaButton).click(function()
+			{
+				if(paraIndex<=0)
+				{
+					alert("Dies ist bereits der erste Paragraph.");
+					return;
+				}
+				var selectedIndex = $("#pagesDropDown").attr("selectedIndex")-1;
+			    var paragraphString = $($contentCache.find( 'paragraphs' )[selectedIndex]).text();
+			    var pageIndex = $($contentCache.find( 'id' )[selectedIndex]).text();
+			    var paraArray = paragraphString.split(",");
+				var formerVal = paraArray[paraIndex-1];
+				paraArray[paraIndex-1] = paraArray[paraIndex];
+				paraArray[paraIndex] = formerVal;
+			    for(p in paraArray)
+			    	if(paraArray[p]=="")
+			    		paraArray.splice(p, 1);
+				var pageData = {
+					paragraphs:paraArray.join(",")
+				};
+				$.fn.loadContent("pages", function(result)
+				{
+					triggerParagraphCreation();
+				}, pageData, "data", {edit:true,req:("id="+pageIndex)});
+			});
+			$(downParaButton).click(function()
+			{
+				var selectedIndex = $("#pagesDropDown").attr("selectedIndex")-1;
+			    var paragraphString = $($contentCache.find( 'paragraphs' )[selectedIndex]).text();
+			    var pageIndex = $($contentCache.find( 'id' )[selectedIndex]).text();
+			    var paraArray = paragraphString.split(",");
+				if(paraIndex>=paraArray.length-1)
+				{
+					alert("Dies ist bereits der letzte Paragraph.");
+					return;
+				}
+				var followingVal = paraArray[paraIndex+1];
+				paraArray[paraIndex+1] = paraArray[paraIndex];
+				paraArray[paraIndex] = followingVal;
+			    for(p in paraArray)
+			    	if(paraArray[p]=="")
+			    		paraArray.splice(p, 1);
+				var pageData = {
+					paragraphs:paraArray.join(",")
+				};
+				$.fn.loadContent("pages", function(result)
+				{
+					triggerParagraphCreation();
+				}, pageData, "data", {edit:true,req:("id="+pageIndex)});
+			});
+		}
+	}
+	
 	/////////////////////////////////////////////////////////////////////////
 	// view
 	/////////////////////////////////////////////////////////////////////////
@@ -212,7 +494,7 @@
 						else
 						{
 							var naviDelData = {pageRef:pageId};
-							$.fn.loadContent("navigation", contentEditHandler, naviDelData, "data", {delete:true});
+							$.fn.loadContent("navigation", contentEditHandler, naviDelData, "data", {del:true});
 						}
 					}, pageData, "data", {edit:true, req:reqString});
 				}, {identifier:theID, menuTitle:$("#pageTitle").attr("value"), priority:menuPriority});
@@ -224,13 +506,13 @@
 			if(!confirmation)
 				return;
 			var selectedIndex = $("#pagesDropDown").attr("selectedIndex")-1;
-	    var pageId = $($contentCache.find( 'id' )[selectedIndex]).text();
+	    	var pageId = $($contentCache.find( 'id' )[selectedIndex]).text();
 			var data = {id:pageId};
 			var navidata = {pageRef:pageId};
 			$.fn.loadContent("pages", function(result)
 			{
-				$.fn.loadContent("navigation", contentEditHandler, navidata, "data", {delete:true});
-			}, data, "data", {delete:true});
+				$.fn.loadContent("navigation", contentEditHandler, navidata, "data", {del:true});
+			}, data, "data", {del:true});
 		}
 
 		////////////////////////////////////////////////////////////////////////////////////////
@@ -448,18 +730,6 @@
 			});
 		};
 		
-		function interpreteMetaData(metaString)
-		{
-			var items = metaString.split(";");
-			var metaObject = {};
-			for(i in items)
-			{
-				var metaTuple = items[i].split("=");
-				metaObject[metaTuple[0]] = metaTuple[1];
-			}
-			return metaObject;
-		}
-		
 		function editTableTrigger(defaultData)
 		{
 			TableEntryDialog.createDialog(document, function()
@@ -477,261 +747,6 @@
 			}, defaultData);
 		}
 		
-		function renderPargraphHTML(paraDiv, paragraphData, paraIndex)
-		{
-			output(paragraphData.find("meta").text());
-			metaData = interpreteMetaData(paragraphData.find("meta").text());
-
-			paraDiv.setAttribute("class", "adminParagraph");
-			paraDiv.style.height = metaData['height'] + "px";
-//			heightobj.offset += parseInt(metaData['height']);
-			// title
-			var editDiv = document.createElement("div");
-			editDiv.setAttribute("class", "editDiv");
-			editDiv.style.textAlign = "right";
-			var editParaButton = document.createElement("input");
-			editParaButton.setAttribute("type", "button");
-			editParaButton.setAttribute("value", "edit");
-			editParaButton.setAttribute("class", "editButton");
-			editParaButton.setAttribute("disabled", "true");
-			editDiv.appendChild(editParaButton);
-			var deleteParaButton = document.createElement("input");
-			deleteParaButton.setAttribute("type", "button");
-			deleteParaButton.setAttribute("value", "delete "+paraIndex);
-			deleteParaButton.setAttribute("class", "deleteButton");
-			editDiv.appendChild(deleteParaButton);
-			var upParaButton = document.createElement("input");
-			upParaButton.setAttribute("type", "button");
-			upParaButton.setAttribute("value", "nach oben");
-			editDiv.appendChild(upParaButton);
-			var downParaButton = document.createElement("input");
-			downParaButton.setAttribute("type", "button");
-			downParaButton.setAttribute("value", "nach unten");
-			editDiv.appendChild(downParaButton);
-			paraDiv.appendChild(editDiv);
-			// title
-			var paraID = paragraphData.find("id").text();
-			var titleDiv = document.createElement("div");
-			titleDiv.setAttribute("class", "paragraphTitle");
-			titleDiv.textContent = paragraphData.find("title").text();
-			paraDiv.appendChild(titleDiv);
-			
-			var type = paragraphData.find("type").text()
-			var imageUrl = "";
-			var imageTitle = "";
-			var paraContent = "";
-			var picID = -1;
-			// image
-			if(null!=metaData['image'])
-			{
-				var imgDiv = document.createElement("div");
-//				var classString = "";
-				imgDiv.setAttribute("class", "picFrame picFrameLeft");
-				$.fn.loadContent("pictures", function(result)
-				{
-					picID = $(result).find("id").text();
-					var img = document.createElement("img");
-					imageUrl = $(result).find("url").text();
-					img.setAttribute("src", imageUrl);
-					imgDiv.appendChild(img);
-					editParaButton.removeAttribute("disabled");
-					var txt = document.createElement("div");
-					imageTitle = $(result).find("title").text();
-					txt.textContent = imageTitle;
-					imgDiv.appendChild(txt);
-				}, {"id":metaData['image']}, "xml");
-				paraDiv.appendChild(imgDiv);
-			}
-			else
-			{
-				editParaButton.removeAttribute("disabled");
-			}
-			switch(type)
-			{
-			case "0":
-			case "1":
-				// title
-				var textDiv = document.createElement("div");
-				textDiv.setAttribute("class", "paragraphContent");
-				var contentHtml = $(paragraphData.find("content").children().first());
-//				alert($(contentHtml).html());
-				$(textDiv).html(contentHtml);
-				paraContent = $(textDiv).html();
-				paraDiv.appendChild(textDiv);
-				break;
-			case "2":
-				if(metaData['table'])
-				{
-					var theTable = metaData['table'];
-					var tableDiv = document.createElement("div");
-					tableDiv.setAttribute("class", "adminTableDiv");
-
-					var addEntryButton = document.createElement("input");
-					addEntryButton.setAttribute("type", "button");
-					addEntryButton.setAttribute("value", "Neu");
-					addEntryButton.setAttribute("class", "editButton");
-					tableDiv.appendChild(addEntryButton);
-
-					$(addEntryButton).click(function()
-					{
-						editTableTrigger({table:theTable});
-					});
-
-					var table = document.createElement("table");
-					table.setAttribute("class", "adminTable");
-					$.fn.loadContent(metaData['table'], function(result)
-					{
-						$(result).find("row").each(function()
-						{
-							var rowDiv = document.createElement("tr");
-//							rowDiv.setAttribute("class", "paragraphContent");
-							var editDiv = document.createElement("td");
-							editDiv.setAttribute("class", "editDiv");
-							editDiv.style.textAlign = "right";
-							var editEntryButton = document.createElement("input");
-							editEntryButton.setAttribute("type", "button");
-							editEntryButton.setAttribute("value", "edit");
-							editEntryButton.setAttribute("class", "editButton");
-							editDiv.appendChild(editEntryButton);
-							var deleteEntryButton = document.createElement("input");
-							deleteEntryButton.setAttribute("type", "button");
-							deleteEntryButton.setAttribute("value", "delete");
-							deleteEntryButton.setAttribute("class", "deleteButton");
-							editDiv.appendChild(deleteEntryButton);
-							rowDiv.appendChild(editDiv);
-							$(this).children().each(function()
-							{
-								var dataDiv = document.createElement("td");
-								dataDiv.textContent = $(this).text();
-//								rowDiv.setAttribute("class", "paragraphContent");
-								rowDiv.appendChild(dataDiv);
-							});
-							table.appendChild(rowDiv);
-							var eventId = $(this).find("id").text();
-							// clck handlers
-							var defaultEditData = {
-								table:theTable,
-								id:eventId,
-								category:$(this).find("category").text(),
-								title:$(this).find("title").text(),
-								date:$(this).find("date").text(),
-								description:$(this).find("description").text(),
-								venue:$(this).find("venue").text(),
-								time:$(this).find("time").text(),
-								misc:$(this).find("misc").text()
-							};
-							$(editEntryButton).click(function()
-							{
-								editTableTrigger(defaultEditData);
-							});
-							$(deleteEntryButton).click(function()
-							{
-								var confirmation = confirm("Sind Sie sicher dass Sie den Eintrag loeschen wollen?");
-								if(confirmation)
-								{
-									$.fn.loadContent(theTable, function(result)
-									{
-										alert("Eintrag erfolgreich geloescht.");
-										triggerParagraphCreation();
-									}, {id:eventId}, "data", {delete:true});
-								}
-							});
-						});
-					}, {"category":metaData['category']}, "xml");
-					tableDiv.appendChild(table);
-					paraDiv.appendChild(tableDiv);
-				}
-				break;
-			default:
-				break;
-			}
-			
-			// clck handlers
-			$(editParaButton).click(function()
-			{
-				var defaultData = {
-					title:titleDiv.textContent,
-					type:metaData['type'],
-					height:metaData['height'],
-					picUrl:imageUrl,
-					picTitle:imageTitle,
-					content:paraContent,
-					table:metaData['table'],
-					category:metaData['category'],
-				};
-				$.createParagraphHandler(defaultData, paraID, picID);
-			});
-			$(deleteParaButton).click(function()
-			{
-				var selectedIndex = $("#pagesDropDown").attr("selectedIndex")-1;
-			    var paragraphString = $($contentCache.find( 'paragraphs' )[selectedIndex]).text();
-			    var pageIndex = $($contentCache.find( 'id' )[selectedIndex]).text();
-			    var paraArray = paragraphString.split(",");
-			    paraArray.splice(paraIndex, 1);
-			    for(p in paraArray)
-			    	if(paraArray[p]=="")
-			    		paraArray.splice(p, 1);
-				var pageData = {
-					paragraphs:paraArray.join(",")
-				};
-//				alert("paraindex:"+paraIndex+", new para string:"+paraArray.join(","));
-				$.fn.loadContent("pages", function(result)
-				{
-					alert("Absatz erfolgreich geloescht.");
-					triggerParagraphCreation();
-				}, pageData, "data", {edit:true,req:("id="+pageIndex)});
-			});
-			$(upParaButton).click(function()
-			{
-				if(paraIndex<=0)
-				{
-					alert("Dies ist bereits der erste Paragraph.");
-					return;
-				}
-				var selectedIndex = $("#pagesDropDown").attr("selectedIndex")-1;
-			    var paragraphString = $($contentCache.find( 'paragraphs' )[selectedIndex]).text();
-			    var pageIndex = $($contentCache.find( 'id' )[selectedIndex]).text();
-			    var paraArray = paragraphString.split(",");
-				var formerVal = paraArray[paraIndex-1];
-				paraArray[paraIndex-1] = paraArray[paraIndex];
-				paraArray[paraIndex] = formerVal;
-			    for(p in paraArray)
-			    	if(paraArray[p]=="")
-			    		paraArray.splice(p, 1);
-				var pageData = {
-					paragraphs:paraArray.join(",")
-				};
-				$.fn.loadContent("pages", function(result)
-				{
-					triggerParagraphCreation();
-				}, pageData, "data", {edit:true,req:("id="+pageIndex)});
-			});
-			$(downParaButton).click(function()
-			{
-				var selectedIndex = $("#pagesDropDown").attr("selectedIndex")-1;
-			    var paragraphString = $($contentCache.find( 'paragraphs' )[selectedIndex]).text();
-			    var pageIndex = $($contentCache.find( 'id' )[selectedIndex]).text();
-			    var paraArray = paragraphString.split(",");
-				if(paraIndex>=paraArray.length-1)
-				{
-					alert("Dies ist bereits der letzte Paragraph.");
-					return;
-				}
-				var followingVal = paraArray[paraIndex+1];
-				paraArray[paraIndex+1] = paraArray[paraIndex];
-				paraArray[paraIndex] = followingVal;
-			    for(p in paraArray)
-			    	if(paraArray[p]=="")
-			    		paraArray.splice(p, 1);
-				var pageData = {
-					paragraphs:paraArray.join(",")
-				};
-				$.fn.loadContent("pages", function(result)
-				{
-					triggerParagraphCreation();
-				}, pageData, "data", {edit:true,req:("id="+pageIndex)});
-			});
-		}
 
 
 		function populateParagraphs()
@@ -747,39 +762,68 @@
 //			var heightobj = new Object();
 //			heightobj.offset = 0;
 			var selectedIndex = $("#pagesDropDown").attr("selectedIndex")-1;
-		    var paragraphs = $($contentCache.find( 'paragraphs' )[selectedIndex]).text();
-		    var paraArray = paragraphs.split(",");
-
-		    for(paraIndex in paraArray)
-		    {
-		    	if(paraArray[paraIndex]=="")
-		    		continue;
-				var paraDiv = document.createElement("div");
-				paraDiv.setAttribute("id", "paragraph_"+paraArray[paraIndex]);
-		    	$.fn.loadContent("paragraphs", function(result)
-		    	{
-		    		result = getXmlDocFromResponse(result);
-						$(result).find("row").each(function()
+			var selectedvalue = $("#pagesDropDown").attr("value");
+			
+			switch(selectedvalue)
+			{
+			case "links":
+				{
+					// $.fn.loadContent("links", function(result)
+					// {
+						// var typeJson = eval(result);
+					// }, null, "data", {def:true,json:"types"});
+					$.fn.loadContent("links", function(result)
+					{
+						var typeJson = eval(result);
+						for(typeArrayIndex in typeJson)
+						{
+							typeArray = typeJson[typeArrayIndex];
+							var paraDiv = document.createElement("div");
+							paraDiv.setAttribute("id", "paragraph_"+typeArray[0]);
+							paraDiv.setAttribute("class", "adminParagraph");
+							paraDiv.appendChild(utils.RenderTable("links", {rubrik:typeArray[0]}));
+							contentDiv.appendChild(paraDiv);
+						}
+					}, null, "data", {selector:"rubrik",distinct:true,json:"types"});
+				}
+				break;
+			default:
+				{
+				    var paragraphs = $($contentCache.find( 'paragraphs' )[selectedIndex]).text();
+				    var paraArray = paragraphs.split(",");
+		
+				    for(paraIndex in paraArray)
 				    {
-//						alert("localParaIndex:"+$(this).find('id').text());
-						var localParaIndex = paraArray.indexOf($(this).find('id').text());
-//				    	output("id:"+$(this).find('id').text());
-				    	$(this).find('title').each(function(index, value)
-					    {
-							optn = document.createElement("OPTION");
-							optn.textContent = $(this).text();
-						    $("#paragraphDropDown").append(optn);
-					    })
-					    
-					    // paragraph itself
-					    var reverseIndex = paraArray.length-localParaIndex;
-					    var myParagraphId = $(this).find("id").first().text();
-					    var myParagraph = element("paragraph_"+myParagraphId);
-					    renderPargraphHTML(myParagraph, $(this), localParaIndex);
-					});
-		    	}, {id:paraArray[paraIndex]}, "data");
-					contentDiv.appendChild(paraDiv);
-		    }
+				    	if(paraArray[paraIndex]=="")
+				    		continue;
+						var paraDiv = document.createElement("div");
+						paraDiv.setAttribute("id", "paragraph_"+paraArray[paraIndex]);
+				    	$.fn.loadContent("paragraphs", function(result)
+				    	{
+				    		result = getXmlDocFromResponse(result);
+								$(result).find("row").each(function()
+						    {
+		//						alert("localParaIndex:"+$(this).find('id').text());
+								var localParaIndex = paraArray.indexOf($(this).find('id').text());
+		//				    	output("id:"+$(this).find('id').text());
+						    	$(this).find('title').each(function(index, value)
+							    {
+									optn = document.createElement("OPTION");
+									optn.textContent = $(this).text();
+								    $("#paragraphDropDown").append(optn);
+							    })
+							    
+							    // paragraph itself
+							    var reverseIndex = paraArray.length-localParaIndex;
+							    var myParagraphId = $(this).find("id").first().text();
+							    var myParagraph = element("paragraph_"+myParagraphId);
+							    utils.renderPargraphHTML(myParagraph, $(this), localParaIndex);
+							});
+				    	}, {id:paraArray[paraIndex]}, "data");
+							contentDiv.appendChild(paraDiv);
+				    }
+				}
+			}
 			$("#admincontent").append(contentDiv);
 		}
 //		function importParagraphHTML(identifier)

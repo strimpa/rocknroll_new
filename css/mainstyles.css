@@ -77,6 +77,13 @@ body {
 	min-height: 300px;
 }
 
+#advertRight
+{
+	position:absolute;
+	top:10px;
+	left:825px;
+}
+
 #articleframe
 {
 	border:none;

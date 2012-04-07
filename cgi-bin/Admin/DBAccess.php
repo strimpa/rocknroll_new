@@ -28,7 +28,7 @@
 			}
 			$result = Aufenthalt::GetInstance()->GetConn()->GetTableContent($query, "max(id)");
 		}
-		else if(isset($params["delete"]) && $params["delete"]==true)
+		else if(isset($params["del"]) && $params["delete"]==true)
 		{
 			$result = Aufenthalt::GetInstance()->GetConn()->DropTableContent($query, $_POST);
 		}
@@ -40,9 +40,19 @@
 				$reqTuple = explode("=", $params["req"]);
 				$requirements = array($reqTuple[0]=>$reqTuple[1]);
 //				PrintHtmlComment("edit:".$reqTuple[0].",".$reqTuple[1]);
-				}
+			}
 			$result = Aufenthalt::GetInstance()->GetConn()->SetTableContent($query, array_keys($_POST), $requirements, array_values($_POST));
 			$result = Aufenthalt::GetInstance()->GetConn()->GetTableContent($query, array("id"), $requirements);
+		}
+		else if(isset($params["def"]))
+		{
+			$requirements = NULL;
+			if(isset($params["req"]))
+			{
+				$reqTuple = explode("=", $params["req"]);
+				$requirements = array($reqTuple[0]=>$reqTuple[1]);
+			}
+			$result = Aufenthalt::GetInstance()->GetConn()->GetTableDef($query, array_keys($_POST), $requirements);
 		}
 		else if(isset($params["folder"]))
 		{
@@ -55,15 +65,15 @@
 			if(isset($params['selector']))
 				$selector = $params['selector'];
 //			PrintHtmlComment('$_POST[id]:'.$_POST['id']);
-			$result = Aufenthalt::GetInstance()->GetConn()->GetTableContent($query, $selector, $_POST, isset($params['regexp']));
+			$result = Aufenthalt::GetInstance()->GetConn()->GetTableContent($query, $selector, $_POST, isset($params['regexp']), NULL, isset($params['distinct']));
 		}
 		
 		if(!is_bool($result))
 		{
-			if(isset($params["jsonArray"]))
+			if(isset($params["json"]))
 			{
 				$keyArray = array();
-				print "{\n\t".$params["jsonArray"].": [\n";
+				print "{\n\t".$params["json"].": [\n";
 				for($k=0;$k<count($result);$k++)
 				{
 					$row = $result[$k];
@@ -91,12 +101,13 @@
 						print ",";
 					print "\n";
 				}
-				print "\t],\n\taoColumns : \n\t[\n";
-				foreach ($keyArray as $field)
-				{
-					print "\t\t{sTitle : \"$field\"},\n";
-				}
 				print "\t]\n";
+				// print "\t],\n\taoColumns : \n\t[\n";
+				// foreach ($keyArray as $field)
+				// {
+					// print "\t\t{sTitle : \"$field\"},\n";
+				// }
+				// print "\t]\n";
 				print "}\n";
 			}
 			else 
