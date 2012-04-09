@@ -40,69 +40,99 @@
 	
 	var utils = 
 	{
-		RenderTable : function(tableName, requirements)
+		RenderTable : function(tableName, types, requirements, fields)
 		{
 			var table = document.createElement("table");
 			table.setAttribute("class", "adminTable");
+			var colTypes = types[0]; 
+			var headRow = document.createElement("tr");
+			for(headIndex in colTypes)
+			{
+				var headCol = document.createElement("th");
+				headCol.textContent = headIndex;
+				headRow.appendChild(headCol);
+			}
+			table.appendChild(headRow);
 			$.fn.loadContent(tableName, function(result)
 			{
-				$(result).find("row").each(function()
+				var json = eval(result);
+				for(rowHash in json)
 				{
 					var rowDiv = document.createElement("tr");
-
-					var editDiv = document.createElement("td");
-					editDiv.setAttribute("class", "editDiv");
-					var editEntryButton = document.createElement("input");
-					editEntryButton.setAttribute("type", "button");
-					editEntryButton.setAttribute("value", "edit");
-					editEntryButton.setAttribute("class", "editButton");
-					editDiv.appendChild(editEntryButton);
-					var deleteEntryButton = document.createElement("input");
-					deleteEntryButton.setAttribute("type", "button");
-					deleteEntryButton.setAttribute("value", "delete");
-					deleteEntryButton.setAttribute("class", "deleteButton");
-					editDiv.appendChild(deleteEntryButton);
-					rowDiv.appendChild(editDiv);
-					$(this).children().each(function()
+					rowDiv.setAttribute("id", "tr_"+rowHash);
+					var row = json[rowHash];
+					for(colHash in row)
 					{
-						var dataDiv = document.createElement("td");
-						dataDiv.textContent = $(this).text();
-//								rowDiv.setAttribute("class", "paragraphContent");
-						dataDiv.setAttribute("id", "td_"+$(this)[0].tagName);
-						rowDiv.appendChild(dataDiv);
-					});
+						var col = row[colHash];
+						var dataTd = document.createElement("td");
+						dataTd.setAttribute("class", "adminTableTd")
+						rowDiv.appendChild(dataTd);
+						
+						if("pic"==colHash)
+						{
+							var picHolder = new PicBrowse("picUrl", "Verwendetes Bild.");
+							var dataDiv = picHolder.createControl(document, {"picUrl":col});
+							dataTd.appendChild(dataDiv);
+							$(picHolder.control).attr("value", col);
+							$(picHolder.control).attr("rowId", row["id"]);
+							$(picHolder.control).attr("field", colHash);
+							picHolder.init(null, function(){
+								var theId = this.getAttribute("rowId");
+								var field = this.getAttribute("field");
+								var value = this.src;
+							    var dbData = eval("({"+field+": \""+value+"\"})"); 
+							    $.fn.loadContent(tableName, null, dbData, "data", {edit:true,req:("id="+theId)});
+							});
+						}
+						else
+						{
+							switch(colTypes[colHash])
+							{
+								case "string":
+								case "blob":
+								{
+									var dataDiv = document.createElement("div");
+									$(dataDiv).html(col);
+									dataTd.appendChild(dataDiv);
+								
+									$(dataDiv).editable(function(value, settings) { 
+									    var dbData = eval("({"+settings.submitdata.field+": \""+value+"\"})"); 
+									    $.fn.loadContent(tableName, null, dbData, "data", {edit:true,req:("id="+settings.submitdata.id)});
+									    return(value);
+									}, { 
+									    // type    : 'textarea',
+										// submit  : 'OK',
+										submitdata: {id: row["id"], field:colHash},
+									});
+								}
+								break;
+								case "date":
+								{
+									var dataDiv = document.createElement("input");
+									dataTd.appendChild(dataDiv);
+									$(dataDiv).attr("value", col);
+									$(dataDiv).attr("rowId", row["id"]);
+									$(dataDiv).attr("field", colHash);
+									
+									$(dataDiv).datepicker({
+										dateFormat:'yy-mm-dd',
+										onClose: function(value, inst) 
+										{
+											var theId = this.getAttribute("rowId");
+											var field = this.getAttribute("field");
+										    var dbData = eval("({"+field+": \""+value+"\"})"); 
+										    $.fn.loadContent(tableName, null, dbData, "data", {edit:true,req:("id="+theId)});
+										}
+									});
+								}
+								break;
+							}
+						}
+					}
 					table.appendChild(rowDiv);
 					var eventId = $(this).find("id").text();
-					// clck handlers
-					var defaultEditData = {
-						table:tableName,
-						id:eventId,
-						category:$(this).find("category").text(),
-						title:$(this).find("title").text(),
-						date:$(this).find("date").text(),
-						description:$(this).find("description").text(),
-						venue:$(this).find("venue").text(),
-						time:$(this).find("time").text(),
-						misc:$(this).find("misc").text()
-					};
-					$(editEntryButton).click(function()
-					{
-						editTableTrigger(defaultEditData);
-					});
-					$(deleteEntryButton).click(function()
-					{
-						var confirmation = confirm("Sind Sie sicher dass Sie den Eintrag loeschen wollen?");
-						if(confirmation)
-						{
-							$.fn.loadContent(theTable, function(result)
-							{
-								alert("Eintrag erfolgreich geloescht.");
-								triggerParagraphCreation();
-							}, {id:eventId}, "data", {del:true});
-						}
-					});
-				});
-			}, requirements, "xml");
+				}
+			}, requirements, "xml", {json:true});
 			
 			return table;
 		},
@@ -193,6 +223,7 @@
 				if(metaData['table'])
 				{
 					var theTable = metaData['table'];
+					var theCategory = metaData['category'];
 					var tableDiv = document.createElement("div");
 					tableDiv.setAttribute("class", "adminTableDiv");
 
@@ -206,9 +237,13 @@
 					{
 						editTableTrigger({table:theTable});
 					});
-					var table = utils.RenderTable(theTable);
+					$.fn.loadContent(theTable, function(result)
+					{
+						var typeJson = eval(result);
+						var table = utils.RenderTable(theTable,typeJson,{category:theCategory});
+						tableDiv.appendChild(table);
+					}, null, "data", {def:true,json:"types"});
 
-					tableDiv.appendChild(table);
 					paraDiv.appendChild(tableDiv);
 				}
 				break;
@@ -725,8 +760,6 @@
 			refreshPages(function(result)
 			{
 			    populateParagraphs();
-
-			    $.fn.loadContent("paragraphs", populateAllParagraphSelect, null, "xml");
 			});
 		};
 		
@@ -768,23 +801,23 @@
 			{
 			case "links":
 				{
-					// $.fn.loadContent("links", function(result)
-					// {
-						// var typeJson = eval(result);
-					// }, null, "data", {def:true,json:"types"});
 					$.fn.loadContent("links", function(result)
 					{
 						var typeJson = eval(result);
-						for(typeArrayIndex in typeJson)
+						$.fn.loadContent("links", function(result)
 						{
-							typeArray = typeJson[typeArrayIndex];
-							var paraDiv = document.createElement("div");
-							paraDiv.setAttribute("id", "paragraph_"+typeArray[0]);
-							paraDiv.setAttribute("class", "adminParagraph");
-							paraDiv.appendChild(utils.RenderTable("links", {rubrik:typeArray[0]}));
-							contentDiv.appendChild(paraDiv);
-						}
-					}, null, "data", {selector:"rubrik",distinct:true,json:"types"});
+							var sections = eval(result);
+							for(sectionIndex in sections)
+							{
+								section = sections[sectionIndex];
+								var paraDiv = document.createElement("div");
+								paraDiv.setAttribute("id", "paragraph_"+section.rubrik);
+								paraDiv.setAttribute("class", "adminParagraph");
+								paraDiv.appendChild(utils.RenderTable("links", typeJson, {rubrik:section.rubrik}, null));
+								contentDiv.appendChild(paraDiv);
+							}
+						}, null, "data", {selector:"rubrik",distinct:true,json:"sections"});
+					}, null, "data", {def:true,json:"types"});
 				}
 				break;
 			default:
@@ -822,6 +855,8 @@
 				    	}, {id:paraArray[paraIndex]}, "data");
 							contentDiv.appendChild(paraDiv);
 				    }
+
+				    $.fn.loadContent("paragraphs", populateAllParagraphSelect, null, "xml");
 				}
 			}
 			$("#admincontent").append(contentDiv);
@@ -1064,7 +1099,7 @@
 //			for(d in data){output("data:"+data[d])};
 		
 //		alert("url:"+url);
-		
+
 		$.post(url, data, callback)
 //		.success($.fn.loadCallback)
 		.error($.fn.loadCallback)

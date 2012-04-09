@@ -19,7 +19,7 @@
 <script type="text/javascript" src="../../script/tiny_mce/jquery.tinymce.js"></script>
 <!--<script type="text/javascript" src="../../script/jquery.microgallery.js"></script>-->
 
-<script type="text/javascript" src="../../script/DataTables-1.9.0/media/js/jquery.dataTables.js"></script>
+<script type="text/javascript" src="../../script/jquery.jeditable.mini.js"></script>
 
 <script type="text/javascript" src="creationTemplates.json"></script>
 <script type="text/javascript" src="adminApp.js"></script>

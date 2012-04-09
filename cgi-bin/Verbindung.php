@@ -3,19 +3,11 @@
 * Diese Klasse managt die Verbindung zur Datenbank
 ***/
 
+
 class Verbindung
 {
 	private $ablauf;
 	//MySQL Server oder Host
-	// mysql5.rock-around.de
-	private $db_serv = 'localhost';//'mysql5.rock-around.de';
-	// MySQL Datenbank Name
-	private $db_name = 'rocknroll';//'db85283_2';
-	// User
-	// Domaingo: db85283_2
-	private $db_user = 'HR';
-	// Passwort
-	private $db_pass = 'hr';//'HoexNumi';
 	// server
 	private $con;
 	// instanz der Datenbank
@@ -48,9 +40,18 @@ class Verbindung
 	
 	function verbinde()
 	{
-		$this->db = mysql_connect($this->db_serv, $this->db_user, $this->db_pass) or die('Fehler beim Verbinden zum Datenbankserver!');
+		if(null!=$this->db)
+			return;
+global $db_serv;
+	// MySQL Datenbank Name
+global $db_name;
+	// User
+global $db_user;
+	// Passwort
+global $db_pass;
+		$this->db = mysql_connect($db_serv, $db_user, $db_pass) or die('Fehler beim Verbinden zum Datenbankserver!');
 		// MySQL Datenbank w�hlen
-		mysql_select_db($this->db_name, $this->db) or die('Fehler beim Verbinden zur Datenbank!');
+		mysql_select_db($db_name, $this->db) or die('Fehler beim Verbinden zur Datenbank!');
 		mysql_query("SET NAMES utf8", $this->db);
 		return true;
 	}
@@ -71,6 +72,7 @@ class Verbindung
 			$fieldString = "`".$joinString."`";
 		}
 
+
 		$reqString = "";
 		if(is_array($requirements))
 		{
@@ -84,6 +86,7 @@ class Verbindung
 					$reqString .= $key." REGEXP '".$value."'";
 				else
 					$reqString .= $key." LIKE '".$value."'";
+		       // print("<!-- requirements:".$reqString." //-->\n");
 			}
 		}
 		$orderByString = $orderBy;
@@ -214,6 +217,7 @@ class Verbindung
 					$reqString .= " AND ";
 				$value = preg_replace("/%20/", " ", $value);
 				$reqString .= $key." LIKE '".$value."'";
+//		    	print("<!-- requirements:".$reqString." //-->\n");
 			}
 		}
 		
@@ -233,7 +237,7 @@ class Verbindung
 			$sql .= ' WHERE '.$reqString;
 		}
 		$sql .= ';';
-        print("<!-- sql:".$sql." //-->\n");
+//        print("<!-- sql:".$sql." //-->\n");
 		$result = mysql_query($sql);
 //		print "<!-- Errors: ".mysql_error()."//-->";
 		return $result;

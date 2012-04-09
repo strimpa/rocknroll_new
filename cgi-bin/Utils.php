@@ -233,4 +233,9 @@ function GetFolderContent($assetFolder)
 	return $retArray;
 }
 
+function IsAssoc($myarray)
+{
+	return array_keys($myarray) !== range(0, count($myarray) - 1);
+}
+
 ?>

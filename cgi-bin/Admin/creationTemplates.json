@@ -12,23 +12,24 @@
 		holder.css("top", position.top);
 		var closeBar = $('<div id="closeBar" style="width:100%;"><img src="../../images/layout/closeButton.png" align="right" /></div>');
 		holder.append(closeBar);
+		$("body").append(holder);
 		$.fn.loadContent("folder", function(result)
 		{
 			$(result).find("row").first().children().each(function(){
 				var pic = $('<img />');
 				pic.attr("class","folderBrowsePic"); 
 				pic.attr("src",$(this).text()); 
+				holder.append(pic);
 				pic.click(function(){
 //					alert("url:"+$(this).attr("src"));
 					$("#picUrl_edit").attr("src", $(this).attr("src"));
 					holder.remove();
 				});
-				holder.append(pic);
 			});
 //			$("#menuPriority").attr("value", $(result).find( 'priority' ).first().text());
 		}, {"assetFolder":rootFolder}, "xml");
-		$("body").append(holder);
-		$("#closeBar").click(function(){
+		$(closeBar).click(function(){
+			alert("closebar click");
 			$("#folderBrowser").remove();
 		});
 	}
@@ -381,41 +382,39 @@ PicBrowse.prototype.createControl = function(doc, presetValues)
 {
 	var holder =  doc.createElement("div");
 	holder.setAttribute("class", "picBrowseHolder");
-	
-	var browseLink = doc.createElement("input");
-	browseLink.setAttribute("type", "button");
-	browseLink.setAttribute("id", "browseLink");
-	browseLink.setAttribute("value", "Vorhandene Bilder durchsuchen");
-	holder.appendChild(browseLink);
 
-	var uploadTarget = doc.createElement("iframe");
-	uploadTarget.setAttribute("id", "uploadTarget");
-	uploadTarget.setAttribute("name", "uploadTarget");
-	uploadTarget.setAttribute("align", "right");
+	var numberOfTargets = $('[id*="uploadTarget"]').size();
+	var uniqueName =  "uploadTarget_"+numberOfTargets;
+	console.log("uniqueName:"+uniqueName);
+	this.uploadTarget = doc.createElement("iframe");
+	this.uploadTarget.setAttribute("id", uniqueName);
+	this.uploadTarget.setAttribute("class", "uploadTarget");
+	this.uploadTarget.setAttribute("name", uniqueName);
+	this.uploadTarget.setAttribute("align", "right");
 	
-	var uploadForm = doc.createElement("form");
-	uploadForm.setAttribute("action", "fileupload.php");
-	uploadForm.setAttribute("method", "POST");
-	uploadForm.setAttribute("id", "uploadForm");
-	uploadForm.setAttribute("target", "uploadTarget");
-	uploadForm.setAttribute("enctype", "multipart/form-data");
-	holder.appendChild(uploadForm);
+	this.uploadForm = doc.createElement("form");
+	this.uploadForm.setAttribute("action", "fileupload.php");
+	this.uploadForm.setAttribute("method", "POST");
+	this.uploadForm.setAttribute("id", "uploadForm");
+	this.uploadForm.setAttribute("target", uniqueName);
+	this.uploadForm.setAttribute("enctype", "multipart/form-data");
+	holder.appendChild(this.uploadForm);
 	
-	var uploadLink = doc.createElement("input");
-	uploadLink.setAttribute("type", "file");
-	uploadLink.setAttribute("id", "uploadedfile");
-	uploadLink.setAttribute("name", "uploadedfile");
-	uploadLink.setAttribute("align", "right");
-	uploadForm.appendChild(uploadLink);
+	this.uploadLink = doc.createElement("input");
+	this.uploadLink.setAttribute("type", "file");
+	this.uploadLink.setAttribute("id", "uploadedfile");
+	this.uploadLink.setAttribute("name", "uploadedfile");
+	this.uploadLink.setAttribute("align", "right");
+	this.uploadForm.appendChild(this.uploadLink);
 
-	var uploadSubmit = doc.createElement("input");
-	uploadSubmit.setAttribute("type", "submit");
-	uploadSubmit.setAttribute("id", "uploadSubmit");
-	uploadSubmit.setAttribute("value", "Neue Datei hochladen");
-	uploadForm.appendChild(uploadSubmit);
+	// var uploadSubmit = doc.createElement("input");
+	// uploadSubmit.setAttribute("type", "submit");
+	// uploadSubmit.setAttribute("id", "uploadSubmit");
+	// uploadSubmit.setAttribute("value", "Neue Datei hochladen");
+	// uploadForm.appendChild(uploadSubmit);
 
-	holder.appendChild(uploadTarget);
-	holder.innerHTML += "<br />";
+	holder.appendChild(this.uploadTarget);
+	// holder.innerHTML += "<br />";
 	
 	this.control =  doc.createElement("img");
 	var myId = this.name+"_edit";
@@ -424,26 +423,66 @@ PicBrowse.prototype.createControl = function(doc, presetValues)
 	this.control.setAttribute("src","/images/layout/noImageDummy.png");
 	if(null!=presetValues && null!=presetValues[this.name])
 	{
+		console.log(presetValues[this.name]);
 		this.control.setAttribute("src", presetValues[this.name]);
 	}
 	holder.appendChild(this.control);
 
-	var picDelete = doc.createElement("input");
-	picDelete.setAttribute("type", "button");
-	picDelete.setAttribute("id", "picDelete");
-	picDelete.setAttribute("value", "Bild entfernen");
-	holder.appendChild(picDelete);
-		
+	this.picDelete = doc.createElement("input");
+	this.picDelete.setAttribute("type", "button");
+	this.picDelete.setAttribute("id", "picDelete");
+	this.picDelete.setAttribute("value", "Bild entfernen");
+	holder.appendChild(this.picDelete);
+	
+	this.browseLink = doc.createElement("input");
+	this.browseLink.setAttribute("type", "button");
+	this.browseLink.setAttribute("id", "browseLink");
+	this.browseLink.setAttribute("value", "Vorhandene Bilder durchsuchen");
+	holder.appendChild(this.browseLink);
+
 	return holder;
 }
-PicBrowse.prototype.init = function(presetValues)
+PicBrowse.prototype.init = function(presetValues, changeHandler)
 {
-	$("#browseLink").click(function(){
+	var controlScopePass = this.control; 
+	$(this.control).load(changeHandler);
+	
+	$(this.picDelete).click(function(){
+		console.log("picDelete.click");
+		$(controlScopePass).attr("src", "/images/layout/noImageDummy.png");
+	});
+
+	console.log("this.browseLink:"+this.browseLink);
+	$(this.browseLink).click(function(){
+		console.log("browseLink.click");
 		showImageBrowser($(this).offset(), "images");
 	});
-	var controlScopePass = this.control; 
-	$("#picDelete").click(function(){
-		$(controlScopePass).attr("src", "/images/layout/noImageDummy.png");
+	
+	var picForm = this.uploadForm;
+	$(this.uploadLink).change(function(){
+		console.log("file target changed");
+		picForm.submit();
+	});
+	
+//	var oDoc = (this.uploadTarget.contentWindow || this.uploadTarget.contentDocument);
+	var target = this.uploadTarget;
+	$(this.uploadTarget).load(function() {
+		//var target = this;
+		function manipIframe() {
+		  	console.log("polling...");
+		    el = $(target).contents();
+		    if (el.length != 1) {
+		    	setTimeout(manipIframe, 100);
+		     	return;
+		    }
+			var resultString = $(target).contents().text();
+			if(resultString.search(/Stored in\: (.+)/) != -1)
+			{
+				console.log("New src:"+RegExp.$1);
+				$(controlScopePass).attr("src", RegExp.$1);
+			}
+		}
+		manipIframe();
 	});
 }
 

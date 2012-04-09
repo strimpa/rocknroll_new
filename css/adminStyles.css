@@ -66,7 +66,7 @@ body {
 
 .LeftGroupBox
 {
-	border: 1px solid darkGray;
+	border: 1px solid #444;
 	position:absolute; 
 	left:0px;
 	top:5px; 
@@ -74,7 +74,7 @@ body {
 }
 .RightGroupBox
 {
-	border: 1px solid darkGray;
+	border: 1px solid #444;
 	position:absolute; 
 	left:410px;
 	top:5px; 
@@ -179,29 +179,38 @@ body {
 
 #closeBar
 {
-	background-color:grey;
+	background-color:gray;
 }
 
-#uploadTarget
+.uploadTarget
 {
-	width:200px;
-	height:200px;
+	width:120px;
+	height:50px;
+	font-family:Arial, Helvetica, sans-serif;
+	font-size:8px;
+	color:#A3BADB;
 }
 
 /*overrides*/
 .adminTableDiv
 {
-	overflow:show;
+	overflow:visible;
 	width:600px;
 }
 .adminTable
 {
 	width:700px;
+	border-spacing:0px;
+	padding:2px;
 }	
+.adminTableTd
+{
+	border:1px solid gray;
+}
 .adminParagraph
 {
 	left:10px;
-	border:1px solid darkgray;
+	border:1px solid #444;
 	width:600px;
 	overflow:auto;
 }

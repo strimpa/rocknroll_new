@@ -5,6 +5,51 @@
 
 	$params = array();
 	$query = FilenameFromUrl($params);
+
+	function RecurseJson($currRoot, $currName, &$returnString, $depth, $printName)
+	{
+		$tabs = "";
+		for ($i=0; $i < $depth; $i++) { 
+			$tabs .= "\t";
+		}
+		
+		$currCount = count($currRoot);
+		
+		if(!is_array($currRoot))
+		{
+			$returnString .= $tabs;
+			if($printName)
+				$returnString .= $currName.": ";
+			$returnString .= "\"".htmlentities(utf8_decode($currRoot))."\"";
+		}
+		else
+		{
+			$returnString .= $tabs;
+			if($printName)
+				$returnString .= $currName.": ";
+			
+			$isAssoc = IsAssoc($currRoot);
+			if($isAssoc)
+				$returnString .= "{\n";
+			else
+				$returnString .= "[\n";
+			$keys = array_keys($currRoot);
+			$values = array_values($currRoot);
+			for($k=0;$k<$currCount;$k++)
+			{
+				$row = $values[$k];
+				$name = $keys[$k];
+				RecurseJson($row, $name, $returnString, $depth+1, $isAssoc);
+				if($k<($currCount-1))
+					$returnString .= ",";
+				$returnString .= "\n";
+			}
+			if($isAssoc)
+				$returnString .= $tabs."}";
+			else
+				$returnString .= $tabs."]";
+		}
+	}
 	
 //	PrintHtmlComment("fuckin DBAccess!");
 	
@@ -41,6 +86,9 @@
 				$requirements = array($reqTuple[0]=>$reqTuple[1]);
 //				PrintHtmlComment("edit:".$reqTuple[0].",".$reqTuple[1]);
 			}
+			// foreach ($_POST as $key => $value) {
+				// PrintHtmlComment('$_POST['.$key.']:'.$value);
+			// }
 			$result = Aufenthalt::GetInstance()->GetConn()->SetTableContent($query, array_keys($_POST), $requirements, array_values($_POST));
 			$result = Aufenthalt::GetInstance()->GetConn()->GetTableContent($query, array("id"), $requirements);
 		}
@@ -64,7 +112,9 @@
 			$selector = "*";
 			if(isset($params['selector']))
 				$selector = $params['selector'];
-//			PrintHtmlComment('$_POST[id]:'.$_POST['id']);
+			// foreach ($_POST as $key => $value) {
+				// PrintHtmlComment('$_POST['.$key.']:'.$value);
+			// }
 			$result = Aufenthalt::GetInstance()->GetConn()->GetTableContent($query, $selector, $_POST, isset($params['regexp']), NULL, isset($params['distinct']));
 		}
 		
@@ -73,42 +123,9 @@
 			if(isset($params["json"]))
 			{
 				$keyArray = array();
-				print "{\n\t".$params["json"].": [\n";
-				for($k=0;$k<count($result);$k++)
-				{
-					$row = $result[$k];
-					print "\t[\n";
-					if(is_bool($row))
-					{
-						Print "\t\t//".$row;
-					}
-					else 
-					{
-						for($colIndex=0;$colIndex<count($row);$colIndex++)
-						{
-							$keyArray = array_keys($row);
-							$fieldName = $keyArray[$colIndex];
-							$content = htmlentities(utf8_decode($row[$fieldName]));
-//							$tagName = MakeSafeTagName($fieldName);
-							print "\t\t\"$content\"";
-							if($colIndex<count($row)-1)
-								print ",";
-							print "\n";
-						}
-					}
-					print "\t]";
-					if($k<(count($result)-1))
-						print ",";
-					print "\n";
-				}
-				print "\t]\n";
-				// print "\t],\n\taoColumns : \n\t[\n";
-				// foreach ($keyArray as $field)
-				// {
-					// print "\t\t{sTitle : \"$field\"},\n";
-				// }
-				// print "\t]\n";
-				print "}\n";
+				$retString = "";
+				RecurseJson($result, $params["json"], $retString, 0, IsAssoc($result));
+				print $retString;
 			}
 			else 
 			{
