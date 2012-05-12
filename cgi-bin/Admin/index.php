@@ -27,6 +27,7 @@
 
 <body> <!--  onload="adminApp.Init();" -->
 
+<span id="TitleSeite"><img src="images/Seite.png" /></span>
 <div class="editfield" id="choice">
 	<fieldset class="LeftGroupBox">
 		<legend>Artikel auswaehlen:</legend>
@@ -43,6 +44,7 @@
 		<input id="deletePageButton" class="deleteButton" type="button" value="delete" />
 	</fieldset>
 </div>
+<span id="TitleNavigation"><img src="images/Navigation.png" /></span>
 <div class="editfield" id="meta">
 	<fieldset class="LeftGroupBox">
 		<legend>Submenu Eintraege:</legend>
@@ -62,6 +64,7 @@
 	</fieldset>
 </div>
 
+<span id="TitleInhalt"><img src="images/Inhalt.png" /></span>
 <div class="editfield" id="contentHolder">
 	<div id="contentCreate">
 		<input id="createParagraphButton" class="createButton" type="button" value="Neuen Absatz erstellen" />

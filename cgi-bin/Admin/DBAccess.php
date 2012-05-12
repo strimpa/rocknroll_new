@@ -21,6 +21,7 @@
 			if($printName)
 				$returnString .= $currName.": ";
 			$returnString .= "\"".htmlentities(utf8_decode($currRoot))."\"";
+			$returnString = str_replace("\r\n", "<br />", $returnString);
 		}
 		else
 		{
@@ -49,33 +50,39 @@
 			else
 				$returnString .= $tabs."]";
 		}
+	}		
+	
+	function ReplaceInvalidChars(&$string)	
+	{
+		$count = 0;		
+		$string = preg_replace('/&.+;/', '<img src="invalidCharPic.gif">', $string, $count);
+//		PrintHtmlComment("Count of replaced invalid chars: $count");	
 	}
 	
 //	PrintHtmlComment("fuckin DBAccess!");
 	
-	$pattern = '/(pages|submenus|paragraphs|events|links|pictures|navigation|folder)/';
+	$pattern = '/(pages|submenus|paragraphs|events|links|pictures|navigation|folder|bestellung)/';
 	if(0!=preg_match($pattern, $query, $matches, PREG_OFFSET_CAPTURE))
 	{
 		if(isset($params["write"]) && $params["write"]==true)
 		{
-			PrintHtmlComment("write:");
 			if($query=="pages")
 			{
-				Aufenthalt::GetInstance()->GetConn()->InsertTableContent("submenus");
+				Aufenthalt::GetInstance()->DBConn()->InsertTableContent(array('table'=>"submenus"));
 				// get submenu with highest id:
-				$result = Aufenthalt::GetInstance()->GetConn()->GetTableContent("submenus", "max(id)");
+				$result = Aufenthalt::GetInstance()->DBConn()->GetTableContent(array('table'=>"submenus", 'fields'=>"max(id)"));
 				$_POST['menuRef'] =  $result[0]["max(id)"];
-				$result = Aufenthalt::GetInstance()->GetConn()->InsertTableContent($query, $_POST);
+				$result = Aufenthalt::GetInstance()->DBConn()->InsertTableContent(array('table'=>$query, 'fields'=>$_POST));
 			}
 			else
 			{
-				$result = Aufenthalt::GetInstance()->GetConn()->InsertTableContent($query, $_POST);
+				$result = Aufenthalt::GetInstance()->DBConn()->InsertTableContent(array('table'=>$query, 'fields'=>$_POST));
 			}
-			$result = Aufenthalt::GetInstance()->GetConn()->GetTableContent($query, "max(id)");
+			$result = Aufenthalt::GetInstance()->DBConn()->GetTableContent(array('table'=>$query, 'fields'=>"max(id)"));
 		}
 		else if(isset($params["del"]) && $params["delete"]==true)
 		{
-			$result = Aufenthalt::GetInstance()->GetConn()->DropTableContent($query, $_POST);
+			$result = Aufenthalt::GetInstance()->DBConn()->DropTableContent(array('table'=>$query, 'fields'=>$_POST));
 		}
 		else if(isset($params["edit"]) && $params["edit"]==true)
 		{
@@ -89,8 +96,25 @@
 			// foreach ($_POST as $key => $value) {
 				// PrintHtmlComment('$_POST['.$key.']:'.$value);
 			// }
-			$result = Aufenthalt::GetInstance()->GetConn()->SetTableContent($query, array_keys($_POST), $requirements, array_values($_POST));
-			$result = Aufenthalt::GetInstance()->GetConn()->GetTableContent($query, array("id"), $requirements);
+			if($params["xmlinput"])
+			{
+				EnterXMLintoTable($params["xmlinput"]);
+			}
+			else {
+				$result = Aufenthalt::GetInstance()->DBConn()->SetTableContent(
+					array(
+						'table'=>$query, 
+						'fields'=>array_keys($_POST), 
+						'requirements'=>$requirements, 
+						'values'=>array_values($_POST)
+						));
+			}
+			$result = Aufenthalt::GetInstance()->DBConn()->GetTableContent(
+				array(
+					'table'=>$query, 
+					'fields'=>"id", 
+					'requirements'=>$requirements
+					));
 		}
 		else if(isset($params["def"]))
 		{
@@ -100,7 +124,23 @@
 				$reqTuple = explode("=", $params["req"]);
 				$requirements = array($reqTuple[0]=>$reqTuple[1]);
 			}
-			$result = Aufenthalt::GetInstance()->GetConn()->GetTableDef($query, array_keys($_POST), $requirements);
+			$joinFields = NULL;
+			if(isset($params["joinFields"]))
+			{
+				$unexploded = explode(",", $params["joinFields"]);
+				$joinFields = array();
+				foreach ($unexploded as $value) {
+					$exploded = explode("=", $value);
+					$joinFields[$exploded[0]] = $exploded[1];
+				}
+			}
+			$result = Aufenthalt::GetInstance()->DBConn()->GetTableDef(
+				array(
+					'table'=>$query, 
+					'fields'=>array_keys($_POST), 
+					'requirements'=>$requirements,
+					'joinFields'=>$joinFields
+					));
 		}
 		else if(isset($params["folder"]))
 		{
@@ -112,13 +152,39 @@
 			$selector = "*";
 			if(isset($params['selector']))
 				$selector = $params['selector'];
+			$orderBy = "";
+			if(isset($params['orderBy']))
+				$orderBy = $params['orderBy'];
+			$joinFields = NULL;
+			if(isset($params["joinFields"]))
+			{
+				$unexploded = explode(",", $params["joinFields"]);
+				$joinFields = array();
+				foreach ($unexploded as $value) {
+					$exploded = explode("=", $value);
+					$joinFields[$exploded[0]] = $exploded[1];
+				}
+			}
 			// foreach ($_POST as $key => $value) {
 				// PrintHtmlComment('$_POST['.$key.']:'.$value);
 			// }
-			$result = Aufenthalt::GetInstance()->GetConn()->GetTableContent($query, $selector, $_POST, isset($params['regexp']), NULL, isset($params['distinct']));
+			$result = Aufenthalt::GetInstance()->DBConn()->GetTableContent(
+				array(
+					'table'=>$query, 
+					'fields'=>$selector, 
+					'requirements'=>$_POST, 
+					'useRegExp'=>isset($params['regexp']), 
+					'orderBy'=>$orderBy, 
+					'distinct'=>isset($params['distinct']),
+					'joinFields'=>$joinFields
+					));
 		}
 		
-		if(!is_bool($result))
+		if(isset($params["xmloutput"]) && $params["xmloutput"])
+		{
+			print gibTabelleAlsXml($result, $query);
+		}
+		else if(!is_bool($result))
 		{
 			if(isset($params["json"]))
 			{
@@ -135,7 +201,7 @@
 		//		$doc->standalone = false;
 				
 				$currRow = NULL;
-				$rootElem = $doc->createElement($query);
+				$rootElem = $doc->createElement(MakeSafeTagName($query));
 				$doc->appendChild($rootElem);
 				$print = "";
 				foreach($result as $row)
@@ -158,7 +224,8 @@
 							{
 								$importdoc = new DOMDocument();
 								$importdoc->encoding = 'UTF-8';
-								$importdoc->loadHTML('<?xml encoding="UTF-8">\n'.$row[$fieldName]);
+//								ReplaceInvalidChars($row[$fieldName]);
+								$importdoc->loadHTML('<?xml version="1.0" encoding="UTF-8"?>\n'.$row[$fieldName]);
 	//							PrintHtmlComment("Xml string after import:".$importdoc->C14N());
 								
 								$node = $importdoc->getElementsByTagName("div")->item(0);
@@ -175,7 +242,7 @@
 							} 
 							else
 							{
-								$col->nodeValue = htmlentities(utf8_decode($row[$fieldName]));
+								$col->nodeValue = $row[$fieldName];
 							}
 							$currRow->appendChild($col);
 						}

@@ -8,6 +8,10 @@
 	var loadingQueue = new Array();
 	var REST_WRITE = 1, REST_DELETE = 2, REST_EDIT = 3;
 
+	var currContent = null;
+	var contentCache = null;
+	var currSubMenuUrls = null;
+
 	/////////////////////////////////////////////////////////////////////////
 	// 'Global functions'
 	/////////////////////////////////////////////////////////////////////////
@@ -40,8 +44,9 @@
 	
 	var utils = 
 	{
-		RenderTable : function(tableName, types, requirements, fields)
+		RenderTable : function(tableName, types, requirements, fields, params)
 		{
+			var tableHolder = document.createElement("span");
 			var table = document.createElement("table");
 			table.setAttribute("class", "adminTable");
 			var colTypes = types[0]; 
@@ -53,6 +58,51 @@
 				headRow.appendChild(headCol);
 			}
 			table.appendChild(headRow);
+			if(params)
+				params.json = true;
+			else
+				params = {json:true};
+				
+			//
+			var downloadButton = document.createElement("input");
+			downloadButton.setAttribute("type", "button");
+			downloadButton.setAttribute("value", "download as xml");
+			tableHolder.appendChild(downloadButton);
+
+			var uniqueName =  "uploadTarget_"+Math.random()*1000;
+			var uploadTarget = document.createElement("iframe");
+			uploadTarget.setAttribute("id", uniqueName);
+			uploadTarget.setAttribute("class", "uploadTarget");
+			uploadTarget.setAttribute("name", uniqueName);
+			uploadTarget.setAttribute("align", "right");
+			tableHolder.appendChild(uploadTarget);
+			var uploadForm = document.createElement("form");
+			uploadForm.setAttribute("action", "fileupload.php");
+			uploadForm.setAttribute("method", "POST");
+			uploadForm.setAttribute("id", "uploadForm");
+			uploadForm.setAttribute("target", uniqueName);
+			uploadForm.setAttribute("enctype", "multipart/form-data");
+			var uploadLink = document.createElement("input");
+			uploadLink.setAttribute("type", "file");
+			uploadLink.setAttribute("id", "uploadedfile");
+			uploadLink.setAttribute("name", "uploadedfile");
+			uploadLink.setAttribute("align", "right");
+			uploadForm.appendChild(uploadLink);
+			tableHolder.appendChild(uploadForm);
+
+			tableHolder.appendChild(table);
+			
+			$(downloadButton).click(function(result){
+				console.log("download!");
+				$.fn.loadContent(tableName,function(result){
+//					console.log(result);
+					document.location = "openFile.php/?url="+result;
+				}, requirements, "xml", {xmloutput:true});
+			});
+			$(uploadLink).change(function(){
+				uploadForm.submit();
+			});
+				
 			$.fn.loadContent(tableName, function(result)
 			{
 				var json = eval(result);
@@ -80,6 +130,9 @@
 								var theId = this.getAttribute("rowId");
 								var field = this.getAttribute("field");
 								var value = this.src;
+								console.log("result of dummy search:"+value.search(/noImageDummy/));
+								if(-1!=value.search(/noImageDummy/))
+									value = "";
 							    var dbData = eval("({"+field+": \""+value+"\"})"); 
 							    $.fn.loadContent(tableName, null, dbData, "data", {edit:true,req:("id="+theId)});
 							});
@@ -132,9 +185,9 @@
 					table.appendChild(rowDiv);
 					var eventId = $(this).find("id").text();
 				}
-			}, requirements, "xml", {json:true});
+			}, requirements, "xml", params);
 			
-			return table;
+			return tableHolder;
 		},
 		
 		renderPargraphHTML : function(paraDiv, paragraphData, paraIndex)
@@ -251,26 +304,30 @@
 				break;
 			}
 			
+			var myHeight = metaData['height'];
+			var whichTable = metaData['table'];
+			var myCategory = metaData['category'];
+			
 			// clck handlers
 			$(editParaButton).click(function()
 			{
 				var defaultData = {
 					title:titleDiv.textContent,
-					type:metaData['type'],
-					height:metaData['height'],
+					type:type,
+					height:myHeight,
 					picUrl:imageUrl,
 					picTitle:imageTitle,
 					content:paraContent,
-					table:metaData['table'],
-					category:metaData['category'],
+					table:whichTable,
+					category:myCategory,
 				};
-				$.createParagraphHandler(defaultData, paraID, picID);
+				createParagraphHandler(defaultData, paraID, picID);
 			});
 			$(deleteParaButton).click(function()
 			{
 				var selectedIndex = $("#pagesDropDown").attr("selectedIndex")-1;
-			    var paragraphString = $($contentCache.find( 'paragraphs' )[selectedIndex]).text();
-			    var pageIndex = $($contentCache.find( 'id' )[selectedIndex]).text();
+			    var paragraphString = $(contentCache.find( 'paragraphs' )[selectedIndex]).text();
+			    var pageIndex = $(contentCache.find( 'id' )[selectedIndex]).text();
 			    var paraArray = paragraphString.split(",");
 			    paraArray.splice(paraIndex, 1);
 			    for(p in paraArray)
@@ -294,8 +351,8 @@
 					return;
 				}
 				var selectedIndex = $("#pagesDropDown").attr("selectedIndex")-1;
-			    var paragraphString = $($contentCache.find( 'paragraphs' )[selectedIndex]).text();
-			    var pageIndex = $($contentCache.find( 'id' )[selectedIndex]).text();
+			    var paragraphString = $(contentCache.find( 'paragraphs' )[selectedIndex]).text();
+			    var pageIndex = $(contentCache.find( 'id' )[selectedIndex]).text();
 			    var paraArray = paragraphString.split(",");
 				var formerVal = paraArray[paraIndex-1];
 				paraArray[paraIndex-1] = paraArray[paraIndex];
@@ -314,8 +371,8 @@
 			$(downParaButton).click(function()
 			{
 				var selectedIndex = $("#pagesDropDown").attr("selectedIndex")-1;
-			    var paragraphString = $($contentCache.find( 'paragraphs' )[selectedIndex]).text();
-			    var pageIndex = $($contentCache.find( 'id' )[selectedIndex]).text();
+			    var paragraphString = $(contentCache.find( 'paragraphs' )[selectedIndex]).text();
+			    var pageIndex = $(contentCache.find( 'id' )[selectedIndex]).text();
 			    var paraArray = paragraphString.split(",");
 				if(paraIndex>=paraArray.length-1)
 				{
@@ -345,9 +402,6 @@
 	
 	$.view = function()
 	{
-		var currContent = null;
-		var $contentCache = null;
-		var currSubMenuUrls = null;
 		
 		////////////////////////////////////////////////////////////////////////////////////////
 		// General utils
@@ -364,7 +418,7 @@
 			$("#pagesDropDown").empty();
 			var optn = document.createElement("OPTION");
 		    $("#pagesDropDown").append(optn);
-		    $contentCache.find( 'identifier' ).each(function(index, value)
+		    contentCache.find( 'identifier' ).each(function(index, value)
 		    {
 				optn = document.createElement("OPTION");
 				optn.textContent = $(this).text();
@@ -422,7 +476,7 @@
 		// ContentPage population
 		////////////////////////////////////////////////////////////////////////////////////////
 
-		this.selectContentHandler = function()
+		selectContentHandler = function()
 		{
 			$("#pageTitle").attr("value", "");
 			var selection = $("#pagesDropDown").attr("value");
@@ -431,7 +485,7 @@
 			output("Selected index:"+selectedIndex);
 			
 			//Title
-			var myIndex = $($contentCache.find( 'id' )[selectedIndex]).text();
+			var myIndex = $(contentCache.find( 'id' )[selectedIndex]).text();
 			$.fn.loadContent("navigation", function(result)
 			{
 				$("#pageTitle").attr("value", $(result).find( 'title' ).first().text());
@@ -439,7 +493,7 @@
 			}, {"pageRef":myIndex}, "xml");
 
 			// trigger submenu creation			
-		    var menuRef = $($contentCache.find( 'menuRef' )[selectedIndex]).text();
+		    var menuRef = $(contentCache.find( 'menuRef' )[selectedIndex]).text();
 			output("Sub menu reference: "+menuRef);
 		    $.fn.loadContent("submenus", populateSubMenuItems, {"id":menuRef}, "xml");
 		    
@@ -451,7 +505,7 @@
 		{
 			$.fn.loadContent("pages", function(result)
 			{
-				$contentCache = $(result);
+				contentCache = $(result);
 				callback();
 			}, null, "xml");
 		}
@@ -459,7 +513,8 @@
 		{
 			refreshPages(populateContentDropDown);
 		}
-		this.createContentHandler = function()
+		
+		createContentHandler = function()
 		{
 			PageCreationDialog.createDialog(document, function()
 			{
@@ -483,12 +538,12 @@
 				}, pageData, "data", {write:true});
 			});
 		}
-		this.editContentHandler = function()
+		editContentHandler = function()
 		{
 			var theTitle = $("#pageTitle").attr("value");
 			var theID = $("#pagesDropDown").attr("value");
 			var selectedIndex = $("#pagesDropDown").attr("selectedIndex")-1;
-			var pageId = $($contentCache.find( 'id' )[selectedIndex]).text();
+			var pageId = $(contentCache.find( 'id' )[selectedIndex]).text();
 			$.fn.loadContent("navigation", function(naviResult)
 			{
 				var naviId = $(naviResult).find("id").text();
@@ -535,13 +590,13 @@
 				}, {identifier:theID, menuTitle:$("#pageTitle").attr("value"), priority:menuPriority});
 			}, {pageRef:pageId}, "data");
 		}
-		this.deleteContentHandler = function()
+		deleteContentHandler = function()
 		{
 			var confirmation = confirm("Sind Sie sicher dass Sie den Inhalt loeschen wollen?");
 			if(!confirmation)
 				return;
 			var selectedIndex = $("#pagesDropDown").attr("selectedIndex")-1;
-	    	var pageId = $($contentCache.find( 'id' )[selectedIndex]).text();
+	    	var pageId = $(contentCache.find( 'id' )[selectedIndex]).text();
 			var data = {id:pageId};
 			var navidata = {pageRef:pageId};
 			$.fn.loadContent("pages", function(result)
@@ -578,13 +633,13 @@
 		function createMenuCallback(result)
 		{
 			var selectedIndex = $("#pagesDropDown").attr("selectedIndex")-1;
-		    var menuRef = $($contentCache.find( 'menuRef' )[selectedIndex]).text();
+		    var menuRef = $(contentCache.find( 'menuRef' )[selectedIndex]).text();
 			output("Sub menu reference: "+menuRef);
 		    $.fn.loadContent("submenus", populateSubMenuItems, {"id":menuRef}, "xml");
 		}
-		this.createMenuEntryHandler = function()
+		createMenuEntryHandler = function()
 		{
-			if(null==$contentCache)
+			if(null==contentCache)
 			{
 				alert("Bitte waehlen Sie einen Artikel zum editieren!");
 				return;
@@ -614,14 +669,14 @@
 
 				// Get menu id to update
 				var selectedIndex = $("#pagesDropDown").attr("selectedIndex")-1;
-			    var menuRef = $($contentCache.find( 'menuRef' )[selectedIndex]).text();
+			    var menuRef = $(contentCache.find( 'menuRef' )[selectedIndex]).text();
 
 			    $.fn.loadContent("submenus", createMenuCallback, data, "data", {edit:true,req:("id="+menuRef)});
 			}, null, presetOptions);
 		}
-		this.editMenuEntryHandler = function()
+		editMenuEntryHandler = function()
 		{
-			if(null==$contentCache)
+			if(null==contentCache)
 			{
 				alert("Bitte waehlen Sie einen Artikel zum editieren!");
 				return;
@@ -652,14 +707,14 @@
 
 				// Get menu id to update
 				var selectedIndex = $("#pagesDropDown").attr("selectedIndex")-1;
-			    var menuRef = $($contentCache.find( 'menuRef' )[selectedIndex]).text();
+			    var menuRef = $(contentCache.find( 'menuRef' )[selectedIndex]).text();
 
 			    $.fn.loadContent("submenus", createMenuCallback, data, "data", {edit:true,req:("id="+menuRef)});
 			}, presetValues, presetOptions);
 		}
-		this.selectParaForSubMenu = function()
+		selectParaForSubMenu = function()
 		{
-			if(null == $contentCache)
+			if(null == contentCache)
 				return;
 			alert("set paragraph...");
 			// prepare data
@@ -677,13 +732,13 @@
 
 			// Get menu id to update
 			var selectedIndex = $("#pagesDropDown").attr("selectedIndex")-1;
-		    var menuRef = $($contentCache.find( 'menuRef' )[selectedIndex]).text();
+		    var menuRef = $(contentCache.find( 'menuRef' )[selectedIndex]).text();
 			output(entryIndex+", "+urls[entryIndex]+", "+menuRef);
 
 		    $.fn.loadContent("submenus", createMenuCallback, data, "data", {edit:true,req:("id="+menuRef)});
 		}
 	
-		this.deleteMenuEntryHandler = function()
+		deleteMenuEntryHandler = function()
 		{
 			var confirmation = confirm("Sind Sie sicher dass Sie den Menueintrag loeschen wollen?");
 			if(!confirmation)
@@ -705,12 +760,12 @@
 
 			// Get menu id to update
 			var selectedIndex = $("#pagesDropDown").attr("selectedIndex")-1;
-		    var menuRef = $($contentCache.find( 'menuRef' )[selectedIndex]).text();
+		    var menuRef = $(contentCache.find( 'menuRef' )[selectedIndex]).text();
 
 		    $.fn.loadContent("submenus", createMenuCallback, data, "data", {edit:true,req:("id="+menuRef)});
 		}
 		
-		this.selectSubMenuItemHandler = function(e)
+		selectSubMenuItemHandler = function(e)
 		{
 			var area = $(this);
 			var rowNumber = (e.clientY-area.offset().top);// / 
@@ -754,7 +809,7 @@
 			});		
 		}
 		
-		function triggerParagraphCreation()
+		triggerParagraphCreation = function()
 		{
 			var selectedIndex = $("#pagesDropDown").attr("selectedIndex")-1;
 			refreshPages(function(result)
@@ -807,6 +862,20 @@
 						$.fn.loadContent("links", function(result)
 						{
 							var sections = eval(result);
+							var tableDiv = document.createElement("div");
+							tableDiv.setAttribute("class", "adminTableDiv");
+		
+							var addEntryButton = document.createElement("input");
+							addEntryButton.setAttribute("type", "button");
+							addEntryButton.setAttribute("value", "Neuer Eintrag");
+							tableDiv.appendChild(addEntryButton);
+		
+							$(addEntryButton).click(function()
+							{
+								editTableTrigger({table:"links"});
+							});
+							contentDiv.appendChild(tableDiv);
+							
 							for(sectionIndex in sections)
 							{
 								section = sections[sectionIndex];
@@ -820,15 +889,31 @@
 					}, null, "data", {def:true,json:"types"});
 				}
 				break;
+			case "order":
+				{
+					$.fn.loadContent("bestellung,kunden", function(result)
+					{
+						var typeJson = eval(result);
+						var paraDiv = document.createElement("div");
+						paraDiv.setAttribute("id", "paragraph_order");
+						paraDiv.setAttribute("class", "adminParagraph");
+						paraDiv.appendChild(utils.RenderTable("bestellung,kunden", typeJson, null, null, {joinFields:"nachNameBesteller=nachname"}));
+						contentDiv.appendChild(paraDiv);
+					}, null, "data", {def:true,json:"types",joinFields:"nachNameBesteller=nachname"});
+				}
+				break;
 			default:
 				{
-				    var paragraphs = $($contentCache.find( 'paragraphs' )[selectedIndex]).text();
+				    var paragraphs = $(contentCache.find( 'paragraphs' )[selectedIndex]).text();
 				    var paraArray = paragraphs.split(",");
 		
+					console.log("paraArray.count"+paraArray.length);
 				    for(paraIndex in paraArray)
 				    {
-				    	if(paraArray[paraIndex]=="")
+				    	console.log("paraArray["+paraIndex+"]: "+paraArray[paraIndex]);
+				    	if(paraArray[paraIndex]=="" || paraArray[paraIndex]==null)
 				    		continue;
+				    	console.log("is valid paraArray[paraIndex]");
 						var paraDiv = document.createElement("div");
 						paraDiv.setAttribute("id", "paragraph_"+paraArray[paraIndex]);
 				    	$.fn.loadContent("paragraphs", function(result)
@@ -836,6 +921,13 @@
 				    		result = getXmlDocFromResponse(result);
 								$(result).find("row").each(function()
 						    {
+							    // paragraph itself
+							    var myParagraphId = $(this).find("id").first().text();
+							    var myParagraph = element("paragraph_"+myParagraphId);
+							    if(null==myParagraph)
+							    	return;
+							    console.log("myParagraphId: "+myParagraphId+", "+myParagraph);
+
 		//						alert("localParaIndex:"+$(this).find('id').text());
 								var localParaIndex = paraArray.indexOf($(this).find('id').text());
 		//				    	output("id:"+$(this).find('id').text());
@@ -846,10 +938,6 @@
 								    $("#paragraphDropDown").append(optn);
 							    })
 							    
-							    // paragraph itself
-							    var reverseIndex = paraArray.length-localParaIndex;
-							    var myParagraphId = $(this).find("id").first().text();
-							    var myParagraph = element("paragraph_"+myParagraphId);
 							    utils.renderPargraphHTML(myParagraph, $(this), localParaIndex);
 							});
 				    	}, {id:paraArray[paraIndex]}, "data");
@@ -872,9 +960,9 @@
 //			triggerParagraphCreation();
 //		}
 		
-		this.createParagraphHandler = function(defaultData, paraID, picID)
+		createParagraphHandler = function(defaultData, paraID, picID)
 		{
-			if(null==$contentCache)
+			if(null==contentCache)
 			{
 				alert("Bitte waehlen Sie einen Artikel zum editieren!");
 				return;
@@ -920,8 +1008,8 @@
 									$.fn.loadContent("paragraphs", function(result)
 									{
 										var selectedIndex = $("#pagesDropDown").attr("selectedIndex")-1;
-									    var paragraphString = $($contentCache.find( 'paragraphs' )[selectedIndex]).text();
-									    var pageIndex = $($contentCache.find( 'id' )[selectedIndex]).text();
+									    var paragraphString = $(contentCache.find( 'paragraphs' )[selectedIndex]).text();
+									    var pageIndex = $(contentCache.find( 'id' )[selectedIndex]).text();
 										var lastParaIndex = $(result).find("max_id_").text();
 										paragraphString += ","+lastParaIndex;
 										var pageData = {
@@ -950,8 +1038,8 @@
 								$.fn.loadContent("paragraphs", function(result)
 								{
 									var selectedIndex = $("#pagesDropDown").attr("selectedIndex")-1;
-								    var paragraphString = $($contentCache.find( 'paragraphs' )[selectedIndex]).text();
-								    var pageIndex = $($contentCache.find( 'id' )[selectedIndex]).text();
+								    var paragraphString = $(contentCache.find( 'paragraphs' )[selectedIndex]).text();
+								    var pageIndex = $(contentCache.find( 'id' )[selectedIndex]).text();
 									var lastParaIndex = $(result).find("max_id_").text();
 									paragraphString += ","+lastParaIndex;
 									var pageData = {
@@ -971,8 +1059,8 @@
 						$.fn.loadContent("paragraphs", function(result)
 						{
 							var selectedIndex = $("#pagesDropDown").attr("selectedIndex")-1;
-						    var paragraphString = $($contentCache.find( 'paragraphs' )[selectedIndex]).text();
-						    var pageIndex = $($contentCache.find( 'id' )[selectedIndex]).text();
+						    var paragraphString = $(contentCache.find( 'paragraphs' )[selectedIndex]).text();
+						    var pageIndex = $(contentCache.find( 'id' )[selectedIndex]).text();
 							var lastParaIndex = $(result).find("max_id_").text();
 							paragraphString += ","+lastParaIndex;
 							var pageData = {
@@ -1003,8 +1091,8 @@
 					$.fn.loadContent("paragraphs", function(result)
 					{
 						var selectedIndex = $("#pagesDropDown").attr("selectedIndex")-1;
-					    var paragraphString = $($contentCache.find( 'paragraphs' )[selectedIndex]).text();
-					    var pageIndex = $($contentCache.find( 'id' )[selectedIndex]).text();
+					    var paragraphString = $(contentCache.find( 'paragraphs' )[selectedIndex]).text();
+					    var pageIndex = $(contentCache.find( 'id' )[selectedIndex]).text();
 						var lastParaIndex = $(result).find("max_id_").text();
 						paragraphString += ","+lastParaIndex;
 						var pageData = {
@@ -1020,7 +1108,7 @@
 			}, defaultData);
 		}
 				
-		this.insertParagraphHandler = function(defaultData, paraID, picID)
+		insertParagraphHandler = function(defaultData, paraID, picID)
 		{
 			if(null==$("#paragraphDropDown").find( 'OPTION' ))
 			{
@@ -1030,7 +1118,7 @@
 			if(null==defaultData)
 				defaultData = {};
 			var selectedIndex = $("#pagesDropDown").attr("selectedIndex")-1;
-		    var paragraphString = $($contentCache.find( 'paragraphs' )[selectedIndex]).text();
+		    var paragraphString = $(contentCache.find( 'paragraphs' )[selectedIndex]).text();
 		    var selectedNewValue = $("#insertParagraphSelect").attr("value");
 		    var valueIdTuple = selectedNewValue.split(" - ");
 		    selectedNewValue = valueIdTuple[1];
@@ -1047,7 +1135,7 @@
 			var pageData = {
 				paragraphs:paragraphString
 			};
-		    var pageIndex = $($contentCache.find( 'id' )[selectedIndex]).text();
+		    var pageIndex = $(contentCache.find( 'id' )[selectedIndex]).text();
 			$.fn.loadContent("pages", function(result)
 			{
 				alert("Absatz eingefuegt.");
@@ -1058,15 +1146,15 @@
 		////////////////////////////////////////////////////////////////////////////////////////
 		// Entry point
 		////////////////////////////////////////////////////////////////////////////////////////
-		$("#pagesDropDown").change(this.selectContentHandler);
-		$("#createPageButton").click(this.createContentHandler);
-		$("#editPageButton").click(this.editContentHandler);
-		$("#deletePageButton").click(this.deleteContentHandler);
-		$("#createMenuEntryButton").click(this.createMenuEntryHandler);
-		$("#editMenuEntryButton").click(this.editMenuEntryHandler);
-		$("#deleteMenuEntryButton").click(this.deleteMenuEntryHandler);
-		$("#createParagraphButton").click(this.createParagraphHandler);
-		$("#insertParagraphSelect").change(this.insertParagraphHandler);
+		$("#pagesDropDown").change(selectContentHandler);
+		$("#createPageButton").click(createContentHandler);
+		$("#editPageButton").click(editContentHandler);
+		$("#deletePageButton").click(deleteContentHandler);
+		$("#createMenuEntryButton").click(createMenuEntryHandler);
+		$("#editMenuEntryButton").click(editMenuEntryHandler);
+		$("#deleteMenuEntryButton").click(deleteMenuEntryHandler);
+		$("#createParagraphButton").click(createParagraphHandler);
+		$("#insertParagraphSelect").change(insertParagraphHandler);
 		$("#paragraphDropDown").change(this.selectParaForSubMenu);
 		refreshPages(populateContentDropDown);
 	}

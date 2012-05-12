@@ -5,7 +5,7 @@
 //	dataType:null
 //}
 
-	function showImageBrowser(position, rootFolder)
+	function showImageBrowser(position, rootFolder, targetPicElem)
 	{
 		var holder = $('<div id="folderBrowser">');
 		holder.css("left", position.left);
@@ -21,15 +21,14 @@
 				pic.attr("src",$(this).text()); 
 				holder.append(pic);
 				pic.click(function(){
-//					alert("url:"+$(this).attr("src"));
-					$("#picUrl_edit").attr("src", $(this).attr("src"));
+					console.log("targetPicElem:"+targetPicElem);
+					$(targetPicElem).attr("src", $(this).attr("src"));
 					holder.remove();
 				});
 			});
 //			$("#menuPriority").attr("value", $(result).find( 'priority' ).first().text());
 		}, {"assetFolder":rootFolder}, "xml");
 		$(closeBar).click(function(){
-			alert("closebar click");
 			$("#folderBrowser").remove();
 		});
 	}
@@ -147,7 +146,7 @@ ComboBox.prototype.createControl = function(doc, presetValues, presetOptions)
 		this.staticPresetData = presetOptions[this.name];
 	if(null!=this.staticPresetData)
 	{
-		var entries = this.staticPresetData.split(",");
+		var entries = this.staticPresetData.split("|");
 		for(e in entries)
 		{
 			optn = document.createElement("OPTION");
@@ -157,7 +156,7 @@ ComboBox.prototype.createControl = function(doc, presetValues, presetOptions)
 	}
 	if(null!=presetValues && null!=presetValues[this.name])
 	{
-		this.control.value = presetValues[this.name];
+		this.control.selectedIndex = presetValues[this.name];
 	}
 	return this.control;
 }
@@ -385,7 +384,6 @@ PicBrowse.prototype.createControl = function(doc, presetValues)
 
 	var numberOfTargets = $('[id*="uploadTarget"]').size();
 	var uniqueName =  "uploadTarget_"+numberOfTargets;
-	console.log("uniqueName:"+uniqueName);
 	this.uploadTarget = doc.createElement("iframe");
 	this.uploadTarget.setAttribute("id", uniqueName);
 	this.uploadTarget.setAttribute("class", "uploadTarget");
@@ -423,7 +421,6 @@ PicBrowse.prototype.createControl = function(doc, presetValues)
 	this.control.setAttribute("src","/images/layout/noImageDummy.png");
 	if(null!=presetValues && null!=presetValues[this.name])
 	{
-		console.log(presetValues[this.name]);
 		this.control.setAttribute("src", presetValues[this.name]);
 	}
 	holder.appendChild(this.control);
@@ -448,25 +445,23 @@ PicBrowse.prototype.init = function(presetValues, changeHandler)
 	$(this.control).load(changeHandler);
 	
 	$(this.picDelete).click(function(){
-		console.log("picDelete.click");
 		$(controlScopePass).attr("src", "/images/layout/noImageDummy.png");
 	});
 
-	console.log("this.browseLink:"+this.browseLink);
+	var picElement = this.control;
 	$(this.browseLink).click(function(){
-		console.log("browseLink.click");
-		showImageBrowser($(this).offset(), "images");
+		showImageBrowser($(this).offset(), "images", picElement);
 	});
 	
 	var picForm = this.uploadForm;
 	$(this.uploadLink).change(function(){
-		console.log("file target changed");
 		picForm.submit();
 	});
 	
 //	var oDoc = (this.uploadTarget.contentWindow || this.uploadTarget.contentDocument);
 	var target = this.uploadTarget;
 	$(this.uploadTarget).load(function() {
+		var controlScopePass1 = controlScopePass;
 		//var target = this;
 		function manipIframe() {
 		  	console.log("polling...");
@@ -479,7 +474,8 @@ PicBrowse.prototype.init = function(presetValues, changeHandler)
 			if(resultString.search(/Stored in\: (.+)/) != -1)
 			{
 				console.log("New src:"+RegExp.$1);
-				$(controlScopePass).attr("src", RegExp.$1);
+				console.log("controlScopePass1:"+controlScopePass1);
+				$(controlScopePass1).attr("src", RegExp.$1);
 			}
 		}
 		manipIframe();
@@ -680,7 +676,7 @@ TableGroup.init = function(presetValues)
 	this.control.setAttribute("style", "visibility:hidden;");
 	$(this.controls[0].control).change(function(){
 		var table = $(this).attr("value");
-		$.fn.loadContent(table, getCategoryCallback, null, "data", {selector:"DISTINCT category"});
+		$.fn.loadContent(table, getCategoryCallback, null, "data", {selector:"category",distinct:true});
 	});
 	Group.prototype.init.call(this, presetValues);
 }
@@ -700,6 +696,13 @@ TableEntryDialog.controls = new Array(
 );
 TableEntryDialog.init = function(initData)
 {
+	var myCategory = "";
+	switch(initData['table'])
+	{
+		case "links":
+			myCategory = "";
+			break;
+	}
 	$.fn.loadContent(initData['table'], function(result)
 	{
 		$(result).find("category").each(function(){
@@ -707,6 +710,6 @@ TableEntryDialog.init = function(initData)
 			optn.textContent = $(this).text();
 			$(TableEntryDialog.controls[0].control).append(optn);
 		});
-	}, null, "data", {selector:"DISTINCT category"});
+	}, null, "data", {selector:"category",distinct:true});
 	Group.prototype.init.call(this, initData);
 }
