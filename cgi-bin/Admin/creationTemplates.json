@@ -471,12 +471,8 @@ PicBrowse.prototype.init = function(presetValues, changeHandler)
 		     	return;
 		    }
 			var resultString = $(target).contents().text();
-			if(resultString.search(/Stored in\: (.+)/) != -1)
-			{
-				console.log("New src:"+RegExp.$1);
-				console.log("controlScopePass1:"+controlScopePass1);
-				$(controlScopePass1).attr("src", RegExp.$1);
-			}
+			console.log("New src:"+resultString);
+			$(controlScopePass1).attr("src", resultString);
 		}
 		manipIframe();
 	});

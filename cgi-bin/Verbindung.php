@@ -3,6 +3,15 @@
 * Diese Klasse managt die Verbindung zur Datenbank
 ***/
 
+class ConnSettings
+{
+	public $table = "";
+	public $fields = array(); 
+	public $requirements = NULL; 
+	public $useRegExp = FALSE;
+	public $orderBy = NULL;
+	public $distinct=FALSE;
+}
 
 class Verbindung
 {
@@ -56,53 +65,116 @@ global $db_pass;
 		return true;
 	}
 	
+	private function GetFieldString($params, $fieldParam)
+	{
+		$fieldString = "*";
+		if(isset($params[$fieldParam]))
+		{
+			if(is_array($params[$fieldParam]))
+			{
+				if(count($params[$fieldParam])>0)
+				{
+					$joinString = join("`,`", $params[$fieldParam]);
+					$fieldString = "`".$joinString."`";
+				}
+			}
+			else {
+				$fieldString = $params[$fieldParam];
+			}
+		}
+		return $fieldString;
+	} 
+
+	private function GetReqString($params, $reqParam)
+	{
+		$reqString = "";
+		if(isset($params[$reqParam]) && is_array($params[$reqParam]))
+		{
+			$index = 0;
+			foreach($params[$reqParam] as $key => $value)
+			{
+				if($index++>0)
+					$reqString .= " AND ";
+				$value = preg_replace("/%20/", " ", $value);
+				if(isset($params['useRegExp']) && $params['useRegExp'])
+					$reqString .= $key." REGEXP '".$value."'";
+				else
+					$reqString .= $key." = '".$value."'";
+//		        print("<!-- requirements:".$reqString." //-->\n");
+			}
+		}
+		return $reqString;
+	}
+
+	private function GetOrderByString($params, $orderByParam)
+	{
+		$orderByString = "";
+		if(isset($params[$orderByParam]))
+		{
+			$orderByString = $params[$orderByParam];
+			if(is_array($params[$orderByParam]))
+			{
+				$orderByString = join(',', $params[$orderByParam]);
+			}
+		}
+		return $orderByString;
+	} 
+
+	private function GetJoinString($params)
+	{
+		$joinString = "";
+		if(isset($params['joinFields']) && is_array($params['joinFields']) && isset($params['table']))
+		{
+			$index = 0;
+			$tables = explode(",", $params['table']);
+			foreach($params['joinFields'] as $key => $value)
+			{
+				if($index++>0)
+					$joinString .= " AND ";
+//				$value = preg_replace("/%20/", " ", $value);
+				$joinString .= $tables[0].".".$key." LIKE ".$tables[1].".".$value."";
+		       // print("<!-- requirements:".$reqString." //-->\n");
+			}
+		}
+		return $joinString;
+	}
+
 	/***********************************************************************************
 	**   Content
 	***********************************************************************************/
 
-	public function GetTableContent($table, $fields, $requirements = NULL, $useRegExp = FALSE, $orderBy = NULL, $distinct=FALSE)
+	public function GetTableContent($settings)
 	{
 		$backGabe = array();
-		$this->verbinde();
+		if(!is_array($settings))
+		{
+			throw new Exception("Invalid Connection Settings object!", 1);
+			print "Invalid Connection Settings object!";
+			return $backGabe;
+		}
 		
-		$fieldString = $fields;
-		if(is_array($fields))
-		{
-			$joinString = join("`,`", $fields);
-			$fieldString = "`".$joinString."`";
-		}
+		$this->verbinde();
 
+		$fieldString = $this->GetFieldString($settings, 'fields');
 
-		$reqString = "";
-		if(is_array($requirements))
-		{
-			$index = 0;
-			foreach($requirements as $key => $value)
-			{
-				if($index>0)
-					$reqString .= " AND ";
-				$value = preg_replace("/%20/", " ", $value);
-				if($useRegExp)
-					$reqString .= $key." REGEXP '".$value."'";
-				else
-					$reqString .= $key." LIKE '".$value."'";
-		       // print("<!-- requirements:".$reqString." //-->\n");
-			}
-		}
-		$orderByString = $orderBy;
-		if(is_array($orderBy))
-		{
-			$orderByString = join(',', $orderBy);
-		}
+		$reqString = $this->GetReqString($settings, 'requirements');
+
+		$joinString = $this->GetJoinString($settings);
+		
+		$orderByString = $this->GetOrderByString($settings, 'orderBy');
 		
 		$sql = 'SELECT ';
-		if($distinct)
+		if(isset($settings['distinct']))
 			$sql .= "DISTINCT ";
 		$sql .= $fieldString;
-        $sql .= ' FROM `'.$table.'` '; 
+        $sql .= ' FROM '.$settings['table'].' '; 
 		if($reqString != "")
 		{
 			$sql .= ' WHERE '.$reqString;
+		}
+		if($joinString != "")
+		{
+			$sql .= ' WHERE '.$joinString;
 		}
 		
 		if($orderByString != "")
@@ -126,35 +198,31 @@ global $db_pass;
 		return $backGabe;
 	}
 
-	public function GetTableDef($table, $fields, $requirements = NULL)
+	public function GetTableDef($settings)
 	{
 		$backGabe = array();
+		if(!is_array($settings))
+		{
+			throw new Exception("Invalid Connection Settings object!", 1);
+			return $backGabe;
+		}
 		$this->verbinde();
 		
-		$fieldString = $fields;
-		if(is_array($fields))
-		{
-			$joinString = join("`,`", $fields);
-			$fieldString = "`".$joinString."`";
-		}
+		$fieldString = $this->GetFieldString($settings, 'fields');
 
-		$reqString = "";
-		if(is_array($requirements))
-		{
-			$index = 0;
-			foreach($requirements as $key => $value)
-			{
-				if($index>0)
-					$reqString .= " AND ";
-				$value = preg_replace("/%20/", " ", $value);
-				$reqString .= $key." LIKE '".$value."'";
-			}
-		}
+		$reqString = $this->GetReqString($settings, 'requirements');
+
+		$joinString = $this->GetJoinString($settings);
+
 		$sql = 'SELECT '.$fieldString;
-        $sql .= ' FROM `'.$table.'` '; 
+        $sql .= ' FROM '.$settings['table'].' '; 
 		if($reqString != "")
 		{
 			$sql .= ' WHERE '.$reqString;
+		}
+		if($joinString != "")
+		{
+			$sql .= ' WHERE '.$joinString;
 		}
 		
 		$sql .= ';';
@@ -170,59 +238,38 @@ global $db_pass;
 		return $backGabe;
 	} 
 
-	public function DropTableContent($table, $requirements = NULL)
+	public function DropTableContent($settings)
 	{
 		$backGabe = array();
 		$this->verbinde();
 		
-		$reqString = "";
-		if(is_array($requirements))
-		{
-			$index = 0;
-			foreach($requirements as $key => $value)
-			{
-				if($index>0)
-					$reqString .= " AND ";
-				$value = preg_replace("/%20/", " ", $value);
-				$reqString .= $key." LIKE '".$value."'";
-			}
-		}
+		$reqString = $this->GetReqString($settings, 'requirements');
 		
 		// UPDATE  `rocknroll`.`submenus` SET  `links` =  'The first entry,The second entry,The third entry' WHERE  `submenus`.`id` =1;
-		$sql = "DELETE FROM `$table`";
+		$sql = "DELETE FROM `".$settings['table']."`";
         
 		if($reqString != "")
 		{
 			$sql .= ' WHERE '.$reqString;
 		}
 		$sql .= ';';
-        print("<!-- sql:".$sql." //-->\n");
+//        print("<!-- sql:".$sql." //-->\n");
 		$result = mysql_query($sql);
 		print "<!-- Errors: ".mysql_error()."//-->";
 		return array($result);
 	}
 
-	public function SetTableContent($table, $fields, $requirements = NULL, $values = NULL)
+	public function SetTableContent($settings)
 	{
 		$backGabe = array();
 		$this->verbinde();
 		
-		$reqString = "";
-		if(is_array($requirements))
-		{
-			$index = 0;
-			foreach($requirements as $key => $value)
-			{
-				if($index>0)
-					$reqString .= " AND ";
-				$value = preg_replace("/%20/", " ", $value);
-				$reqString .= $key." LIKE '".$value."'";
-//		    	print("<!-- requirements:".$reqString." //-->\n");
-			}
-		}
+		$reqString = $this->GetReqString($settings, 'requirements');
 		
 		// UPDATE  `rocknroll`.`submenus` SET  `links` =  'The first entry,The second entry,The third entry' WHERE  `submenus`.`id` =1;
-		$sql = "UPDATE `$table` SET "; 
+		$sql = "UPDATE `".$settings['table']."` SET "; 
+		$fields = $settings['fields'];
+		$values = $settings['values'];
         for($fieldIndex = 0; $fieldIndex<count($fields);$fieldIndex++)
         {
         	if('null'==$values[$fieldIndex])
@@ -243,30 +290,17 @@ global $db_pass;
 		return $result;
 	}
 	
-	public function InsertTableContent($table, $fields=NULL, $requirements = NULL)
+	public function InsertTableContent($settings)
 	{
 		$backGabe = array();
 		$this->verbinde();
 		
-		$reqString = "";
-		if(is_array($requirements))
-		{
-			$index = 0;
-			foreach($requirements as $key => $value)
-			{
-				if($index>0)
-					$reqString .= " AND ";
-				$value = preg_replace("/%20/", " ", $value);
-				$reqString .= $key." LIKE '".$value."'";
-			}
-		}
-		
 		// UPDATE  `rocknroll`.`submenus` SET  `links` =  'The first entry,The second entry,The third entry' WHERE  `submenus`.`id` =1;
-		$sql = "INSERT INTO `$table` (";
+		$sql = "INSERT INTO `".$settings['table']."` (";
+        $keys = $settings['fields'];
+        $values = $settings['values'];
 		if(is_array($fields) && count($fields)>0)
 		{
-	        $keys = array_keys($fields);
-	        $values = array_values($fields);
 	        for($fieldIndex = 0; $fieldIndex<count($fields);$fieldIndex++)
 	        {
 	        	if('null'==$values[$fieldIndex])
@@ -279,7 +313,6 @@ global $db_pass;
 		$sql .= ') VALUES ('; 
 		if(is_array($fields) && count($fields)>0)
 		{
-	        $values = array_values($fields);
 			for($fieldIndex= 0; $fieldIndex<count($fields);$fieldIndex++)
 	        {
 	        	if('null'==$values[$fieldIndex])
@@ -291,7 +324,7 @@ global $db_pass;
 	        
 		}
 		$sql .= ');';
-//        print("<!-- sql:".$sql." //-->\n");
+        print("<!-- sql:".$sql." //-->\n");
 		$result = mysql_query($sql);
 //		print "<!-- Errors: ".mysql_error()."//-->";
 		return array($result);
@@ -586,114 +619,6 @@ global $db_pass;
 	return $result;
 	}
 
-	
-	function gibBestellungAlsXml($result){
-	// Verbinden
-		$this->verbinde();
-
-	/*
-		$result = $this->gibBestellungAus();
-		if($result){
-			// DOMXML Objekt erzeugen
-			$doc = xmldoc('<?xml version="1.0"?><!DOCTYPE root [<!ENTITY ouml "oe"><!ENTITY uuml "ue">]><root/>');
-			// Wurzel erzeugen (<article> ... </article>
-			$root = $doc->add_root( "Bestellungen" );
-			$trans = get_html_translation_table(HTML_ENTITIES);
-			//Anzahl der Zeilen
-			while($reihe = mysql_fetch_row($result)){
-			  // <artheader> ... </artheader>
-			  $row = $root->new_child( "Row", "" );
-				for($g=0;$g<count($reihe);$g++){
-					 $cell = $row->new_child( "Cell", "" );
-					 $data = $cell->new_child( "Data", htmlentities($reihe[$g]) );
-				}
-			}
-			
-			// XML ausgeben
-			$file = fopen ("Bestellungen.xml", "w+");
-
-			fputs($file, $doc->dumpmem() );
-			fclose($file);
-		}
-		  // XSLT Prozessor erzeugen
-		  $xslt_processor = xslt_create();
-		
-		  // Transformierung durchf�hren
-		  $result = xslt_run($xslt_processor, "Bestellungen.xsl", "Bestellungen.xml");
-		
-		  // �berpr�fen, ob ein Fehler aufgetreten ist
-		  if(!$result) echo xslt_error($xslt_processor);
-		
-			$file = fopen ("Bestellungen_final.xml", "w+");
-
-			fputs($file, xslt_fetch_result($xslt_processor) );
-			fclose($file);
-
-		  // Ergebnis der Transformation ausgeben
-		 // print xslt_fetch_result($xslt_processor);
-		
-		  // Vom XSLT Prozessor belegten Speicher freigeben
-		  xslt_free($xslt_processor);   
-		  
-		  // Ende XML Generierung
-		*/  
-		//Written by Dan Zarrella. Some additional tweaks provided by JP Honeywell
-		//pear excel package has support for fonts and formulas etc.. more complicated
-		//this is good for quick table dumps (deliverables)
-		
-		$count = mysql_num_fields($result);
-		
-		for ($i = 0; $i < $count; $i++){
-			$header .= mysql_field_name($result, $i)."\t";
-		}
-		
-		while($row = mysql_fetch_row($result)){
-		  $line = '';
-		  foreach($row as $value){
-			if(!isset($value) || $value == ""){
-			  $value = "\t";
-			}else{
-		# important to escape any quotes to preserve them in the data.
-			  $value = str_replace('"', '""', $value);
-		# needed to encapsulate data in quotes because some data might be multi line.
-		# the good news is that numbers remain numbers in Excel even though quoted.
-			  $value = '"' . $value . '"' . "\t";
-			}
-			$line .= $value;
-		  }
-		  $data .= trim($line)."\n";
-		}
-		# this line is needed because returns embedded in the data have "\r"
-		# and this looks like a "box character" in Excel
-		  $data = str_replace("\r", "", $data);
-		
-		
-		# Nice to let someone know that the search came up empty.
-		# Otherwise only the column name headers will be output to Excel.
-		if ($data == "") {
-		  $data = "\nno matching records found\n";
-		}
-		
-		# This line will stream the file to the user rather than spray it across the screen
-		/*(header("Content-type: application/octet-stream");
-		
-		# replace excelfile.xls with whatever you want the filename to default to
-		header("Content-Disposition: attachment; filename=excelfile.xls");
-		header("Pragma: no-cache");
-		header("Expires: 0");
-		
-		//echo $header."\n".$data;
-		*/
-
-
-
-		// XML ausgeben
-		$file = fopen ($_POST['dateiUrl'], "w+");
-
-		fputs($file, $header."\n".$data);
-		fclose($file);
-
-	}
 	
 	function verabeiteBenutzerdatei($url){
 		$datei = fopen($url, "r") or die("Konnte die Datei nicht lesen.");

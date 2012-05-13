@@ -22,12 +22,25 @@ body {
 	float:right;
 }
 
+#TitleSeite
+{
+	position:absolute;
+	top:0px;
+	left:90px;
+}
 #choice
 {
 	top:0px;
 	height:60px;
 }
 
+#TitleNavigation
+{
+	position:absolute;
+	top:80px;
+	left:90px;
+	z-index: 30;
+}
 #meta
 {
 	top:80px;
@@ -40,6 +53,12 @@ body {
 	height:20px;
 }
 
+#TitleInhalt
+{
+	position:absolute;
+	top:240px;
+	left:90px;
+}
 #contentHolder
 {
 	top:240px;

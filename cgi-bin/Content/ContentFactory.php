@@ -103,14 +103,13 @@ class ContentFactory
 	
 	public function &CreateMainNavi()
 	{
-		$dbConn = Aufenthalt::GetInstance()->GetConn();
-		$result = $dbConn->GetNavi();
+		$result = Aufenthalt::GetInstance()->Controller()->GetNavi();
 		$theMenu = new MainNavi();
 		$titlesAndLinks = array();
 		foreach($result as $entry)
 		{
 			// Menu entries
-			$pageIdentifier = $dbConn->GetPageIdentifier($entry["pageRef"]);
+			$pageIdentifier = Aufenthalt::GetInstance()->Controller()->GetPageIdentifier($entry["pageRef"]);
 			$titlesAndLinks[$entry['title']] = $pageIdentifier['identifier'];
 		}
 		$theMenu->SetTitles($titlesAndLinks);
@@ -120,8 +119,7 @@ class ContentFactory
 	public function CreateContentPages($id)
 	{
 //		PrintHtmlComment("content id:".$id);
-		$dbConn = Aufenthalt::GetInstance()->GetConn();
-		$result = $dbConn->GetContent($id);
+		$result = Aufenthalt::GetInstance()->Controller()->GetContent($id);
 //		PrintHtmlComment("Content count:".count($result));
 		foreach($result as $pageData)
 		{

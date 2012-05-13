@@ -1,6 +1,5 @@
 <?php
-
-
+include("cgi-bin/Drawing.php");
 interface iParagraph
 {
 	const eTYPE_PIC_RIGHT=0, eTYPE_PIC_LEFT=1, eTYPE_TABLE=2, eTYPE_ORDER=3;
@@ -69,7 +68,7 @@ class PicPara implements iParagraph
 	}
 
 	public function Render(&$parentNode, &$currentOffset)
-	{
+	{	
 		$builder = ContentMgr::GetInstance()->GetBuilder();
 
 		$div = $builder->AddTag("div", "paragraph_".MakeSafeString($this->header), "paragraph");
@@ -82,18 +81,30 @@ class PicPara implements iParagraph
 		}
 		else
 		{
-			$className = "paragraphTitle paragraphDeko".rand(1,5);
+			$className = "paragraphTitle paragraphDeko";
 			$title = $builder->AddTag("p", "paragraph_title_".MakeSafeString($this->header), $className);
 		}
 		$div->appendChild($title);
-		
+		// $newPicUrl = Drawing::RandRect(0);	
+		// $newPicUrl = Drawing::RandRect(1);	
+		// $newPicUrl = Drawing::RandRect(2);	
+		// $newPicUrl = Drawing::RandRect(3);	
+		// $newPicUrl = Drawing::RandRect(4);	
+		// $newPicUrl = Drawing::RandRect(5);	
+		// $newPicUrl = Drawing::RandRect(6);	
+		// $newPicUrl = Drawing::RandRect(7);	
+		// $newPicUrl = Drawing::RandRect(8);	
+		// $newPicUrl = Drawing::RandRect(9);	
+		// PrintHtmlComment("newPicUrl:$newPicUrl");		
+//		$testPic = $builder->GetDoc()->createElement("img");
+//		$testPic->setAttribute("src", $newPicUrl);
+//		$div->appendChild($testPic);		
 		$content = $builder->AddTag("div", "paragraph_content_".MakeSafeString($this->header), "paragraphContent");
 		$contentHeight = ($this->height-iParagraph::TITLE_HEIGHT);
 		$builder->AddStyle($content, "height:".$contentHeight."px;");
 		$text = $builder->AddTag("p", "paragraph_content_".MakeSafeString($this->header), "paragraphText");
 		if(null!=$this->picUrl)
-		{
-			$pic = $builder->AddImage($this->picUrl, $this->picAlign);
+		{			$pic = $builder->AddImage($this->picUrl, $this->picAlign);
 			$content->appendChild($pic);
 		}
 		$content->appendChild($text);
@@ -228,7 +239,7 @@ class TablePara implements iParagraph
 						{
 							$date = new DateTime($value);
 							$weekday = strftime("%A", strtotime($value));//$date->getTimestamp());
-							$value = $date->format('d').",".substr($weekday, 0, 3);
+							$value = substr($weekday, 0, 3).",".$date->format('d.m.');
 //							$print ($weekday);
 //							$lastSlashIndex = strrpos($value, "-");
 //							$value = substr($value, $lastSlashIndex+1);
@@ -295,8 +306,11 @@ class TablePara implements iParagraph
 		$root = $configXML->firstChild;
 //		try{
 		$dbTable = $root->getAttribute("name");
-		$dbConn = Aufenthalt::GetInstance()->GetConn();
-		$dbResult = $dbConn->GetTableContent($dbTable, "*", array("category"=>$this->category));
+		$dbResult = Aufenthalt::GetInstance()->DBConn()->GetTableContent(
+			array(
+				"table"=>$dbTable, 
+				"requirements"=>array("category"=>$this->category)
+				));
 		$doc = $builder->GetDoc();
 		
 		$table = $doc->createElement("table");

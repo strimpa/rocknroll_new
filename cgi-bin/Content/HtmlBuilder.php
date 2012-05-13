@@ -46,6 +46,7 @@ class HtmlBuilder
 	    $index = sprintf("%02d", $index+1);
 //		print("titleArray:".$menuTuple->title."\n");
 	    $ele->nodeValue = $menuTuple->title;
+		$secNaviRand = rand(0,9);
 	    $ele->setAttribute("class", "secNavi");
 	    $ele->setAttribute("id", "secNavi".$index);
 	    $link->appendChild($ele);
@@ -80,8 +81,7 @@ class HtmlBuilder
 	
 	public function AddImage($picID, $align=NULL)
 	{
-		$conn = Aufenthalt::GetInstance()->GetConn();
-		$result = $conn->GetPicData($picID);
+		$result = Aufenthalt::GetInstance()->Controller()->GetPicData($picID);
 
 		$picDiv = $this->doc->createElement("div");
 	    switch($align)

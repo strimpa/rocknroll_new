@@ -84,6 +84,7 @@
 			uploadForm.setAttribute("enctype", "multipart/form-data");
 			var uploadLink = document.createElement("input");
 			uploadLink.setAttribute("type", "file");
+			uploadLink.setAttribute("value", "XML hochladen");
 			uploadLink.setAttribute("id", "uploadedfile");
 			uploadLink.setAttribute("name", "uploadedfile");
 			uploadLink.setAttribute("align", "right");
@@ -101,6 +102,28 @@
 			});
 			$(uploadLink).change(function(){
 				uploadForm.submit();
+			});
+			$(uploadTarget).load(function() {
+				function manipIframe() {
+				  	console.log("polling...");
+				    el = $(uploadTarget).contents();
+				    if (el.length != 1) {
+				    	setTimeout(manipIframe, 100);
+				     	return;
+				    }
+					var resultString = $(uploadTarget).contents().text();
+					if(""==resultString)
+						return;
+					console.log("resultString:\""+resultString+"\"");
+					var lastSlash = resultString.lastIndexOf("/");
+					resultString = resultString.substring(lastSlash+1, resultString.length);
+					console.log("uploaded file:"+resultString);
+					$.fn.loadContent(tableName,function(result){
+						console.log(result);
+//						document.location = "openFile.php/?url="+result;
+					}, null, "xml", {xmlinput:resultString});
+				}
+				manipIframe();
 			});
 				
 			$.fn.loadContent(tableName, function(result)
@@ -196,7 +219,7 @@
 			metaData = interpreteMetaData(paragraphData.find("meta").text());
 
 			paraDiv.setAttribute("class", "adminParagraph");
-			paraDiv.style.height = metaData['height'] + "px";
+			//paraDiv.style.height = metaData['height'] + "px";
 //			heightobj.offset += parseInt(metaData['height']);
 			// title
 			var editDiv = document.createElement("div");

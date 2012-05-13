@@ -44,9 +44,14 @@ class Aufenthalt
 		return self::$instance;
 	}
 	
-	public function &GetConn()
+	public function &Controller()
 	{
 		return $this->dbConn;
+	}
+
+	public function &DBConn()
+	{
+		return $this->dbConn->Conn();
 	}
 
 	function &GetAblauf()

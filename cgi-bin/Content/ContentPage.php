@@ -26,20 +26,22 @@ class ContentPage
 		$this->isDirty = true;
 		
 		// Menu entries
-		$dbConn = Aufenthalt::GetInstance()->GetConn();
-		$menuRef = $dbConn->GetMenu($pageData["menuRef"]);
+		$menuRef = Aufenthalt::GetInstance()->Controller()->GetMenu($pageData["menuRef"]);
 		ContentFactory::GetInstance()->IterateOverFields($menuRef, array("entries","links"), 'AddMenuCallback', $this->menu);
 		
 		// Article
 		$this->article->SetTitle($pageData["title"]);
-		$paraIndeces = explode(",",$pageData["paragraphs"]);
-		foreach($paraIndeces as $index)
+		if("NULL"!=$pageData["paragraphs"] && NULL!=$pageData["paragraphs"])
 		{
-			if($index == "")
-				continue;
-//			PrintHtmlComment("one paragraph:".$index);
-			$paragraph = $dbConn->GetParagraph($index);
-			$this->article->AddParagraph(ContentFactory::GetInstance()->CreateParagraph($paragraph));
+			$paraIndeces = explode(",",$pageData["paragraphs"]);
+			foreach($paraIndeces as $index)
+			{
+				if($index == "")
+					continue;
+	//			PrintHtmlComment("one paragraph:".$index);
+				$paragraph = Aufenthalt::GetInstance()->Controller()->GetParagraph($index);
+				$this->article->AddParagraph(ContentFactory::GetInstance()->CreateParagraph($paragraph));
+			}
 		}
 	}
 	

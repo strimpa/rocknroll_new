@@ -72,11 +72,21 @@
 				// get submenu with highest id:
 				$result = Aufenthalt::GetInstance()->DBConn()->GetTableContent(array('table'=>"submenus", 'fields'=>"max(id)"));
 				$_POST['menuRef'] =  $result[0]["max(id)"];
-				$result = Aufenthalt::GetInstance()->DBConn()->InsertTableContent(array('table'=>$query, 'fields'=>$_POST));
+				$result = Aufenthalt::GetInstance()->DBConn()->InsertTableContent(
+					array(
+						'table'=>$query, 
+						'fields'=>array_keys($_POST),
+						'values'=>array_values($_POST)
+						));
 			}
 			else
 			{
-				$result = Aufenthalt::GetInstance()->DBConn()->InsertTableContent(array('table'=>$query, 'fields'=>$_POST));
+				$result = Aufenthalt::GetInstance()->DBConn()->InsertTableContent(
+					array(
+						'table'=>$query, 
+						'fields'=>array_keys($_POST),
+						'values'=>array_values($_POST)
+						));
 			}
 			$result = Aufenthalt::GetInstance()->DBConn()->GetTableContent(array('table'=>$query, 'fields'=>"max(id)"));
 		}
@@ -96,19 +106,13 @@
 			// foreach ($_POST as $key => $value) {
 				// PrintHtmlComment('$_POST['.$key.']:'.$value);
 			// }
-			if($params["xmlinput"])
-			{
-				EnterXMLintoTable($params["xmlinput"]);
-			}
-			else {
-				$result = Aufenthalt::GetInstance()->DBConn()->SetTableContent(
-					array(
-						'table'=>$query, 
-						'fields'=>array_keys($_POST), 
-						'requirements'=>$requirements, 
-						'values'=>array_values($_POST)
-						));
-			}
+			$result = Aufenthalt::GetInstance()->DBConn()->SetTableContent(
+				array(
+					'table'=>$query, 
+					'fields'=>array_keys($_POST), 
+					'requirements'=>$requirements, 
+					'values'=>array_values($_POST)
+					));
 			$result = Aufenthalt::GetInstance()->DBConn()->GetTableContent(
 				array(
 					'table'=>$query, 
@@ -145,6 +149,11 @@
 		else if(isset($params["folder"]))
 		{
 			$result = GetFolderContent($_POST['assetFolder']);
+		}
+		else if(isset($params["xmlinput"]))
+		{
+			print "path param:".$params["xmlinput"];
+			$result = EnterXMLintoTable($query, $params["xmlinput"]);
 		}
 		else
 		{
@@ -258,6 +267,11 @@
 		//			PrintHtmlComment($print);
 			}
 		}
+		else
+		{
+			print "ERROR: boolean result given back:".$result;
+		}
+	
 	}
 	else
 	{

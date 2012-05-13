@@ -7,8 +7,6 @@ class Article
 {
 	const DELEGATE_ARTICLE_PLOGGER = 1;
 	const DELEGATE_ARTICLE_LINKS = 2;
-	const DELEGATE_ARTICLE_ORDER = 3;
-	
 		
 	private $title;
 	private $paragraphs;
@@ -46,7 +44,8 @@ EOD;
 		{
 		    $para->Render($contentDiv, $currentOffset);
 		}	
-//		$builder->AddStyle($contentDiv, ("height:".$currentOffset."px;"));
+		if($currentOffset!=20)
+			$builder->AddStyle($contentDiv, ("height:".$currentOffset."px;"));
 	}
 	
 	public function Render(&$parentNode)
@@ -139,8 +138,8 @@ class FrameArticle extends Article
 		$importdoc->encoding = 'UTF-8';
 $htmlStr = <<<EOD
 <p style="margin-left:10px;">
-	<a href="http://www.rock-around.de/system-cgi/guestbook/guestbook.php?action=sign" target="innerFrame">Ins Gästebuch eintragen</a>
-	 | <a href="http://www.rock-around.de/system-cgi/guestbook/guestbook.php?action=view" target="innerFrame">Gästebuch anschauen</a>
+	<a href="http://www.rock-around.de/system-cgi/guestbook/guestbook.php?action=sign" target="innerFrame">Ins Gï¿½stebuch eintragen</a>
+	 | <a href="http://www.rock-around.de/system-cgi/guestbook/guestbook.php?action=view" target="innerFrame">Gï¿½stebuch anschauen</a>
 </p>
 EOD;
 		$importdoc->loadXML('<?xml version="1.0" encoding="UTF-8" ?>'.utf8_encode($htmlStr));
@@ -156,14 +155,6 @@ EOD;
 		$iframe->setAttribute("src", $this->url);
 		
 		$contentDiv->appendChild($iframe);
-	}
-}
-
-class OrderArticle extends Article
-{
-	public function RenderParagraphs(&$contentDiv)
-	{
-		Aufenthalt::GetInstance()->GetAblauf()->aktuellerBestellSchritt($contentDiv);
 	}
 }
 

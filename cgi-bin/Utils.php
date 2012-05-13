@@ -11,7 +11,7 @@ function MyHtmlSpecialVars_decode($string)
 
 function PrintHtmlComment($string)
 {
-	print ("<!-- ".$string."//-->\n");
+	//print ("<!-- ".$string."//-->\n");
 }
 
 function FilenameFromUrl(&$params=NULL)
@@ -74,7 +74,10 @@ function MakeSafeString($string)
 
 function MakeSafeTagName($string)
 {
-	return preg_replace("/[\%\.\s+()]/", "_", $string);
+	$value = preg_replace("/[^a-zA-Z0-9]/", "_", $string);
+	if(preg_match("/^[0-9]/", $value))
+		$value = "_".$value;
+	return $value;
 }
 
 function DitchQuotes($string)
@@ -196,16 +199,18 @@ function IsXmlString($subject)
 
 function GetFolderContent($assetFolder)
 {
-	$default_dir = $_SERVER['DOCUMENT_ROOT'];
+	global $serverRoot;
+	global $httpRoot;
+	$default_dir = $serverRoot;
 	$suffix = "";
 	$extensions = array("*");
-	global $serverRoot;
 	switch($assetFolder)
 	{
 		case "images":
 		{
-			$suffix = $serverRoot."images/";
-			$extensions = array("jpg", "gif");
+			$suffix = "images/";
+			PrintHtmlComment("suffix: $suffix");
+			$extensions = array("jpg", "gif", "png");
 		}
 	}
 	$default_dir = $default_dir.$suffix;
@@ -224,7 +229,7 @@ function GetFolderContent($assetFolder)
 			if(FALSE !== array_search($ext, $extensions))
 			{
 				$safeFileName = MakeSafeTagName($file);
-				$fileList[$safeFileName] = "http://".$_SERVER['SERVER_NAME'].$suffix.$file;
+				$fileList[$safeFileName] = $httpRoot.$suffix.$file;
 			}				
 		}
 	}
@@ -236,6 +241,176 @@ function GetFolderContent($assetFolder)
 function IsAssoc($myarray)
 {
 	return array_keys($myarray) !== range(0, count($myarray) - 1);
+}
+
+function EncodeUmlaute($string)
+{
+	  $res = htmlentities($string);
+	  $res = str_replace("&uuml;","ü",$res);
+	  $res = str_replace("&auml;","ä",$res);
+	  $res = str_replace("&ouml;",'ö',$res);
+	  $res = str_replace("&Uuml;",'Ü',$res);
+	  $res = str_replace("&Auml;",'Ä',$res);
+	  $res = str_replace("&Ouml;",'Ö',$res);
+	  $res = str_replace("&szlig;",'ß',$res);
+	  return $res;
+}
+
+function gibTabelleAlsXml($result, $name){
+	global $serverRoot;
+	global $httpRoot;
+// Verbinden
+
+	if($result)
+	{
+		// DOMXML Objekt erzeugen
+		$doc = new DOMDocument();
+		$doc->encoding = 'ISO-8859-1';
+		$doc->formatOutput = true;
+		$doc->xmlStandalone = true;
+		// Wurzel erzeugen (<article> ... </article>
+		$name = MakeSafeTagName($name);
+		PrintHtmlComment("safemame: $name \n");
+		$root = $doc->createElement( $name );
+		$doc->appendChild($root);
+//			$trans = get_html_translation_table(HTML_ENTITIES);
+
+		//Anzahl der Zeilen
+		foreach ($result as $rowkey => $rowvalue) {
+		 	 // <artheader> ... </artheader>
+		 	 // $safeRowName  = MakeSafeTagName($rowkey);
+			 // PrintHtmlComment( "$rowkey safeRowName: $safeRowName \n");
+		  	$row = $doc->createElement( "Row" );
+		  	$root->appendChild($row);
+			foreach ($rowvalue as $cellkey => $cellvalue) {
+				$safeCellName = MakeSafeTagName($cellkey);
+				PrintHtmlComment( "$cellkey safeCellName: $safeCellName \n");
+				 $cell = $doc->createElement( $safeCellName );
+				 $row->appendChild($cell);
+				 $actualValue = EncodeUmlaute( utf8_decode($cellvalue) );
+//				 print "value: $actualValue\n";
+				 $cell->nodeValue =$actualValue; 
+			}
+		}
+					
+		// XML ausgeben
+		$filename = $serverRoot."cgi-bin/Admin/temp/$name.xml";
+		$file = fopen ($filename, "w+");
+
+		fputs($file, $doc->saveXML() );
+		fclose($file);
+		return $filename;
+	}
+
+	
+/*		
+		//Written by Dan Zarrella. Some additional tweaks provided by JP Honeywell
+		//pear excel package has support for fonts and formulas etc.. more complicated
+		//this is good for quick table dumps (deliverables)
+		
+		$count = mysql_num_fields($result);
+		
+		for ($i = 0; $i < $count; $i++){
+			$header .= mysql_field_name($result, $i)."\t";
+		}
+		
+		while($row = mysql_fetch_row($result)){
+		  $line = '';
+		  foreach($row as $value){
+			if(!isset($value) || $value == ""){
+			  $value = "\t";
+			}else{
+		# important to escape any quotes to preserve them in the data.
+			  $value = str_replace('"', '""', $value);
+		# needed to encapsulate data in quotes because some data might be multi line.
+		# the good news is that numbers remain numbers in Excel even though quoted.
+			  $value = '"' . $value . '"' . "\t";
+			}
+			$line .= $value;
+		  }
+		  $data .= trim($line)."\n";
+		}
+		# this line is needed because returns embedded in the data have "\r"
+		# and this looks like a "box character" in Excel
+		  $data = str_replace("\r", "", $data);
+		
+		
+		# Nice to let someone know that the search came up empty.
+		# Otherwise only the column name headers will be output to Excel.
+		if ($data == "") {
+		  $data = "\nno matching records found\n";
+		}
+		
+		# This line will stream the file to the user rather than spray it across the screen
+		(header("Content-type: application/octet-stream");
+		
+		# replace excelfile.xls with whatever you want the filename to default to
+		header("Content-Disposition: attachment; filename=excelfile.xls");
+		header("Pragma: no-cache");
+		header("Expires: 0");
+		
+		//echo $header."\n".$data;
+*/
+}
+
+function EnterXMLintoTable($tablename, $filename)
+{
+	global $serverRoot;
+//	$path_parts = pathinfo($filename);
+	$localPath = $serverRoot."cgi-bin/Admin/temp/$filename";//$path_parts['filename'].".".$path_parts['extension'];
+	print "localpath $localPath\n";
+
+	$doc = new DOMDocument();
+	$doc->encoding = 'ISO-8859-1';
+	$doc->load($localPath);
+	$root = $doc->firstChild;
+	print "tag:".$root->tagName."\n";
+	
+	$lastResult = FALSE;
+	foreach ($root->childNodes as $row) 
+	{
+		if(!is_a($row, "DOMElement"))
+		{
+			print "row not an element.\n";
+			continue;
+		}
+		$fieldArray = array();
+		$valueArray = array();
+		$idValue = null;
+		foreach ($row->childNodes as $cell) 
+		{
+			if(!is_a($cell, "DOMElement"))
+			{
+				print "cell not an element.\n";
+				continue;
+			}
+			print "there's a value:".$cell->tagName.":".$cell->textContent."\n";
+			if($cell->tagName=="id")
+				$idValue = $cell->textContent;
+			else {
+				array_push($fieldArray,$cell->tagName);
+				array_push($valueArray,$cell->textContent);
+			}
+		}
+		$params = array(
+				'table'=>$tablename, 
+				'fields'=>$fieldArray, 
+				'values'=>$valueArray
+				);
+		if($idValue != null)
+		{
+			$params['requirements'] = array("id"=>$idValue);
+			$lastResult = Aufenthalt::GetInstance()->DBConn()->SetTableContent($params);
+		}
+		else
+		{
+			$result = Aufenthalt::GetInstance()->DBConn()->InsertTableContent($params);
+		}
+		if(is_bool($lastResult) && FALSE==$lastResult)
+			return FALSE;
+	}
+
+	return $lastResult;
 }
 
 ?>

@@ -19,7 +19,7 @@ var $zeigeDatum;
 	
 	public function PrintSections()
 	{
-		$result = Aufenthalt::GetInstance()->GetConn()->Conn()->getLinkSections();
+		$result = Aufenthalt::GetInstance()->DBConn()->getLinkSections();
 		$builder = ContentMgr::GetInstance()->GetBuilder();
 		print "<ul>";
 		while($row = mysql_fetch_row($result))
@@ -72,13 +72,13 @@ var $zeigeDatum;
 	
 	public function rubrikAusgabe($inhalt)
 	{
-		$result = Aufenthalt::GetInstance()->GetConn()->Conn()->gibLinksAusFuerRubrik($inhalt);
+		$result = Aufenthalt::GetInstance()->DBConn()->gibLinksAusFuerRubrik($inhalt);
 		$this->TableOutput($result);
 	}
 	
 	function suchAusgabe($suchEingabe)
 	{
-		$result = Aufenthalt::GetInstance()->GetConn()->Conn()->gibLinksAusFuerSuche($suchEingabe);
+		$result = Aufenthalt::GetInstance()->DBConn()->gibLinksAusFuerSuche($suchEingabe);
 		
 		// Linktabelle malen
 		$this->TableOutput($result);

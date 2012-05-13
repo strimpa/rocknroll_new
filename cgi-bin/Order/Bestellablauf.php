@@ -97,7 +97,7 @@ class BestellAblauf{
 	function aktuellerBestellSchritt(&$parentNode)
 	{
 	/*******************************************************************/
-	// nach dritter Bestätigung ist die Flagvariable vorhanden und auf s
+	// nach dritter Bestï¿½tigung ist die Flagvariable vorhanden und auf s
 	/*******************************************************************/
 		if(!$this->bestellungAufgegeben && isset($_POST['formFilled']) && $_POST['formFilled'] == "s")
 		{
@@ -119,11 +119,11 @@ class BestellAblauf{
 			}
 			
 	/*******************************************************************/
-	// nach zweiter Bestätigung ist die Flagvariable vorhanden und auf y
+	// nach zweiter Bestï¿½tigung ist die Flagvariable vorhanden und auf y
 	/*******************************************************************/
 		} else if (!$this->bestellungAufgegeben && isset($_POST['formFilled']) && $_POST['formFilled'] == "y"){
 			$ausgabePuffer = $this->pruefeFormElemente(0);
-	// Eingaben vollständig
+	// Eingaben vollstï¿½ndig
 			if($ausgabePuffer == ""){
 				$this->aufenthalt->GetUser()->registriereMich();
 				$this->importHTML("confirmForm.htm", $parentNode);
@@ -131,26 +131,26 @@ class BestellAblauf{
 				$this->addTextNode($this->aktuelleBestellung->zeigeBestellungen($this), $parentNode);
 				$this->importHTML("confirmFormFuss.htm", $parentNode);
 			} else {
-	// Eingaben nicht vollständig
+	// Eingaben nicht vollstï¿½ndig
 				$this->importHTML("registrierFormKopf.htm", $parentNode);
-				$ausgabePuffer = "Angaben nicht vollständig:".$ausgabePuffer; 
+				$ausgabePuffer = "Angaben nicht vollstï¿½ndig:".$ausgabePuffer; 
 				$this->addErrorText($ausgabePuffer,$parentNode);
 				$this->aktuelleBestellung->zeigeBestellungen($this);
 				$this->importHTML("registrierForm.htm", $parentNode);
 			}
 	/*******************************************************************/
-	// nach erster Bestätigung ist die Flagvariable vorhanden und auf j
+	// nach erster Bestï¿½tigung ist die Flagvariable vorhanden und auf j
 	/*******************************************************************/
 		} else if(!$this->bestellungAufgegeben && isset($_POST['formFilled']) && $_POST['formFilled'] == "j"){
 			$ausgabePuffer = $this->pruefeFormElemente(1);
-	// Eingaben vollständig
+	// Eingaben vollstï¿½ndig
 			if($ausgabePuffer == "")
 			{
 				$this->importHTML("registrierFormKopf.htm", $parentNode);
 				$this->gibBestellungAuf();
 				$this->addTextNode($this->aktuelleBestellung->zeigeBestellungen($this), $parentNode);
 				$this->importHTML("registrierForm.htm", $parentNode);
-	// Eingaben nicht vollständig
+	// Eingaben nicht vollstï¿½ndig
 			} else {
 				$this->importHTML("bestellFormKopf.htm", $parentNode);
 				$this->addErrorText($ausgabePuffer,$parentNode);
@@ -202,12 +202,12 @@ class BestellAblauf{
 		switch($formNummer){
 			case 0:
 					if($_POST['anrede'] == "" || 0!=preg_match("/Bitte/", $_POST['anrede'])) 
-						$rueckGabe.="<li>Bitte füllen Sie das Anredefeld aus.</li>";
-					if($_POST['Nachname'] == "") $rueckGabe.="<li>Bitte füllen Sie das Nachnamefeld aus.</li>";
-					if($_POST['Postadresse'] == "") $rueckGabe.="<li>Bitte füllen Sie das Postadressenfeld aus.</li>";
-					if($_POST['Ort'] == "") $rueckGabe.="<li>Bitte füllen Sie das Ortsfeld aus.</li>";
+						$rueckGabe.="<li>Bitte fï¿½llen Sie das Anredefeld aus.</li>";
+					if($_POST['Nachname'] == "") $rueckGabe.="<li>Bitte fï¿½llen Sie das Nachnamefeld aus.</li>";
+					if($_POST['Postadresse'] == "") $rueckGabe.="<li>Bitte fï¿½llen Sie das Postadressenfeld aus.</li>";
+					if($_POST['Ort'] == "") $rueckGabe.="<li>Bitte fï¿½llen Sie das Ortsfeld aus.</li>";
 					$emailRichtig = preg_match($emailPruefString, $_POST['EMail']);
-					if(!$emailRichtig) $rueckGabe.="<li>Bitte geben Sie eine gültige E-Mail Adresse ein.</li>";
+					if(!$emailRichtig) $rueckGabe.="<li>Bitte geben Sie eine gï¿½ltige E-Mail Adresse ein.</li>";
 					if($_POST['Land'] == "germany")$this->aktuelleBestellung->destination="inland";
 					else if($_POST['Land'] == "sonstigesEU")$this->aktuelleBestellung->destination="euausland";
 					else if($_POST['Land'] == "sonstiges")$this->aktuelleBestellung->destination="noneuausland";
@@ -239,11 +239,11 @@ class BestellAblauf{
 					}
 				}
 				if(!$anythingSet)
-					$rueckGabe.="<li>Bitte füllen Sie mindestens ein Bestellfeld aus.</li>";
+					$rueckGabe.="<li>Bitte fï¿½llen Sie mindestens ein Bestellfeld aus.</li>";
 				
 				if(	($_POST['EinzelheftAusgabeNr']!="" && !preg_match($ausgabenPruefString, $_POST['EinzelheftAusgabeNr'])) ||
 					($_POST['AboAbAusgabe']!="" && !preg_match($ausgabenPruefString, $_POST['AboAbAusgabe'])) )
-					$rueckGabe.="<li>Bitte geben Sie in das Feld für die Eingabe der gewünschten Heftausgaben nur Zahlen ein und trennen diese NUR mit Kommas oder Leerzeichen.</li>";
+					$rueckGabe.="<li>Bitte geben Sie in das Feld fï¿½r die Eingabe der gewï¿½nschten Heftausgaben nur Zahlen ein und trennen diese NUR mit Kommas oder Leerzeichen.</li>";
 				break;
 			}
 		return $rueckGabe;
@@ -255,14 +255,14 @@ class BestellAblauf{
 		/***********************************************************
 		**        User in Datenbank schreiben               **
 		***********************************************************/
-		$errors = $this->aufenthalt->GetConn()->gibUserInDB($this->aufenthalt->GetUser());
+		$errors = Aufenthalt::GetInstance()->DBConn()->gibUserInDB($this->aufenthalt->GetUser());
 		if($errors!=""){
 			$rueckgabe= "Keine erfolgreiche Verbindung zur DB bei der Speicherung des Benutzers.<br>".$errors;
 		} else {
 		/***********************************************************
 		**        Bestellung in Datenbank schreiben               **
 		***********************************************************/
-			$errors = $this->aufenthalt->GetConn()->gibBestellungInDB($this->aufenthalt->GetUser(), $this->aktuelleBestellung);
+			$errors = Aufenthalt::GetInstance()->DBConn()->gibBestellungInDB($this->aufenthalt->GetUser(), $this->aktuelleBestellung);
 			if($errors!="")
 			{
 				$rueckgabe="Keine erfolgreiche Verbindung zur DB bei der Speicherung der Bestellung.<br>".$errors;
