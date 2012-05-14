@@ -418,7 +418,7 @@ PicBrowse.prototype.createControl = function(doc, presetValues)
 	var myId = this.name+"_edit";
 	this.control.setAttribute("id", myId);
 	this.control.setAttribute("class", "creationControl");
-	this.control.setAttribute("src","/images/layout/noImageDummy.png");
+	this.control.setAttribute("src","images/noImageDummy.png");
 	if(null!=presetValues && null!=presetValues[this.name])
 	{
 		this.control.setAttribute("src", presetValues[this.name]);
@@ -445,7 +445,7 @@ PicBrowse.prototype.init = function(presetValues, changeHandler)
 	$(this.control).load(changeHandler);
 	
 	$(this.picDelete).click(function(){
-		$(controlScopePass).attr("src", "/images/layout/noImageDummy.png");
+		$(controlScopePass).attr("src", "images/noImageDummy.png");
 	});
 
 	var picElement = this.control;
@@ -471,8 +471,18 @@ PicBrowse.prototype.init = function(presetValues, changeHandler)
 		     	return;
 		    }
 			var resultString = $(target).contents().text();
-			console.log("New src:"+resultString);
-			$(controlScopePass1).attr("src", resultString);
+			if(resultString.length>0)
+			{
+				if(resultString.search(/Invalid file/) == -1)
+				{
+					console.log("New src:"+resultString);
+					$(controlScopePass1).attr("src", resultString);
+				}
+				else
+				{
+					alert(resultString);
+				}
+			}
 		}
 		manipIframe();
 	});

@@ -256,6 +256,13 @@ function EncodeUmlaute($string)
 	  return $res;
 }
 
+function SafeJSONString($in)
+{
+	$out = htmlentities($in);
+	$out = str_replace("\n","<br />",$out);
+	return $out;
+}
+
 function gibTabelleAlsXml($result, $name){
 	global $serverRoot;
 	global $httpRoot;

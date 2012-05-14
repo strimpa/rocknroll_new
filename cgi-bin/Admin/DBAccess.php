@@ -20,7 +20,7 @@
 			$returnString .= $tabs;
 			if($printName)
 				$returnString .= $currName.": ";
-			$returnString .= "\"".htmlentities(utf8_decode($currRoot))."\"";
+			$returnString .= "\"".SafeJSONString(utf8_decode($currRoot))."\"";
 			$returnString = str_replace("\r\n", "<br />", $returnString);
 		}
 		else
@@ -90,9 +90,13 @@
 			}
 			$result = Aufenthalt::GetInstance()->DBConn()->GetTableContent(array('table'=>$query, 'fields'=>"max(id)"));
 		}
-		else if(isset($params["del"]) && $params["delete"]==true)
+		else if(isset($params["del"]) && $params["del"]==true)
 		{
-			$result = Aufenthalt::GetInstance()->DBConn()->DropTableContent(array('table'=>$query, 'fields'=>$_POST));
+			$result = Aufenthalt::GetInstance()->DBConn()->DropTableContent(
+				array(
+					'table'=>$query, 
+					'requirements'=>$_POST)
+					);
 		}
 		else if(isset($params["edit"]) && $params["edit"]==true)
 		{

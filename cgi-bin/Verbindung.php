@@ -297,7 +297,7 @@ global $db_pass;
 		
 		// UPDATE  `rocknroll`.`submenus` SET  `links` =  'The first entry,The second entry,The third entry' WHERE  `submenus`.`id` =1;
 		$sql = "INSERT INTO `".$settings['table']."` (";
-        $keys = $settings['fields'];
+        $fields = $settings['fields'];
         $values = $settings['values'];
 		if(is_array($fields) && count($fields)>0)
 		{
@@ -307,7 +307,7 @@ global $db_pass;
 	        		continue;
 	        	if($fieldIndex>0)
 	        		$sql .= ",";
-	        	$sql .= "`".$keys[$fieldIndex]."`";
+	        	$sql .= "`".$fields[$fieldIndex]."`";
 	        }
 		}
 		$sql .= ') VALUES ('; 

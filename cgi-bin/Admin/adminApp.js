@@ -219,6 +219,7 @@
 			metaData = interpreteMetaData(paragraphData.find("meta").text());
 
 			paraDiv.setAttribute("class", "adminParagraph");
+			var paraID = paragraphData.find("id").text();
 			//paraDiv.style.height = metaData['height'] + "px";
 //			heightobj.offset += parseInt(metaData['height']);
 			// title
@@ -233,7 +234,7 @@
 			editDiv.appendChild(editParaButton);
 			var deleteParaButton = document.createElement("input");
 			deleteParaButton.setAttribute("type", "button");
-			deleteParaButton.setAttribute("value", "delete "+paraIndex);
+			deleteParaButton.setAttribute("value", "delete "+paraID);
 			deleteParaButton.setAttribute("class", "deleteButton");
 			editDiv.appendChild(deleteParaButton);
 			var upParaButton = document.createElement("input");
@@ -246,7 +247,6 @@
 			editDiv.appendChild(downParaButton);
 			paraDiv.appendChild(editDiv);
 			// title
-			var paraID = paragraphData.find("id").text();
 			var titleDiv = document.createElement("div");
 			titleDiv.setAttribute("class", "paragraphTitle");
 			titleDiv.textContent = paragraphData.find("title").text();
@@ -360,9 +360,17 @@
 					paragraphs:paraArray.join(",")
 				};
 //				alert("paraindex:"+paraIndex+", new para string:"+paraArray.join(","));
+				
+				var keep = confirm("Den Absatz in der DB behalten?");
+				if(!keep)
+				{
+					$.fn.loadContent("paragraphs", function(result)
+					{
+						alert("Absatz erfolgreich geloescht.");
+					}, {id:paraID}, "data", {del:true});
+				}
 				$.fn.loadContent("pages", function(result)
 				{
-					alert("Absatz erfolgreich geloescht.");
 					triggerParagraphCreation();
 				}, pageData, "data", {edit:true,req:("id="+pageIndex)});
 			});
@@ -739,7 +747,6 @@
 		{
 			if(null == contentCache)
 				return;
-			alert("set paragraph...");
 			// prepare data
 			/////////////////////////
 			var entryData = [];
@@ -1178,7 +1185,7 @@
 		$("#deleteMenuEntryButton").click(deleteMenuEntryHandler);
 		$("#createParagraphButton").click(createParagraphHandler);
 		$("#insertParagraphSelect").change(insertParagraphHandler);
-		$("#paragraphDropDown").change(this.selectParaForSubMenu);
+		$("#paragraphDropDown").change(selectParaForSubMenu);
 		refreshPages(populateContentDropDown);
 	}
 
