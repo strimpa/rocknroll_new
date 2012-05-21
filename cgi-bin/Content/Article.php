@@ -7,11 +7,12 @@ class Article
 {
 	const DELEGATE_ARTICLE_PLOGGER = 1;
 	const DELEGATE_ARTICLE_LINKS = 2;
+	const DELEGATE_ARTICLE_ORDER = 3;
 		
 	private $title;
 	private $paragraphs;
 	
-	public function Article()
+	public function __construct()
 	{
 		$this->paragraphs = array();
 	}
@@ -23,6 +24,8 @@ class Article
 	
 	public function AddParagraph($para)
 	{
+		if(!is_array($this->paragraphs))
+			$this->paragraphs = array();
 		array_push($this->paragraphs, $para);
 	}
 	
@@ -54,20 +57,22 @@ EOD;
 
 		$parentNode->appendChild($builder->AddTag("div", "articleTitle", NULL, $this->title));
 		
-		$contentBGDiv = $builder->AddTag("div", "contentBG", "redbordered");
+		$contentBGBorderDiv = $builder->AddTag("div", "contentBGBorder");
+		$contentBGDiv = $builder->AddTag("div", "contentBG");
 		$menuPicDiv = $builder->AddTag("div", "contentLeftOverlap");
 	    $pic = $builder->GetDoc()->createElement( "img" );
 		$pic->setAttribute("src", "/images/layout/BG_04.jpg");
 		$menuPicDiv->appendChild($pic);
 		$contentBGDiv->appendChild($menuPicDiv);
-		$parentNode->appendChild($contentBGDiv);
+		$contentBGBorderDiv->appendChild($contentBGDiv);
+		$parentNode->appendChild($contentBGBorderDiv);
 		
 		$contentDiv = $builder->AddTag("div", "content");
 		$contentBGDiv->appendChild($contentDiv);
 		
 		$this->RenderParagraphs($contentDiv);
 		$footerDiv = $builder->AddTag("div", "footerDiv", NULL);
-		$contentBGDiv->appendChild($footerDiv);
+		$contentBGBorderDiv->appendChild($footerDiv);
 		$footerDiv->appendChild($builder->CreateImage("/images/layout/FooterDeko.jpg"));
 	}
 }
@@ -105,20 +110,23 @@ class DelegateArticle extends Article
 	public function RenderParagraphs(&$contentDiv)
 	{
 		$builder = ContentMgr::GetInstance()->GetBuilder();
-		//<iframe src="/plogger/" id="ploggerFrame" />
-		//$iframe = $builder->AddTag("iframe", "ploggerFrame", NULL);
-//		$iframe->setAttribute("src", $this->url);
-		
-		ob_start();
-		$this->RenderDelegate();
-		$str=ob_get_contents();
-		ob_end_clean();	
-		$importdoc = new DOMDocument();
-		$importdoc->encoding = 'UTF-8';
-		$importdoc->loadHTML('<?xml encoding="UTF-8">'.$str);
-		$doc = $builder->GetDoc();
-		$text = $doc->importNode($importdoc->documentElement, true);
-		$contentDiv->appendChild($text);
+		if($this->type == Article::DELEGATE_ARTICLE_ORDER)
+		{
+			Aufenthalt::GetInstance()->GetAblauf()->aktuellerBestellSchritt($contentDiv);
+		}
+		else 
+		{
+			ob_start();
+			$this->RenderDelegate();
+			$str=ob_get_contents();
+			ob_end_clean();	
+			$importdoc = new DOMDocument();
+			$importdoc->encoding = 'UTF-8';
+			$importdoc->loadHTML('<?xml encoding="UTF-8">'.$str);
+			$doc = $builder->GetDoc();
+			$text = $doc->importNode($importdoc->documentElement, true);
+			$contentDiv->appendChild($text);
+		}
 	}
 }
 

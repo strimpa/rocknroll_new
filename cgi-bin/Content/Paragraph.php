@@ -335,18 +335,4 @@ class TablePara implements iParagraph
 		$currentOffset += ($this->height + iParagraph::PARAGRAPH_PADDING);
 	}
 }
-
-class OrderPara implements iParagraph
-{
-	public function InterpreteMetaData($data)
-	{}
-	
-	public function Init($header, $meta, $content)
-	{}
-
-	public function Render(&$parentNode, &$currentOffset)
-	{
-		Aufenthalt::GetInstance()->GetAblauf()->aktuellerBestellSchritt($parentNode);
-	}
-}
 ?>

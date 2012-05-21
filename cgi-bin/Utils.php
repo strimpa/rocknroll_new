@@ -11,7 +11,7 @@ function MyHtmlSpecialVars_decode($string)
 
 function PrintHtmlComment($string)
 {
-	//print ("<!-- ".$string."//-->\n");
+	print ("<!-- ".$string."//-->\n");
 }
 
 function FilenameFromUrl(&$params=NULL)
@@ -277,7 +277,6 @@ function gibTabelleAlsXml($result, $name){
 		$doc->xmlStandalone = true;
 		// Wurzel erzeugen (<article> ... </article>
 		$name = MakeSafeTagName($name);
-		PrintHtmlComment("safemame: $name \n");
 		$root = $doc->createElement( $name );
 		$doc->appendChild($root);
 //			$trans = get_html_translation_table(HTML_ENTITIES);
@@ -286,16 +285,13 @@ function gibTabelleAlsXml($result, $name){
 		foreach ($result as $rowkey => $rowvalue) {
 		 	 // <artheader> ... </artheader>
 		 	 // $safeRowName  = MakeSafeTagName($rowkey);
-			 // PrintHtmlComment( "$rowkey safeRowName: $safeRowName \n");
 		  	$row = $doc->createElement( "Row" );
 		  	$root->appendChild($row);
 			foreach ($rowvalue as $cellkey => $cellvalue) {
 				$safeCellName = MakeSafeTagName($cellkey);
-				PrintHtmlComment( "$cellkey safeCellName: $safeCellName \n");
 				 $cell = $doc->createElement( $safeCellName );
 				 $row->appendChild($cell);
 				 $actualValue = EncodeUmlaute( utf8_decode($cellvalue) );
-//				 print "value: $actualValue\n";
 				 $cell->nodeValue =$actualValue; 
 			}
 		}

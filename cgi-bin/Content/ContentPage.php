@@ -38,8 +38,10 @@ class ContentPage
 			{
 				if($index == "")
 					continue;
-	//			PrintHtmlComment("one paragraph:".$index);
+				PrintHtmlComment("one paragraph:".$index);
 				$paragraph = Aufenthalt::GetInstance()->Controller()->GetParagraph($index);
+				foreach($paragraph as $key=>$paramInfo)
+					PrintHtmlComment("paragraph info:$key : $paramInfo");
 				$this->article->AddParagraph(ContentFactory::GetInstance()->CreateParagraph($paragraph));
 			}
 		}

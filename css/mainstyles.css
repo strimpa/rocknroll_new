@@ -60,13 +60,21 @@ body {
 	z-index:2;
 }
 
-#contentBG
+#contentBGBorder
 {
 	position:absolute;
-	background-color:#01274C;
+	background-color:#730B24;
 	top:202px;
 	left:112px;
+	width:696px;
+	overflow:hidden;
+	z-index:3; 
+}
+#contentBG
+{
+	background-color:#01274C;
 	width:690px;
+	overflow:hidden;
 	z-index:4; 
 }
 
@@ -130,11 +138,10 @@ body {
 	text-align:left;
 	padding-top:2px;
 	height:50px;
-	padding-left:40px;
 	color:#075AAC;
 	font-size:35px;
 	margin:0px;
-	width:585px;
+	width:630px;
 	right:0px;
 }
 
@@ -189,15 +196,13 @@ a:hover{
 
 #contentLeftOverlap
 {
+	position:absolute;
+	top:0px;
+	left:0px;
 	background-color:#003366;
 	width:55px;
 	height:200px;
-	float:left;
-/*	position:absolute;
-	top:200px;
-	left:112px;
-	z-index:2;
-	*/
+	z-index:5;
 }
 #Deco01
 {

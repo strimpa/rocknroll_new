@@ -76,9 +76,6 @@
 	</div>
 </div>
 
-<div class="editfield" id="outputDiv">
-</div>
-
 </body>
 
 </html>

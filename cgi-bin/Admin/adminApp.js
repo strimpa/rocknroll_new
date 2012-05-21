@@ -23,7 +23,7 @@
 	
 	function output(text)
 	{
-		element("outputDiv").innerHTML = text+"<br />"+element("outputDiv").innerHTML;
+		console.log(text);
 	}
 
 	function interpreteMetaData(metaString)
@@ -252,7 +252,7 @@
 			titleDiv.textContent = paragraphData.find("title").text();
 			paraDiv.appendChild(titleDiv);
 			
-			var type = paragraphData.find("type").text()
+			var paratype = paragraphData.find("type").text();
 			var imageUrl = "";
 			var imageTitle = "";
 			var paraContent = "";
@@ -282,7 +282,7 @@
 			{
 				editParaButton.removeAttribute("disabled");
 			}
-			switch(type)
+			switch(paratype)
 			{
 			case "0":
 			case "1":
@@ -336,7 +336,7 @@
 			{
 				var defaultData = {
 					title:titleDiv.textContent,
-					type:type,
+					type:paratype,
 					height:myHeight,
 					picUrl:imageUrl,
 					picTitle:imageTitle,
@@ -910,12 +910,12 @@
 							{
 								section = sections[sectionIndex];
 								var paraDiv = document.createElement("div");
-								paraDiv.setAttribute("id", "paragraph_"+section.rubrik);
+								paraDiv.setAttribute("id", "paragraph_"+section.category);
 								paraDiv.setAttribute("class", "adminParagraph");
-								paraDiv.appendChild(utils.RenderTable("links", typeJson, {rubrik:section.rubrik}, null));
+								paraDiv.appendChild(utils.RenderTable("links", typeJson, {category:section.rubrik}, null));
 								contentDiv.appendChild(paraDiv);
 							}
-						}, null, "data", {selector:"rubrik",distinct:true,json:"sections"});
+						}, null, "data", {selector:"category",distinct:true,json:"sections"});
 					}, null, "data", {def:true,json:"types"});
 				}
 				break;
@@ -927,7 +927,7 @@
 						var paraDiv = document.createElement("div");
 						paraDiv.setAttribute("id", "paragraph_order");
 						paraDiv.setAttribute("class", "adminParagraph");
-						paraDiv.appendChild(utils.RenderTable("bestellung,kunden", typeJson, null, null, {joinFields:"nachNameBesteller=nachname"}));
+						paraDiv.appendChild(utils.RenderTable("bestellung,kunden", typeJson, null, null, {joinFields:"kundenID=id"}));
 						contentDiv.appendChild(paraDiv);
 					}, null, "data", {def:true,json:"types",joinFields:"nachNameBesteller=nachname"});
 				}

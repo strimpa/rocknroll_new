@@ -70,8 +70,7 @@
 			{
 				Aufenthalt::GetInstance()->DBConn()->InsertTableContent(array('table'=>"submenus"));
 				// get submenu with highest id:
-				$result = Aufenthalt::GetInstance()->DBConn()->GetTableContent(array('table'=>"submenus", 'fields'=>"max(id)"));
-				$_POST['menuRef'] =  $result[0]["max(id)"];
+				$_POST['menuRef'] =  mysql_insert_id();
 				$result = Aufenthalt::GetInstance()->DBConn()->InsertTableContent(
 					array(
 						'table'=>$query, 
@@ -88,7 +87,7 @@
 						'values'=>array_values($_POST)
 						));
 			}
-			$result = Aufenthalt::GetInstance()->DBConn()->GetTableContent(array('table'=>$query, 'fields'=>"max(id)"));
+			$result = mysql_insert_id();
 		}
 		else if(isset($params["del"]) && $params["del"]==true)
 		{

@@ -91,12 +91,8 @@ class ContentFactory
 				$p = new TablePara();
 				$p->Init($paraResult["title"], $paraResult["meta"], NULL);
 				break;
-			case iParagraph::eTYPE_ORDER:
-				$p = new OrderPara();
-				$p->Init($paraResult["title"], $paraResult["meta"], NULL);
-				break;
 			default:
-			break;
+				break;
 		}
 		return $p;
 	}
@@ -133,6 +129,9 @@ class ContentFactory
 					break;
 				case "links":
 					$type = Article::DELEGATE_ARTICLE_LINKS;
+					break;
+				case "order":
+					$type = Article::DELEGATE_ARTICLE_ORDER;
 					break;
 				case "guestbook":
 					$url = "http://www.rock-around.de/system-cgi/guestbook/guestbook.php?action=view";

@@ -276,7 +276,8 @@ global $db_pass;
         		continue;
         	if($fieldIndex>0)
         		$sql .= ",";
-        	$sql .= "`".$fields[$fieldIndex]."` = '".$values[$fieldIndex]."'";
+			$escapedValue = mysql_real_escape_string($values[$fieldIndex]);
+        	$sql .= "`".$fields[$fieldIndex]."` = '".$escapedValue."'";
         }
         
 		if($reqString != "")
@@ -284,9 +285,9 @@ global $db_pass;
 			$sql .= ' WHERE '.$reqString;
 		}
 		$sql .= ';';
-//        print("<!-- sql:".$sql." //-->\n");
+        print("<!-- sql:".$sql." //-->\n");
 		$result = mysql_query($sql);
-//		print "<!-- Errors: ".mysql_error()."//-->";
+		print "<!-- Errors: ".mysql_error()."//-->";
 		return $result;
 	}
 	
@@ -324,7 +325,7 @@ global $db_pass;
 	        
 		}
 		$sql .= ');';
-        print("<!-- sql:".$sql." //-->\n");
+//        print("<!-- sql:".$sql." //-->\n");
 		$result = mysql_query($sql);
 //		print "<!-- Errors: ".mysql_error()."//-->";
 		return array($result);
@@ -362,7 +363,7 @@ global $db_pass;
 
 	function gibLinksAusFuerRubrik($rubrik){
 		$this->verbinde();
-		$sql = "SELECT DISTINCT rubrik, beschreibung, url, anlegeDatum FROM links WHERE rubrik LIKE \"$rubrik\""; 
+		$sql = "SELECT DISTINCT category, beschreibung, url, anlegeDatum FROM links WHERE category LIKE \"$rubrik\""; 
 		$result = mysql_query($sql);
 		if(!$result)
 			print "Aufgetretene Fehler: ".mysql_error();
@@ -371,7 +372,7 @@ global $db_pass;
 
 	function getLinkSections(){
 		$this->verbinde();
-		$sql = "SELECT DISTINCT rubrik FROM links"; 
+		$sql = "SELECT DISTINCT category FROM links"; 
 		$result = mysql_query($sql);
 		if(!$result)
 			print "Aufgetretene Fehler: ".mysql_error();
@@ -381,10 +382,10 @@ global $db_pass;
 	function gibLinksAusFuerSuche($eingabe){
 		$this->verbinde();
 		print "Sucheingabe \"$eingabe\"";
-		$sql = "SELECT DISTINCT `rubrik`,`beschreibung`,`url`,`anlegeDatum` FROM links WHERE LOCATE(\"".$eingabe."\", beschreibung) != 0 OR LOCATE(\"".$eingabe."\", url) != 0"; 
+		$sql = "SELECT DISTINCT `category`,`beschreibung`,`url`,`anlegeDatum` FROM links WHERE LOCATE(\"".$eingabe."\", beschreibung) != 0 OR LOCATE(\"".$eingabe."\", url) != 0"; 
 		$result = mysql_query($sql);
 		if(mysql_num_rows($result)<1){
-			$sql = "SELECT DISTINCT `rubrik`,`beschreibung`,`url`,`anlegeDatum` FROM links WHERE LOCATE(\"".$eingabe."\", LCASE(beschreibung)) != 0 OR LOCATE(\"".$eingabe."\", LCASE(url)) != 0"; 
+			$sql = "SELECT DISTINCT `category`,`beschreibung`,`url`,`anlegeDatum` FROM links WHERE LOCATE(\"".$eingabe."\", LCASE(beschreibung)) != 0 OR LOCATE(\"".$eingabe."\", LCASE(url)) != 0"; 
 			$result = mysql_query($sql);
 		}
 		if(!$result)
@@ -394,7 +395,7 @@ global $db_pass;
 
 	function gibLinksEin($rubrik, $beschreibung, $link, $anlegeDatum){
 		$this->verbinde();
-		$sql = "INSERT INTO `links`(rubrik,beschreibung,url,angelegtVon) VALUES ('$rubrik','$beschreibung','$link','$_POST[adminName]')"; 
+		$sql = "INSERT INTO `links`(category,beschreibung,url,angelegtVon) VALUES ('$rubrik','$beschreibung','$link','$_POST[adminName]')"; 
 		$result = mysql_query($sql);
 		if(!$result)
 			print "Aufgetretene Fehler: ".mysql_error();
@@ -457,9 +458,8 @@ global $db_pass;
 		 return $rueckGabe;
 	}
 	
-	function gibUserInDB($user){
-		$rueckGabe = "";
-		$abbruch=false;
+	function gibUserInDB($user)
+	{
 		// namen der Tabellenspalten
 		$kundenNamensArray = array("kundenNr", "anrede", "vorname" , "nachname" , "adresse" , "ort" , "plz" , "land" , 
 							"telPrivat" , "email" , "bankName" , "blz" , "ktnr");
@@ -469,7 +469,7 @@ global $db_pass;
 			($user->kundenNummer == "" ? NULL : $user->kundenNummer),
 			($user->anrede == "" ? NULL : $user->anrede),
 			($user->vorName == "" ? NULL : $user->vorName),
-			($user->nachName == "" ? $abbruch=true : $user->nachName),
+			($user->nachName),
 			($user->adresse == "" ? NULL : $user->adresse),
 			($user->ort == "" ? NULL : $user->ort),
 			($user->postleitzahl == "" ? NULL : $user->postleitzahl),
@@ -479,47 +479,41 @@ global $db_pass;
 			($user->bankInstitut == "" ? NULL : $user->bankInstitut),
 			($user->blz == "" ? NULL : $user->blz),
 			($user->ktnr == "" ? NULL : $user->ktnr));
-		if(!$abbruch)
-		{
 		/**************************************************************
 		*          Userdaten
 		**************************************************************/
-			// Datenbankstring schreiben
-			$namensString = "";
-			$ausgabeString = "";
-			$beginnFlag=false;
-			for($k=0;$k<count($kundenNamensArray);$k++){
-				if(($kundenAusGabeArray[$k]!=NULL) || 
-				   ($kundenAusGabeArray[$k]!=0))
-				{
-					if($beginnFlag){
-						$namensString.=" , ";
-						$ausgabeString.=", ";
-					}
-					$beginnFlag=true;
-					$namensString.="`$kundenNamensArray[$k]`";
-					$ausgabeString.="'$kundenAusGabeArray[$k]'";
-				}
-			}
-			// Query
-			$sql = "INSERT INTO `kunden` ( " . $namensString . " ) VALUES ( " . $ausgabeString . " )";
-			
-			//Ergebnis		
-			$result = mysql_query($sql);
-			//echo mysql_affected_rows();
-			if(!$result)
+		// Datenbankstring schreiben
+		$namensString = "";
+		$ausgabeString = "";
+		$beginnFlag=false;
+		for($k=0;$k<count($kundenNamensArray);$k++){
+			if(($kundenAusGabeArray[$k]!=NULL) || 
+			   ($kundenAusGabeArray[$k]!=0))
 			{
-				$rueckGabe="".
-				"Es Konnte nicht in die Kunden-Datenbank geschrieben werden, bitte versuchen Sie es sp&auml;ter ".
-				"noch einmal und/oder berichten sie bitte den Fehler:<br> <a href=\"mailto:schreib@gunnardroege.de\">Mail an Webmaster</a><br>".
-				"Vielen Dank f&uuml;r Ihr Verst&auml;ndnis.<br>".mysql_error();
+				if($beginnFlag){
+					$namensString.=" , ";
+					$ausgabeString.=", ";
+				}
+				$beginnFlag=true;
+				$namensString.="`$kundenNamensArray[$k]`";
+				$ausgabeString.="'$kundenAusGabeArray[$k]'";
 			}
-		} 
-		else
-		{
-			$rueckGabe="Keine Verbindung.";
 		}
-		return $rueckGabe;
+		// Query
+		$sql = "INSERT INTO `kunden` ( " . $namensString . " ) VALUES ( " . $ausgabeString . " )";
+		
+		//Ergebnis		
+		$result = mysql_query($sql);
+		//echo mysql_affected_rows();
+		if(!$result)
+		{
+			throw new Exception(
+			"Es Konnte nicht in die Kunden-Datenbank geschrieben werden, bitte versuchen Sie es sp&auml;ter ".
+			"noch einmal und/oder berichten sie bitte den Fehler:<br> <a href=\"mailto:schreib@gunnardroege.de\">Mail an Webmaster</a><br>".
+			"Vielen Dank f&uuml;r Ihr Verst&auml;ndnis.<br>".mysql_error());
+		}
+		// get max id
+		return mysql_insert_id();
 	}
 
 
@@ -527,13 +521,14 @@ global $db_pass;
 	**   Bestellung
 	***********************************************************************************/
 	
-	function gibBestellungInDB($user, $aktuelleBestellung)
+	function gibBestellungInDB($user, $aktuelleBestellung, $kundenID)
 	{
 		$rueckGabe = "";
 		$abbruch=false;
-		$bestellNamensArray = array("schonKunde", "nachNameBesteller", "kundenNrBesteller", "bestellungen", "kommentar", "bestellDatum");
+		$bestellNamensArray = array("kundenID", "schonKunde", "nachNameBesteller", "kundenNrBesteller", "bestellungen", "kommentar", "bestellDatum");
 		$bestellAusGabeArray = array(	
 		// Eingabewerte mit auszugebenden Werten vergleichen
+			($kundenID),
 			($user->Abonnent == "ja" ? $user->Abonnent : "nein"),
 			($user->nachName == "" ? $abbruch=true : $user->nachName),
 			($user->kundenNummer == "" ? NULL : $user->kundenNummer),
@@ -541,7 +536,8 @@ global $db_pass;
 			($aktuelleBestellung->kommentar == "" ? NULL : $aktuelleBestellung->kommentar),
 			($aktuelleBestellung->bestellDatum == "" ? NULL : $aktuelleBestellung->bestellDatum));
 		
-		if(!$abbruch){
+		if(!$abbruch)
+		{
 		/**************************************************************
 		*          Bestelldaten
 		**************************************************************/
@@ -568,10 +564,10 @@ global $db_pass;
 			$result = mysql_query($sql);
 			//printf ("Ver�nderte Datens�tze: %d\n", mysql_affected_rows());
 			if(!$result){
-				$rueckGabe="Nicht erfolgreich beim schreiben der Datensaetze.";
+				throw new Exception("Nicht erfolgreich beim schreiben der Datensaetze.");
 			} 
 		} else {
-			$rueckGabe="<P>".
+			throw new Exception("<P>".
 				"Es Konnte nicht in die Bestell-Datenbank geschrieben werden, bitte versuchen Sie es sp�ter ".
 				"noch einmal und/oder berichten sie bitte den Fehler:<br> <a href=\"mailto:schreib@gunnardroege.de\">Mail an Webmaster</a><br>".
 				"Vielen Dank f�r Ihr Verst�ndnis.<br>".
@@ -580,7 +576,7 @@ global $db_pass;
 				($user->kundenNummer == "" ? NULL : $user->kundenNummer).
 				($user->gibBestellung(0) == "" ? $abbruch=true : $user->gibBestellung(0)).
 				($user->gibBestellung(1) == "" ? NULL : $user->gibBestellung(1)).
-				($user->gibBestellung(2) == "" ? NULL : $user->gibBestellung(2))."";
+				($user->gibBestellung(2) == "" ? NULL : $user->gibBestellung(2))."");
 			}
 		return $rueckGabe;
 	}

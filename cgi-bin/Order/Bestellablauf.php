@@ -71,6 +71,7 @@ class BestellAblauf{
 	function addTextNode($text, &$parentNode)
 	{
 		$importdoc = new DOMDocument();
+		$importdoc->encoding = "utf-8";
 		$this->InsertPostVars($text);
 		if($importdoc->loadHTML($text))
 		{
@@ -83,6 +84,7 @@ class BestellAblauf{
 	function addErrorText($errorText, &$parentNode)
 	{
 		$importdoc = new DOMDocument();
+		$importdoc->encoding = "utf-8";
 		$doc = $parentNode->ownerDocument;
 		$errorTextHolder = $doc->createElement("ul");
 		$errorTextHolder->setAttribute("class", "errorText");
@@ -106,8 +108,8 @@ class BestellAblauf{
 			if($errorText==""){
 				$this->bestellungAufgegeben=true;
 				$this->importHTML("endKopf.htm", $parentNode);
-				$this->aufenthalt->GetUser()->printUserShort();
-				$this->aktuelleBestellung->zeigeBestellungen($this);
+				$this->addTextNode($this->aufenthalt->GetUser()->printUserShort(), $parentNode);
+				$this->addTextNode($this->aktuelleBestellung->zeigeBestellungen($this), $parentNode);
 				$this->importHTML("endFuss.htm", $parentNode);
 		// Fehler beim schreiben der Daten
 			} else {
@@ -202,12 +204,12 @@ class BestellAblauf{
 		switch($formNummer){
 			case 0:
 					if($_POST['anrede'] == "" || 0!=preg_match("/Bitte/", $_POST['anrede'])) 
-						$rueckGabe.="<li>Bitte f�llen Sie das Anredefeld aus.</li>";
-					if($_POST['Nachname'] == "") $rueckGabe.="<li>Bitte f�llen Sie das Nachnamefeld aus.</li>";
-					if($_POST['Postadresse'] == "") $rueckGabe.="<li>Bitte f�llen Sie das Postadressenfeld aus.</li>";
-					if($_POST['Ort'] == "") $rueckGabe.="<li>Bitte f�llen Sie das Ortsfeld aus.</li>";
+						$rueckGabe.="<li>Bitte f&uuml;llen Sie das Anredefeld aus.</li>";
+					if($_POST['Nachname'] == "") $rueckGabe.="<li>Bitte f&uuml;llen Sie das Nachnamefeld aus.</li>";
+					if($_POST['Postadresse'] == "") $rueckGabe.="<li>Bitte f&uuml;llen Sie das Postadressenfeld aus.</li>";
+					if($_POST['Ort'] == "") $rueckGabe.="<li>Bitte f&uuml;llen Sie das Ortsfeld aus.</li>";
 					$emailRichtig = preg_match($emailPruefString, $_POST['EMail']);
-					if(!$emailRichtig) $rueckGabe.="<li>Bitte geben Sie eine g�ltige E-Mail Adresse ein.</li>";
+					if(!$emailRichtig) $rueckGabe.="<li>Bitte geben Sie eine g&uuml;ltige E-Mail Adresse ein.</li>";
 					if($_POST['Land'] == "germany")$this->aktuelleBestellung->destination="inland";
 					else if($_POST['Land'] == "sonstigesEU")$this->aktuelleBestellung->destination="euausland";
 					else if($_POST['Land'] == "sonstiges")$this->aktuelleBestellung->destination="noneuausland";
@@ -239,7 +241,7 @@ class BestellAblauf{
 					}
 				}
 				if(!$anythingSet)
-					$rueckGabe.="<li>Bitte f�llen Sie mindestens ein Bestellfeld aus.</li>";
+					$rueckGabe.="<li>Bitte f&uuml;llen Sie mindestens ein Bestellfeld aus.</li>";
 				
 				if(	($_POST['EinzelheftAusgabeNr']!="" && !preg_match($ausgabenPruefString, $_POST['EinzelheftAusgabeNr'])) ||
 					($_POST['AboAbAusgabe']!="" && !preg_match($ausgabenPruefString, $_POST['AboAbAusgabe'])) )
@@ -252,22 +254,14 @@ class BestellAblauf{
 	function gibDatenInDb()
 	{
 		$rueckgabe="";
-		/***********************************************************
-		**        User in Datenbank schreiben               **
-		***********************************************************/
-		$errors = Aufenthalt::GetInstance()->DBConn()->gibUserInDB($this->aufenthalt->GetUser());
-		if($errors!=""){
-			$rueckgabe= "Keine erfolgreiche Verbindung zur DB bei der Speicherung des Benutzers.<br>".$errors;
-		} else {
-		/***********************************************************
-		**        Bestellung in Datenbank schreiben               **
-		***********************************************************/
-			$errors = Aufenthalt::GetInstance()->DBConn()->gibBestellungInDB($this->aufenthalt->GetUser(), $this->aktuelleBestellung);
-			if($errors!="")
-			{
-				$rueckgabe="Keine erfolgreiche Verbindung zur DB bei der Speicherung der Bestellung.<br>".$errors;
-			}
+		try{
+			$kundenId = Aufenthalt::GetInstance()->DBConn()->gibUserInDB($this->aufenthalt->GetUser());
+			Aufenthalt::GetInstance()->DBConn()->gibBestellungInDB($this->aufenthalt->GetUser(), $this->aktuelleBestellung, $kundenId);
 		}
+		catch(Exception $e)
+		{
+			$rueckgabe= $e->getMessage();
+		} 
 		return $rueckgabe;
 	}
 	
