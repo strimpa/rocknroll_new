@@ -185,6 +185,7 @@ global $db_pass;
 		$sql .= ';';
 //        print("<!-- sql:".$sql." //-->\n");
 		$result = mysql_query($sql);
+//		print "<!-- Errors: ".mysql_error()."//-->";
 		if($result && mysql_num_rows($result)>0)
 		{
 			while($reihe = mysql_fetch_assoc($result))
@@ -255,7 +256,7 @@ global $db_pass;
 		$sql .= ';';
 //        print("<!-- sql:".$sql." //-->\n");
 		$result = mysql_query($sql);
-		print "<!-- Errors: ".mysql_error()."//-->";
+//		print "<!-- Errors: ".mysql_error()."//-->";
 		return array($result);
 	}
 
@@ -285,9 +286,9 @@ global $db_pass;
 			$sql .= ' WHERE '.$reqString;
 		}
 		$sql .= ';';
-        print("<!-- sql:".$sql." //-->\n");
+//        print("<!-- sql:".$sql." //-->\n");
 		$result = mysql_query($sql);
-		print "<!-- Errors: ".mysql_error()."//-->";
+//		print "Errors: ".mysql_error();
 		return $result;
 	}
 	
@@ -320,14 +321,15 @@ global $db_pass;
 	        		continue;
 	        	if($fieldIndex>0)
 	        		$sql .= ",";
-	        	$sql .= "'".$values [$fieldIndex]."'";
+				$escapedValue = mysql_real_escape_string($values[$fieldIndex]);
+	        	$sql .= "'".$escapedValue."'";
 	        }
 	        
 		}
 		$sql .= ');';
 //        print("<!-- sql:".$sql." //-->\n");
 		$result = mysql_query($sql);
-//		print "<!-- Errors: ".mysql_error()."//-->";
+//		print "Errors: ".mysql_error();
 		return array($result);
 	}
 
@@ -525,12 +527,10 @@ global $db_pass;
 	{
 		$rueckGabe = "";
 		$abbruch=false;
-		$bestellNamensArray = array("kundenID", "schonKunde", "nachNameBesteller", "kundenNrBesteller", "bestellungen", "kommentar", "bestellDatum");
+		$bestellNamensArray = array("kundenID", "kundenNrBesteller", "bestellungen", "kommentar", "bestellDatum");
 		$bestellAusGabeArray = array(	
 		// Eingabewerte mit auszugebenden Werten vergleichen
 			($kundenID),
-			($user->Abonnent == "ja" ? $user->Abonnent : "nein"),
-			($user->nachName == "" ? $abbruch=true : $user->nachName),
 			($user->kundenNummer == "" ? NULL : $user->kundenNummer),
 			(($bestellSumme=$aktuelleBestellung->dbText) == "" ? $abbruch=true : $bestellSumme),
 			($aktuelleBestellung->kommentar == "" ? NULL : $aktuelleBestellung->kommentar),
@@ -602,7 +602,7 @@ global $db_pass;
 	
 	function gibBestellungAus(){
 		$this->verbinde();
-		$sql = "SELECT DISTINCT * FROM bestellung,kunden WHERE LOCATE(bestellung.nachNameBesteller, kunden.nachname) != 0"; 
+		$sql = "SELECT DISTINCT * FROM bestellung,kunden WHERE LOCATE(bestellung.kundenID, kunden.id) != 0"; 
 		$result = mysql_query($sql);
 		print "Aufgetretene Fehler: ".mysql_error();
 	return $result;

@@ -117,6 +117,8 @@ class ContentFactory
 //		PrintHtmlComment("content id:".$id);
 		$result = Aufenthalt::GetInstance()->Controller()->GetContent($id);
 //		PrintHtmlComment("Content count:".count($result));
+		if(count($result)<=0)
+			$result = Aufenthalt::GetInstance()->Controller()->GetContent("start");
 		foreach($result as $pageData)
 		{
 			// inital create
@@ -124,13 +126,13 @@ class ContentFactory
 			$url = NULL;
 			switch($pageData["identifier"])
 			{
-				case "plogger":
+				case "galerie":
 					$type = Article::DELEGATE_ARTICLE_PLOGGER;
 					break;
 				case "links":
 					$type = Article::DELEGATE_ARTICLE_LINKS;
 					break;
-				case "order":
+				case "bestellen":
 					$type = Article::DELEGATE_ARTICLE_ORDER;
 					break;
 				case "guestbook":

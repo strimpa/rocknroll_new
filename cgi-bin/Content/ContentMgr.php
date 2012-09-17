@@ -50,7 +50,7 @@ class ContentMgr
 		$currId = FilenameFromUrl();
 		PrintHtmlComment("currId:$currId");
 		if($currId=="")
-			$currId = "index";
+			$currId = "start";
 		$this->content = ContentFactory::GetInstance()->CreateContentPages($currId);
 	}
 	
@@ -66,6 +66,7 @@ class ContentMgr
 	
 	public function RenderContent()
 	{
+		global $loadingErrors;
 //		print ("current content:".FilenameFromUrl()."\n");
 //		print ("num content:".count($this->content)."\n");
 		if(NULL!=$this->navi)
@@ -83,6 +84,8 @@ class ContentMgr
 			$this->content->Render();
 		else
 			print "Error creating content!";
+		
+		print "<div id='loadingErrors'>$loadingErrors</div>";
 	}
 
 }

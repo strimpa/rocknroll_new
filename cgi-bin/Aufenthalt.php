@@ -7,6 +7,8 @@ require_once("Linkausgabe.php");
 require_once("Order/Bestellablauf.php");
 require_once("Controller.php");
 
+global $loadingErrors;
+
 class Aufenthalt
 {
 	private static $instance;

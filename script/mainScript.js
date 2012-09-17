@@ -11,7 +11,7 @@
 	{
 		$(".infoDiv").each(function()
 		{
-			var extendableDiv = $(this).parent().parent().next().find("div.extendable").first();
+			var extendableDiv = $(this).parent().parent().next().next().find("div.extendable").first();
 			$(this).click(function()
 			{
 				if(extendableDiv.attr("extended")=="true")
@@ -21,7 +21,7 @@
 				}
 				else
 				{
-					extendableDiv.css("height", "50px");
+					extendableDiv.removeAttr("style");
 					extendableDiv.attr("extended", "true")
 				}
 			});

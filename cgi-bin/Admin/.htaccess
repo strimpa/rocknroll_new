@@ -3,15 +3,16 @@
 RewriteEngine On
 RewriteRule ^index/([a-zA-Z0-9\/]*)$ index.php?$1
 RewriteRule ^DBAccess/(.*)$ DBAccess.php?$1
-RewriteRule ^FileUpload/(.*)$ fileupload.php?$1
 #RewriteRule ^DBAccess/(.*)$ /cgi-bin/Admin/DBAccess.php?$1
-RewriteRule ^ContentAccess/([a-zA-Z0-9\/]*)$ ContentAccess.php?$1
+#RewriteRule ^ContentAccess/([a-zA-Z0-9\/]*)$ ContentAccess.php?$1
 #RewriteRule ^([a-zA-Z0-9^/]+)/([a-zA-Z0-9^/]*)$ $1.php?$2
 #RewriteRule ^([^/]+)$ index.php?$1
 
-# .htaccess-Datei für Web-Verzeichnis /service
+# .htaccess-Datei fï¿½r Web-Verzeichnis /service
 AuthType Basic
 AuthName "Service-Bereich"
 AuthUserFile E:\wwwroot\rocknroll_new\cgi-bin\Admin\.htusers
+#/home/strimpa/rnr_new/cgi-bin/Admin/.htusers
+#E:\wwwroot\rocknroll_new\cgi-bin\Admin\.htusers
 #/kunden/85283_26135/new/cgi-bin/Admin/.htusers
 Require user  Gunnar Waltraut

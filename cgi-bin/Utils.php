@@ -364,7 +364,7 @@ function EnterXMLintoTable($tablename, $filename)
 	print "localpath $localPath\n";
 
 	$doc = new DOMDocument();
-	$doc->encoding = 'ISO-8859-1';
+	$doc->encoding = 'utf-8'; //'ISO-8859-1';
 	$doc->load($localPath);
 	$root = $doc->firstChild;
 	print "tag:".$root->tagName."\n";
@@ -387,12 +387,19 @@ function EnterXMLintoTable($tablename, $filename)
 				print "cell not an element.\n";
 				continue;
 			}
-			print "there's a value:".$cell->tagName.":".$cell->textContent."\n";
 			if($cell->tagName=="id")
 				$idValue = $cell->textContent;
 			else {
+				$val = $cell->textContent;
 				array_push($fieldArray,$cell->tagName);
-				array_push($valueArray,$cell->textContent);
+				if ($cell->tagName == 'date') 
+				{
+					$test = date_create_from_format("d.m.Y", $val);
+					if(FALSE != $test)
+						$val = date_format($test, 'Y-m-d'); // 2011-03-03 00:00:00;
+				}
+				array_push($valueArray,$val);
+				print "there's a value:".$cell->tagName.":".$val."\n";
 			}
 		}
 		$params = array(
@@ -407,13 +414,25 @@ function EnterXMLintoTable($tablename, $filename)
 		}
 		else
 		{
-			$result = Aufenthalt::GetInstance()->DBConn()->InsertTableContent($params);
+			$lastResult = Aufenthalt::GetInstance()->DBConn()->InsertTableContent($params);
 		}
 		if(is_bool($lastResult) && FALSE==$lastResult)
-			return FALSE;
+		{
+			//return FALSE;
+		}
 	}
 
 	return $lastResult;
+}
+
+function handleError($errno, $errstr, $errfile, $errline, array $errcontext)
+{
+    // error was suppressed with the @-operator
+    if (0 === error_reporting()) {
+        return false;
+    }
+
+    throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
 }
 
 ?>

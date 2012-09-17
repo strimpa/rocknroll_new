@@ -61,7 +61,8 @@
 	
 //	PrintHtmlComment("fuckin DBAccess!");
 	
-	$pattern = '/(pages|submenus|paragraphs|events|links|pictures|navigation|folder|bestellung)/';
+	$pattern = '/(pages|submenus|paragraphs|events|links|pictures|navigation|folder|bestellung|archive)/';
+	$resultEntryID = null;
 	if(0!=preg_match($pattern, $query, $matches, PREG_OFFSET_CAPTURE))
 	{
 		if(isset($params["write"]) && $params["write"]==true)
@@ -87,7 +88,7 @@
 						'values'=>array_values($_POST)
 						));
 			}
-			$result = mysql_insert_id();
+			$resultEntryID = mysql_insert_id();
 		}
 		else if(isset($params["del"]) && $params["del"]==true)
 		{
@@ -116,12 +117,8 @@
 					'requirements'=>$requirements, 
 					'values'=>array_values($_POST)
 					));
-			$result = Aufenthalt::GetInstance()->DBConn()->GetTableContent(
-				array(
-					'table'=>$query, 
-					'fields'=>"id", 
-					'requirements'=>$requirements
-					));
+			assert(count($result)==1);
+			$resultEntryID = mysql_insert_id();
 		}
 		else if(isset($params["def"]))
 		{
@@ -196,6 +193,10 @@
 		{
 			print gibTabelleAlsXml($result, $query);
 		}
+		else if(null!=$resultEntryID)
+		{
+			echo $resultEntryID;
+		}
 		else if(!is_bool($result))
 		{
 			if(isset($params["json"]))
@@ -216,53 +217,72 @@
 				$rootElem = $doc->createElement(MakeSafeTagName($query));
 				$doc->appendChild($rootElem);
 				$print = "";
+				
+				set_error_handler('handleError', E_WARNING|E_ERROR);
+				
+				$build_errors = array();
+				
 				foreach($result as $row)
 				{
-					$currRow = $doc->createElement("row");
-					if(is_bool($row))
-					{
-						$currRow->nodeValue = $row;
-					}
-					else 
-					{
-						for($colIndex=0;$colIndex<count($row);$colIndex++)
+					try{
+						$currRow = $doc->createElement("row");
+						if(is_bool($row))
 						{
-							$keyArray = array_keys($row);
-							$fieldName = $keyArray[$colIndex];
-							$tagName = MakeSafeTagName($fieldName);
-							$col = $doc->createElement($tagName);
-	
-							if(IsXmlString($row[$fieldName]))
+							$currRow->nodeValue = $row;
+						}
+						else 
+						{
+							for($colIndex=0;$colIndex<count($row);$colIndex++)
 							{
-								$importdoc = new DOMDocument();
-								$importdoc->encoding = 'UTF-8';
-//								ReplaceInvalidChars($row[$fieldName]);
-								$importdoc->loadHTML('<?xml version="1.0" encoding="UTF-8"?>\n'.$row[$fieldName]);
-	//							PrintHtmlComment("Xml string after import:".$importdoc->C14N());
-								
-								$node = $importdoc->getElementsByTagName("div")->item(0);
-								$text = FALSE;
-								if(null!=$node)
-									$text = $doc->importNode($node, true);
-								if(FALSE!=$text)
-									$col->appendChild($text);
+								$keyArray = array_keys($row);
+								$fieldName = $keyArray[$colIndex];
+								$tagName = MakeSafeTagName($fieldName);
+								$col = $doc->createElement($tagName);
+		
+								if(IsXmlString($row[$fieldName]))
+								{
+									$importdoc = new DOMDocument();
+									$importdoc->encoding = 'UTF-8';
+	//								ReplaceInvalidChars($row[$fieldName]);
+									$importdoc->loadHTML('<?xml version="1.0" encoding="UTF-8"?>\n'.$row[$fieldName]);
+		//							PrintHtmlComment("Xml string after import:".$importdoc->C14N());
+									
+									$node = $importdoc->getElementsByTagName("div")->item(0);
+									$text = FALSE;
+									if(null!=$node)
+										$text = $doc->importNode($node, true);
+									if(FALSE!=$text)
+										$col->appendChild($text);
+									else
+									{
+										$text = $doc->createTextNode("Fehler beim Text laden!");
+										$col->appendChild($text);
+									}
+								} 
 								else
 								{
-									$text = $doc->createTextNode("Fehler beim Text laden!");
-									$col->appendChild($text);
+									$col->nodeValue = htmlspecialchars($row[$fieldName]);
 								}
-							} 
-							else
-							{
-								$col->nodeValue = $row[$fieldName];
+								$currRow->appendChild($col);
 							}
-							$currRow->appendChild($col);
-						}
-			//			print("<test>".$currRow->nodeValue."</test>");
-			//			$doc->normalizeDocument();
-					}			
-					$rootElem->appendChild($currRow);
+				//			print("<test>".$currRow->nodeValue."</test>");
+				//			$doc->normalizeDocument();
+						}			
+						$rootElem->appendChild($currRow);
+					}
+					catch(Exception $e)
+					{
+						array_push($build_errors, "Fehler beim lesen von html in Tabelle $query and id ".$row["id"].": ".$e->getMessage());
+					}
 				}
+				foreach($build_errors as $anError)
+				{
+					$currError = $doc->createElement("error");
+					$currError->nodeValue = $anError;
+					$rootElem->appendChild($currError);
+				}
+
+				restore_error_handler();
 			
 				$output = $doc->saveXML();
 		//		$output = preg_replace("/[\n\r]/", "", $output);
@@ -270,9 +290,9 @@
 		//			PrintHtmlComment($print);
 			}
 		}
-		else
+		else if($result!=TRUE)
 		{
-			print "ERROR: boolean result given back:".$result;
+			print "ERROR: FALSE result given back:";
 		}
 	
 	}

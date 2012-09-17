@@ -7,6 +7,7 @@ class Bestellung
 	static $Produkte = array(
 			"Abonnement", 
 			"Einzelheft", 
+			"Aktuelles Heft",
 			"Probeheft", 
 			"kleines Probepaket", 
 			"gro&szlig;es Probepaket",  
@@ -46,8 +47,10 @@ class Bestellung
 		$this->bestellDatum = $datum;
 		$this->kommentar = $kommentar;
 		$this->gesamtPreis = 0;
-		$this->Preise_Inland = array_slice($preise, 0, 8);
-		$this->Preise_Ausland = array_slice($preise, 8, 8);
+		
+		$numProdukte = count($this->Produkte);
+		$this->Preise_Inland = array_slice($preise, 0, $numProdukte);
+		$this->Preise_Ausland = array_slice($preise, $numProdukte, $numProdukte);
 	}
 	
 	function gibDBText(){

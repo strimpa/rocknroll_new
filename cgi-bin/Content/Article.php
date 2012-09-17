@@ -47,8 +47,8 @@ EOD;
 		{
 		    $para->Render($contentDiv, $currentOffset);
 		}	
-		if($currentOffset!=20)
-			$builder->AddStyle($contentDiv, ("height:".$currentOffset."px;"));
+		// if($currentOffset!=20)
+			// $builder->AddStyle($contentDiv, ("height:".$currentOffset."px;"));
 	}
 	
 	public function Render(&$parentNode)
@@ -146,11 +146,11 @@ class FrameArticle extends Article
 		$importdoc->encoding = 'UTF-8';
 $htmlStr = <<<EOD
 <p style="margin-left:10px;">
-	<a href="http://www.rock-around.de/system-cgi/guestbook/guestbook.php?action=sign" target="innerFrame">Ins G�stebuch eintragen</a>
-	 | <a href="http://www.rock-around.de/system-cgi/guestbook/guestbook.php?action=view" target="innerFrame">G�stebuch anschauen</a>
+	<a href="http://www.rock-around.de/system-cgi/guestbook/guestbook.php?action=sign" target="innerFrame">Ins G&auml;stebuch eintragen</a>
+	 | <a href="http://www.rock-around.de/system-cgi/guestbook/guestbook.php?action=view" target="innerFrame">G&auml;stebuch anschauen</a>
 </p>
 EOD;
-		$importdoc->loadXML('<?xml version="1.0" encoding="UTF-8" ?>'.utf8_encode($htmlStr));
+		$importdoc->loadHTML('<?xml version="1.0" encoding="UTF-8" ?>'.utf8_encode($htmlStr));
 		$doc = $builder->GetDoc();
 		$text = $doc->importNode($importdoc->documentElement, true);
 		$contentDiv->appendChild($text);

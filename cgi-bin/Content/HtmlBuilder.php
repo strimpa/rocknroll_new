@@ -75,11 +75,11 @@ class HtmlBuilder
 	    if(NULL!=$class)
 	    	$div->setAttribute("class", $class);
 	    if(NULL!=$inhalt)
-		    $div->nodeValue = $inhalt;
+		    $div->nodeValue = htmlspecialchars($inhalt);
 	    return $div;
 	}
 	
-	public function AddImage($picID, $align=NULL)
+	public function AddImage($picID, $align=NULL, $paraImage=false)
 	{
 		$result = Aufenthalt::GetInstance()->Controller()->GetPicData($picID);
 
@@ -97,6 +97,8 @@ class HtmlBuilder
 		$picLink = $this->doc->createElement("a");
 	    $pic = $this->doc->createElement( "img" );
 	    $pic->setAttribute("src", $result["url"]);
+		if($paraImage)
+		    $pic->setAttribute("class", "paraContentImage");
 		$picLink->appendChild($pic);
 		$picLink->setAttribute("href", $result["url"]);
 		$picLink->setAttribute("target", "_blank");

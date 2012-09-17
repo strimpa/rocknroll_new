@@ -1,7 +1,7 @@
 <?php
 
 	$path_parts = pathinfo(__FILE__);
-	//$serverRoot = $path_parts['dirname']."/";//"/rocknroll_new/";
+//	$img = ($path_parts['dirname']."/".$prefix."_".rand(1,8).".png");
 	$serverRoot = $_SERVER['DOCUMENT_ROOT']."/rocknroll_new/";
 	$httpRoot = "http://".$_SERVER['SERVER_NAME']."/rocknroll_new/";
 

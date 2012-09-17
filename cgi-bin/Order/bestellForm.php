@@ -100,7 +100,7 @@ Ggf. entstehende Bankgeb&uuml;hren bei &Uuml;berweisungen aus dem Ausland m&uuml
 		  <td colspan="7">&nbsp;</td>
 	  </tr>
 		<tr>
-		  <td rowspan="3"><img src="/images/collage_sonderangebot.gif" height="135" align="right"></td>
+		  <td rowspan="3"><img src="/images/collage.gif" height="135" align="right"></td>
 		  <td bgcolor="#336699"><p style="line-height: 100%" align="left">
               <input name="Bestelltyp_klProbepaket" id="Bestelltyp_klProbepaket" type="checkbox" value="Bestelltyp_klProbepaket" />
 		  </p></td>
@@ -129,7 +129,7 @@ Ggf. entstehende Bankgeb&uuml;hren bei &Uuml;berweisungen aus dem Ausland m&uuml
 	    </tr>
 	</tbody>
   </table>
-	<P align="left">M&ouml;chten Sie uns noch etwas mitteilen oder haben Sie spezielle Wünsche?</P>
+	<P align="left">M&ouml;chten Sie uns noch etwas mitteilen oder haben Sie spezielle W&uuml;nsche?</P>
 	<P> 
 	  <textarea rows="4" name="Sonstiges" id="Sonstiges" cols="52"></textarea>
 	</P>

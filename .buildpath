@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<buildpath>
+	<buildpathentry excluding="_vti_cnf/|_vti_pvt/|cgi-bin/_vti_cnf/|cgi-bin/_notes/" kind="src" path=""/>
+	<buildpathentry kind="con" path="org.eclipse.php.core.LANGUAGE"/>
+</buildpath>

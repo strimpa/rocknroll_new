@@ -46,22 +46,28 @@
 	{
 		RenderTable : function(tableName, types, requirements, fields, params)
 		{
+			var excludeFields = ["id", "type", "location", "angelegtVon", "anlegeDatum"];
 			var tableHolder = document.createElement("span");
 			var table = document.createElement("table");
 			table.setAttribute("class", "adminTable");
 			var colTypes = types[0]; 
 			var headRow = document.createElement("tr");
+			var headCol = document.createElement("th");
+			headCol.textContent = "Loesche Eintrag";
+			headRow.appendChild(headCol);
 			for(headIndex in colTypes)
 			{
+				if($.inArray(headIndex, excludeFields)!=-1)
+					continue;
 				var headCol = document.createElement("th");
 				headCol.textContent = headIndex;
 				headRow.appendChild(headCol);
 			}
 			table.appendChild(headRow);
 			if(params)
-				params.json = true;
+				params.json = "results";
 			else
-				params = {json:true};
+				params = {json:"results"};
 				
 			//
 			var downloadButton = document.createElement("input");
@@ -120,6 +126,7 @@
 					console.log("uploaded file:"+resultString);
 					$.fn.loadContent(tableName,function(result){
 						console.log(result);
+						triggerParagraphCreation();
 //						document.location = "openFile.php/?url="+result;
 					}, null, "xml", {xmlinput:resultString});
 				}
@@ -131,11 +138,30 @@
 				var json = eval(result);
 				for(rowHash in json)
 				{
+					var row = json[rowHash];
 					var rowDiv = document.createElement("tr");
 					rowDiv.setAttribute("id", "tr_"+rowHash);
-					var row = json[rowHash];
+					var delTd = document.createElement("td");
+					delTd.setAttribute("class", "adminTableTd");
+					var delRowButton = document.createElement("input");
+					delRowButton.setAttribute("type", "button");
+					delRowButton.setAttribute("class", "deleteButton");
+					delRowButton.setAttribute("value", "X");
+					delRowButton.setAttribute("id", row["id"]);
+					delTd.appendChild(delRowButton);
+					rowDiv.appendChild(delTd);
+					$(delRowButton).click(function(evnt)
+					{
+						if(!confirm("Sicher dass du den Eintrag loeschen moechtest?"))
+							return;
+						$.fn.loadContent(tableName, triggerParagraphCreation, {id:this.id}, "data", {del:true});
+					});
+
 					for(colHash in row)
 					{
+						if($.inArray(colHash, excludeFields)!=-1)
+							continue;
+					
 						var col = row[colHash];
 						var dataTd = document.createElement("td");
 						dataTd.setAttribute("class", "adminTableTd")
@@ -190,8 +216,38 @@
 									$(dataDiv).attr("rowId", row["id"]);
 									$(dataDiv).attr("field", colHash);
 									
+									
 									$(dataDiv).datepicker({
-										dateFormat:'yy-mm-dd',
+										dateFormat:"yy-mm-dd",
+										onClose: function(value, inst) 
+										{
+											var theId = this.getAttribute("rowId");
+											var field = this.getAttribute("field");
+											var dateParts = value.split(".");
+											var sqlDate = value;
+											if(dateParts.length>1)
+											{
+												sqlDate = dateParts[2]+"-"+dateParts[1]+"-"+dateParts[0];
+											}
+										    var dbData = eval("({"+field+": \""+sqlDate+"\"})"); 
+										    $.fn.loadContent(tableName, null, dbData, "data", {edit:true,req:("id="+theId)});
+										}
+									});
+									console.log(col);
+									$(dataDiv).datepicker( "setDate" , col );
+									$(dataDiv).datepicker( "option", "dateFormat", "dd.mm.yy" );
+								}
+								break;
+								case "int":
+								case "float":
+								{
+									var dataDiv = document.createElement("input");
+									dataTd.appendChild(dataDiv);
+									$(dataDiv).attr("value", col);
+									$(dataDiv).attr("rowId", row["id"]);
+									$(dataDiv).attr("field", colHash);
+									
+									$(dataDiv).spinner({
 										onClose: function(value, inst) 
 										{
 											var theId = this.getAttribute("rowId");
@@ -199,6 +255,30 @@
 										    var dbData = eval("({"+field+": \""+value+"\"})"); 
 										    $.fn.loadContent(tableName, null, dbData, "data", {edit:true,req:("id="+theId)});
 										}
+									});
+								}
+								break;
+								case "time":
+								{
+									var dataDiv = document.createElement("input");
+									dataTd.appendChild(dataDiv);
+									$(dataDiv).attr("value", col);
+									$(dataDiv).attr("rowId", row["id"]);
+									$(dataDiv).attr("field", colHash);
+									
+									$(dataDiv).timeEntry({
+										show24Hours: true, 
+										showSeconds: false,
+										spinnerImage: '../../images/jquery_ui/spinnerDefault.png'
+									});
+										
+									$(dataDiv).change(function(e) 
+									{
+										var theId = this.getAttribute("rowId");
+										var field = this.getAttribute("field");
+										var value = $(this).attr("value");
+									    var dbData = eval("({"+field+": \""+value+"\"})"); 
+									    $.fn.loadContent(tableName, null, dbData, "data", {edit:true,req:("id="+theId)});
 									});
 								}
 								break;
@@ -220,6 +300,11 @@
 
 			paraDiv.setAttribute("class", "adminParagraph");
 			var paraID = paragraphData.find("id").text();
+
+			var titleIDDiv = document.createElement("div");
+			titleIDDiv.textContent = "Absatz "+paraID;
+			paraDiv.appendChild(titleIDDiv);
+
 			//paraDiv.style.height = metaData['height'] + "px";
 //			heightobj.offset += parseInt(metaData['height']);
 			// title
@@ -290,8 +375,7 @@
 				var textDiv = document.createElement("div");
 				textDiv.setAttribute("class", "paragraphContent");
 				var contentHtml = $(paragraphData.find("content").children().first());
-//				alert($(contentHtml).html());
-				$(textDiv).html(contentHtml);
+				$(textDiv).append(contentHtml);
 				paraContent = $(textDiv).html();
 				paraDiv.appendChild(textDiv);
 				break;
@@ -300,26 +384,65 @@
 				{
 					var theTable = metaData['table'];
 					var theCategory = metaData['category'];
+					if(theCategory=="" || null==theCategory)
+						$("#errorOutput").append("Absatz "+paraID+" hat keine Kategorie definiert!");
 					var tableDiv = document.createElement("div");
+					$(tableDiv).css("height", "0px");
+					var tableCollapseButton = document.createElement("input");
+					tableCollapseButton.setAttribute("type", "button");
+					tableCollapseButton.setAttribute("value", "Daten anzeigen");
+					$(tableCollapseButton).click(function(evnt)
+					{
+						if($(this).attr("value")=="Daten anzeigen")
+						{
+							$(tableDiv).css("height","");
+							$(tableDiv).css("overflow","visible");
+							$(this).attr("value","Daten verbergen");
+						}
+						else
+						{
+							$(tableDiv).css("height", "0px");
+							$(tableDiv).css("overflow","hidden");
+							$(this).attr("value","Daten anzeigen");
+						}
+					});
 					tableDiv.setAttribute("class", "adminTableDiv");
 
 					var addEntryButton = document.createElement("input");
 					addEntryButton.setAttribute("type", "button");
-					addEntryButton.setAttribute("value", "Neu");
-					addEntryButton.setAttribute("class", "editButton");
+					addEntryButton.setAttribute("value", "Neuer Eintrag");
 					tableDiv.appendChild(addEntryButton);
+					var delEntriesButton = document.createElement("input");
+					delEntriesButton.setAttribute("type", "button");
+					delEntriesButton.setAttribute("class", "deleteButton");
+					delEntriesButton.setAttribute("value", "Loesche \""+theCategory+"\" Eintraege");
+					tableDiv.appendChild(delEntriesButton);
 
 					$(addEntryButton).click(function()
 					{
-						editTableTrigger({table:theTable});
+						var data = {category:theCategory};
+						$.fn.loadContent(theTable, triggerParagraphCreation, data, "data", {write:true});
 					});
+					$(delEntriesButton).click(function()
+					{
+						if(!confirm("Wollen Sie wirklich ALLE Eintraege aus diesem Absatz aus der Datenbank loeschen?"))
+							return;
+						var data = {category:theCategory};
+						$.fn.loadContent(theTable, triggerParagraphCreation, data, "data", {del:true});
+					});
+					var abreak = document.createElement("br");
+					paraDiv.appendChild(abreak);
 					$.fn.loadContent(theTable, function(result)
 					{
 						var typeJson = eval(result);
-						var table = utils.RenderTable(theTable,typeJson,{category:theCategory});
+						var reqs = null;
+						if(theCategory!="")
+							reqs = {category:theCategory}
+						var table = utils.RenderTable(theTable,typeJson,reqs);
 						tableDiv.appendChild(table);
 					}, null, "data", {def:true,json:"types"});
 
+					paraDiv.appendChild(tableCollapseButton);
 					paraDiv.appendChild(tableDiv);
 				}
 				break;
@@ -348,6 +471,8 @@
 			});
 			$(deleteParaButton).click(function()
 			{
+				if(!confirm("Sind sie sicher dass Sie den Absatz loeschen moechten?"))
+					return;
 				var selectedIndex = $("#pagesDropDown").attr("selectedIndex")-1;
 			    var paragraphString = $(contentCache.find( 'paragraphs' )[selectedIndex]).text();
 			    var pageIndex = $(contentCache.find( 'id' )[selectedIndex]).text();
@@ -364,10 +489,7 @@
 				var keep = confirm("Den Absatz in der DB behalten?");
 				if(!keep)
 				{
-					$.fn.loadContent("paragraphs", function(result)
-					{
-						alert("Absatz erfolgreich geloescht.");
-					}, {id:paraID}, "data", {del:true});
+					$.fn.loadContent("paragraphs", null, {id:paraID}, "data", {del:true});
 				}
 				$.fn.loadContent("pages", function(result)
 				{
@@ -534,6 +656,7 @@
 		
 		function refreshPages(callback)
 		{
+			$("#errorOutput").empty();
 			$.fn.loadContent("pages", function(result)
 			{
 				contentCache = $(result);
@@ -556,11 +679,12 @@
 				var pattern = /[^a-z^A-Z^_]/ig;
 				var pageData = {title:menuTitle};
 				pageData['identifier'] = data['identifier'].replace(pattern, "_"); 
+				pageData['title'] = data['articleTitle'];
 				$.fn.loadContent("pages", function(result)
 				{
 					if(pageData['identifier'])
 					{
-						var thePageRef = $(result).find("max_id_").text();
+						var thePageRef = result;
 						var naviData = {title:menuTitle, pageRef:thePageRef, priority:menuPriority};
 						$.fn.loadContent("navigation", contentEditHandler, naviData, "data", {write:true});
 					}
@@ -575,6 +699,7 @@
 			var theID = $("#pagesDropDown").attr("value");
 			var selectedIndex = $("#pagesDropDown").attr("selectedIndex")-1;
 			var pageId = $(contentCache.find( 'id' )[selectedIndex]).text();
+			var articleTitle = $(contentCache.find( 'title' )[selectedIndex]).text();
 			$.fn.loadContent("navigation", function(naviResult)
 			{
 				var naviId = $(naviResult).find("id").text();
@@ -588,12 +713,14 @@
 					var newMenuPriority = data['priority'];
 					var pattern = /[^a-z^A-Z^_]/ig;
 	//				data['title'] = data['title'].replace(pattern, "_"); 
-					var pageData = {title:data['title']};
+					var pageData = {identifier:data['identifier']};
+					pageData['identifier'] = data['identifier'].replace(pattern, "_"); 
+					pageData['title'] = data['articleTitle'];
 					$.fn.loadContent("pages", function(result)
 					{
 						// if existent - create, otherwise - delete
 //						alert("menuTitle:"+data['menuTitle']);
-						if(data['menuTitle']!="")
+						if(menuTitle!="")
 						{
 							// is navigation entry already existent?
 							var idTestData = {pageRef:pageId};
@@ -618,7 +745,7 @@
 							$.fn.loadContent("navigation", contentEditHandler, naviDelData, "data", {del:true});
 						}
 					}, pageData, "data", {edit:true, req:reqString});
-				}, {identifier:theID, menuTitle:$("#pageTitle").attr("value"), priority:menuPriority});
+				}, {identifier:theID, menuTitle:$("#pageTitle").attr("value"), articleTitle:articleTitle, priority:menuPriority});
 			}, {pageRef:pageId}, "data");
 		}
 		deleteContentHandler = function()
@@ -777,16 +904,14 @@
 			// prepare data
 			/////////////////////////
 			var entryData = [];
-			var urls = [];
 			for(var c=0;c<element("submenuEntries").children.length;c++)
 			{
 				entryData.push(element("submenuEntries").children[c].innerHTML);
-				urls.push(currSubMenuUrls[c]);
 			}
 			var selMenuIndex = $("#submenuEntries").attr("selectedIndex");
 			entryData.splice(selMenuIndex, 1);
-			urls.splice(selMenuIndex, 1);
-			var data = {entries:entryData.join("|"), links:urls.join("|")};
+			currSubMenuUrls.splice(selMenuIndex, 1);
+			var data = {entries:entryData.join("|"), links:currSubMenuUrls.join("|")};
 
 			// Get menu id to update
 			var selectedIndex = $("#pagesDropDown").attr("selectedIndex")-1;
@@ -817,6 +942,48 @@
 			// tyry to select dropdown item
 			output("surrent link:"+currSubMenuUrls[rowNumber]);
 		}
+		
+		moveMenuItemHandler = function(e)
+		{
+			var selMenuIndex = parseInt($("#submenuEntries").attr("selectedIndex"));
+			if(selMenuIndex<=0)
+			{
+				return;
+			}
+
+			// prepare data
+			/////////////////////////
+			var entryData = [];
+			var urls = [];
+			var selectedEntry = null;
+			var selectedUrl = currSubMenuUrls[selMenuIndex];
+			currSubMenuUrls.splice(selMenuIndex, 1);
+			for(var c=0;c<element("submenuEntries").children.length;c++)
+			{
+				if(c==selMenuIndex)
+					selectedEntry = element("submenuEntries").children[c].innerHTML;
+				else
+					entryData.push(element("submenuEntries").children[c].innerHTML);
+			}
+			if(this.id=="upMenuItemButton")
+			{
+				entryData.splice(selMenuIndex-1, 0, selectedEntry);
+				currSubMenuUrls.splice(selMenuIndex-1, 0, selectedUrl);
+			}
+			else
+			{
+				entryData.splice(selMenuIndex+1, 0, selectedEntry);
+				currSubMenuUrls.splice(selMenuIndex+1, 0, selectedUrl);
+			}
+
+			var data = {entries:entryData.join("|"), links:currSubMenuUrls.join("|")};
+
+			// Get menu id to update
+			var selectedPageIndex = $("#pagesDropDown").attr("selectedIndex")-1;
+		    var menuRef = $(contentCache.find( 'menuRef' )[selectedPageIndex]).text();
+
+		    $.fn.loadContent("submenus", createMenuCallback, data, "data", {edit:true,req:("id="+menuRef)});
+		}
 	
 		////////////////////////////////////////////////////////////////////////////////////////
 		// Paragraph population
@@ -825,6 +992,7 @@
 		function populateAllParagraphSelect(response)
 		{
 			$("#insertParagraphSelect").empty();
+			$("#errorOutput").find("error").each($(this).remove());
 
 			optn = document.createElement("OPTION");
 		    $("#insertParagraphSelect").append(optn);
@@ -837,15 +1005,17 @@
 				optn.textContent = title + " - " + id;
 			    $("#insertParagraphSelect").append(optn);
 			});		
+			$(response).find("error").each(function()
+		    {
+				var anError = document.createElement("div");
+				$(anError).append(this);
+			    $("#errorOutput").append(anError);
+			});		
 		}
 		
 		triggerParagraphCreation = function()
 		{
-			var selectedIndex = $("#pagesDropDown").attr("selectedIndex")-1;
-			refreshPages(function(result)
-			{
-			    populateParagraphs();
-			});
+			refreshPages(populateParagraphs);
 		};
 		
 		function editTableTrigger(defaultData)
@@ -874,7 +1044,7 @@
 
 			optn = document.createElement("OPTION");
 		    $("#paragraphDropDown").append(optn);
-			var contentDiv = document.createElement("div");
+			var contentDiv = document.createElement("p");
 			contentDiv.setAttribute("class", "contentDiv");
 			
 //			var heightobj = new Object();
@@ -892,34 +1062,57 @@
 						$.fn.loadContent("links", function(result)
 						{
 							var sections = eval(result);
-							var tableDiv = document.createElement("div");
-							tableDiv.setAttribute("class", "adminTableDiv");
 		
 							var addEntryButton = document.createElement("input");
 							addEntryButton.setAttribute("type", "button");
 							addEntryButton.setAttribute("value", "Neuer Eintrag");
-							tableDiv.appendChild(addEntryButton);
+							contentDiv.appendChild(addEntryButton);
 		
-							$(addEntryButton).click(function()
-							{
-								editTableTrigger({table:"links"});
-							});
-							contentDiv.appendChild(tableDiv);
+							var abreak = document.createElement("br");
+							contentDiv.appendChild(abreak);
+							var label = document.createTextNode("Zeige Kategorie:");
+							contentDiv.appendChild(label);
 							
+							var categorySelect = document.createElement("select");
+							categorySelect.setAttribute("id", "categorySelect");
+							contentDiv.appendChild(categorySelect);
 							for(sectionIndex in sections)
 							{
 								section = sections[sectionIndex];
-								var paraDiv = document.createElement("div");
-								paraDiv.setAttribute("id", "paragraph_"+section.category);
-								paraDiv.setAttribute("class", "adminParagraph");
-								paraDiv.appendChild(utils.RenderTable("links", typeJson, {category:section.rubrik}, null));
-								contentDiv.appendChild(paraDiv);
+								var sectionOption = document.createElement("option");
+								sectionOption.textContent = section.category;
+								categorySelect.appendChild(sectionOption);
 							}
+
+							$(addEntryButton).click(function()
+							{
+								var data = {category:$("#categorySelect").attr("value")};
+								$.fn.loadContent("links", triggerParagraphCreation, data, "data", {write:true});
+							});
+
+							var tableDiv = document.createElement("div");
+							tableDiv.setAttribute("class", "adminTableDiv");
+							contentDiv.appendChild(tableDiv);
+							
+							var categoryFill = function(section)
+							{
+								$(tableDiv).empty();
+								var paraDiv = document.createElement("div");
+								paraDiv.setAttribute("id", "paragraph_"+section);
+								paraDiv.setAttribute("class", "adminParagraph");
+								paraDiv.appendChild(utils.RenderTable("links", typeJson, {category:section}, null));
+								tableDiv.appendChild(paraDiv);
+							};
+							$(categorySelect).change(function(){
+								categoryFill(this.value);
+							});
+							categoryFill(sections[0].category);
+							
 						}, null, "data", {selector:"category",distinct:true,json:"sections"});
 					}, null, "data", {def:true,json:"types"});
 				}
 				break;
-			case "order":
+			case "bestellen":
 				{
 					$.fn.loadContent("bestellung,kunden", function(result)
 					{
@@ -948,28 +1141,33 @@
 						paraDiv.setAttribute("id", "paragraph_"+paraArray[paraIndex]);
 				    	$.fn.loadContent("paragraphs", function(result)
 				    	{
-				    		result = getXmlDocFromResponse(result);
-								$(result).find("row").each(function()
-						    {
-							    // paragraph itself
-							    var myParagraphId = $(this).find("id").first().text();
-							    var myParagraph = element("paragraph_"+myParagraphId);
-							    if(null==myParagraph)
-							    	return;
-							    console.log("myParagraphId: "+myParagraphId+", "+myParagraph);
-
-		//						alert("localParaIndex:"+$(this).find('id').text());
-								var localParaIndex = paraArray.indexOf($(this).find('id').text());
-		//				    	output("id:"+$(this).find('id').text());
-						    	$(this).find('title').each(function(index, value)
+				    		try{
+					    		result = getXmlDocFromResponse(result);
+									$(result).find("row").each(function()
 							    {
-									optn = document.createElement("OPTION");
-									optn.textContent = $(this).text();
-								    $("#paragraphDropDown").append(optn);
-							    })
-							    
-							    utils.renderPargraphHTML(myParagraph, $(this), localParaIndex);
-							});
+								    // paragraph itself
+								    var myParagraphId = $(this).find("id").first().text();
+								    var myParagraph = element("paragraph_"+myParagraphId);
+								    if(null==myParagraph)
+								    	return;
+								    console.log("myParagraphId: "+myParagraphId+", "+myParagraph);
+	
+			//						alert("localParaIndex:"+$(this).find('id').text());
+									var localParaIndex = paraArray.indexOf($(this).find('id').text());
+			//				    	output("id:"+$(this).find('id').text());
+							    	$(this).find('title').each(function(index, value)
+								    {
+										optn = document.createElement("OPTION");
+										optn.textContent = $(this).text();
+									    $("#paragraphDropDown").append(optn);
+								    })
+								    
+								    utils.renderPargraphHTML(myParagraph, $(this), localParaIndex);
+								});
+							}catch(err)
+							{
+								$(paraDiv).append("Der Ansatz konnte nicht gerendert werden. Ueberpruefen sie bitte das eingegebene html.");
+							}
 				    	}, {id:paraArray[paraIndex]}, "data");
 							contentDiv.appendChild(paraDiv);
 				    }
@@ -1011,13 +1209,40 @@
 					var metaString = "height="+data['height']+";table="+data['table']+";category="+data['category'];
 					var paraData = {
 						title:data['title'],
-						type:TableTypeStrings.indexOf(data['type']),
+						type:ParaTypeStrings.indexOf(data['type']),
 						content:data['content'],
 						meta:metaString
 					};
 					var paraParams = {write:true};
 					if(paraID!=null)
 						paraParams = {edit:true,req:"id="+paraID};
+						
+					var enterParagraph = function(result)
+					{
+						var selectedIndex = $("#pagesDropDown").attr("selectedIndex")-1;
+						var paragraphString = $(contentCache.find( 'paragraphs' )[selectedIndex]).text();
+						var paraArray = paragraphString.split(",");
+						var pageIndex = $(contentCache.find( 'id' )[selectedIndex]).text();
+						var lastParaIndex = parseInt(result);
+						console.log("result:"+lastParaIndex+" currentpargraphs:");
+						for(d in paraArray)
+							console.log("#"+paraArray[d]);
+						if(!isNaN(lastParaIndex) && paraArray.indexOf(lastParaIndex)==-1)
+						{
+							console.log("adding");
+							paraArray.push(lastParaIndex);
+						}
+						paragraphString = paraArray.join(",");
+						var pageData = {
+							paragraphs:paragraphString
+						};
+						$.fn.loadContent("pages", function(result)
+						{
+							output("Content successfully created.");
+							triggerParagraphCreation();
+						}, pageData, "data", {edit:true,req:("id="+pageIndex)});
+					}
+						
 					// Text and picture. Insert pic.
 					if(data['picUrl']!="")
 					{
@@ -1026,92 +1251,45 @@
 						$.fn.loadContent("pictures", function(result)
 						{
 							// no picture found: insert!
-							var foundID = $(result).find("id").text();
-							if(""==foundID)
+							var foundID = $(result).find("id");
+							if(foundID.length==0)	
 							{
+								console.log("Did NOT find picture ID");
 								var picWriteData = {"url":data['picUrl'],"title":data['picTitle']};
 								var picWriteParams = {write:true};
 								$.fn.loadContent("pictures", function(result)
 								{
-									var lastPicIndex = $(result).find("max_id_").text();
+									console.log("NEW picture ID :"+result);
+									var lastPicIndex = result;
 									metaString += ";image="+lastPicIndex;
-									$.fn.loadContent("paragraphs", function(result)
-									{
-										var selectedIndex = $("#pagesDropDown").attr("selectedIndex")-1;
-									    var paragraphString = $(contentCache.find( 'paragraphs' )[selectedIndex]).text();
-									    var pageIndex = $(contentCache.find( 'id' )[selectedIndex]).text();
-										var lastParaIndex = $(result).find("max_id_").text();
-										paragraphString += ","+lastParaIndex;
-										var pageData = {
-											paragraphs:paragraphString
-										};
-										$.fn.loadContent("pages", function(result)
-										{
-											output("Content successfully created.");
-											triggerParagraphCreation();
-										}, pageData, "data", {edit:true,req:("id="+pageIndex)});
-									}, paraData, "data", paraParams);
+									paraData.meta = metaString;
+									$.fn.loadContent("paragraphs", enterParagraph, paraData, "data", paraParams);
 								}, picWriteData, "data", picWriteParams);
 							}
 							else // picture found, just insert into paragraphs
 							{
-								var metaString = "height="+data['height']+";table="+data['table']+";category="+data['category']+";image="+foundID;
-								var paraData = {
-									title:data['title'],
-									type:TableTypeStrings.indexOf(data['type']),
-									content:data['content'],
-									meta:metaString
-								};
-								var paraParams = {write:true};
-								if(paraID!=null)
-									paraParams = {edit:true,req:"id="+paraID};
-								$.fn.loadContent("paragraphs", function(result)
-								{
-									var selectedIndex = $("#pagesDropDown").attr("selectedIndex")-1;
-								    var paragraphString = $(contentCache.find( 'paragraphs' )[selectedIndex]).text();
-								    var pageIndex = $(contentCache.find( 'id' )[selectedIndex]).text();
-									var lastParaIndex = $(result).find("max_id_").text();
-									paragraphString += ","+lastParaIndex;
-									var pageData = {
-										paragraphs:paragraphString
-									};
-									$.fn.loadContent("pages", function(result)
-									{
-										output("Content successfully created.");
-										triggerParagraphCreation();
-									}, pageData, "data", {edit:true,req:("id="+pageIndex)});
-								}, paraData, "data", paraParams);							
+								var idString = foundID.first().text();
+								console.log("found picture ID :"+idString);
+								var metaString = "height="+data['height']+";image="+idString;
+								paraData.meta = metaString;
+								$.fn.loadContent("paragraphs", enterParagraph, paraData, "data", paraParams);							
 							}
 						}, picReadData, "xml");
 					}
 					else // NO picture entered
 					{
-						$.fn.loadContent("paragraphs", function(result)
-						{
-							var selectedIndex = $("#pagesDropDown").attr("selectedIndex")-1;
-						    var paragraphString = $(contentCache.find( 'paragraphs' )[selectedIndex]).text();
-						    var pageIndex = $(contentCache.find( 'id' )[selectedIndex]).text();
-							var lastParaIndex = $(result).find("max_id_").text();
-							paragraphString += ","+lastParaIndex;
-							var pageData = {
-								paragraphs:paragraphString
-							};
-							$.fn.loadContent("pages", function(result)
-							{
-								output("Content successfully created.");
-								triggerParagraphCreation();
-							}, pageData, "data", {edit:true,req:("id="+pageIndex)});
-						}, paraData, "data", paraParams);
+						$.fn.loadContent("paragraphs", enterParagraph, paraData, "data", paraParams);
 
 					}
 				}
 				else
 				{
 					// Tabelle creation
-					var metaString = "height="+data['height']+";table="+data['table']+";category="+data['category'];
+					var category = ""!=data['newCategory'] ? data['newCategory'] : data['category'];
+					var metaString = "height="+data['height']+";table="+data['table']+";category="+category;
 					var paraData = {
 						title:data['title'],
-						type:TableTypeStrings.indexOf(data['type']),
+						type:ParaTypeStrings.indexOf(data['type']),
 						content:data['content'],
 						meta:metaString
 					};
@@ -1123,7 +1301,7 @@
 						var selectedIndex = $("#pagesDropDown").attr("selectedIndex")-1;
 					    var paragraphString = $(contentCache.find( 'paragraphs' )[selectedIndex]).text();
 					    var pageIndex = $(contentCache.find( 'id' )[selectedIndex]).text();
-						var lastParaIndex = $(result).find("max_id_").text();
+						var lastParaIndex = result;
 						paragraphString += ","+lastParaIndex;
 						var pageData = {
 							paragraphs:paragraphString
@@ -1150,7 +1328,7 @@
 			var selectedIndex = $("#pagesDropDown").attr("selectedIndex")-1;
 		    var paragraphString = $(contentCache.find( 'paragraphs' )[selectedIndex]).text();
 		    var selectedNewValue = $("#insertParagraphSelect").attr("value");
-		    var valueIdTuple = selectedNewValue.split(" - ");
+		    var valueIdTuple = selectedNewValue.split("- ");
 		    selectedNewValue = valueIdTuple[1];
 		    var paraArray = paragraphString.split(",");
 		    for(p in paraArray)
@@ -1160,7 +1338,7 @@
 		    		paraArray.splice(p, 1);
 		    	}
 			}		    		
-		    paraArray.unshift(selectedNewValue);
+		    paraArray.push(selectedNewValue);
 		    paragraphString = paraArray.join(",");
 			var pageData = {
 				paragraphs:paragraphString
@@ -1186,6 +1364,8 @@
 		$("#createParagraphButton").click(createParagraphHandler);
 		$("#insertParagraphSelect").change(insertParagraphHandler);
 		$("#paragraphDropDown").change(selectParaForSubMenu);
+		$("#upMenuItemButton").click(moveMenuItemHandler);
+		$("#downMenuItemButton").click(moveMenuItemHandler);
 		refreshPages(populateContentDropDown);
 	}
 
