@@ -11,7 +11,7 @@ function MyHtmlSpecialVars_decode($string)
 
 function PrintHtmlComment($string)
 {
-	print ("<!-- ".$string."//-->\n");
+	//print ("<!-- ".$string."//-->\n");
 }
 
 function FilenameFromUrl(&$params=NULL)

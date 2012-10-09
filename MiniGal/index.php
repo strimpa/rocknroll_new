@@ -169,7 +169,8 @@ $dirs = array();
 							"name" => $file,
 							"date" => filemtime($currentdir . "/" . $file . "/folder.jpg"),
 							"html" => "<li><a href='?dir=" .ltrim($queryDir . "/" . $file, "/") . "'><em>" . padstring($file, $label_max_length) . "</em><span></span><img src='$picUrl'  alt='$label_loading' /></a></li>");
-					}  else
+					}  
+					else
 					{
 					// Set thumbnail to first image found (if any):
 						unset ($firstimage);
@@ -370,6 +371,16 @@ for ($y = $i; $y < sizeof($files); $y++)
 	$page_navigation .= "<a href='" . $currentHTTPDir . "/" . $files[$y]["name"] . "' rel='lightbox[billeder]'  class='hidden' title='" . $img_captions[$files[$y]["name"]] . "'></a>";
 }
 
+$foldertxt = "<!-- folder txt //--><br />";
+// $handle = fopen($currentdir."folder.txt", "r");
+// if ($handle)
+// {
+	// while(!feof($handle))
+		// $foldertxt .= fread($handle,$size); 
+	// fclose($handle);
+// }
+$foldertxt.=file_get_contents($currentdir."/$file/folder.txt");
+
 //-----------------------
 // OUTPUT MESSAGES
 //-----------------------
@@ -395,6 +406,7 @@ $messages = "<div id=\"topbar\">" . $messages . " <a href=\"#\" onclick=\"docume
 		$template = preg_replace("/<% author %>/", $author, $template);
 		$template = preg_replace("/<% gallery_root %>/", GALLERY_ROOT, $template);
 		$template = preg_replace("/<% images %>/", "$images", $template);
+		$template = preg_replace("/<% foldertxt %>/", "$foldertxt", $template);
 		$template = preg_replace("/<% thumbnails %>/", "$thumbnails", $template);
 		$template = preg_replace("/<% breadcrumb_navigation %>/", "$breadcrumb_navigation", $template);
 		$template = preg_replace("/<% page_navigation %>/", "$page_navigation", $template);

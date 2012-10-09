@@ -19,31 +19,24 @@ class Aufenthalt
 	private $aktuellerBestellAblauf;
 	private $meineTermine;
 	private $meineLinks;
+	public $testVar; 
 
 	private function Aufenthalt()
 	{
 		$this->dbConn = new DBCOntroller();
 		$this->aktuellerNutzer = new Benutzer();
 		$this->meineLinks = new Linkausgabe(0);
+		$testVar = 0;
 	}
 	
 	public static function &GetInstance()
 	{
-		if(!isset(self::$instance))
+		if(!isset($_SESSION['Aufenthalt']))
 		{
-			if(!isset($_SESSION['Aufenthalt']))
-			{
 //				PrintHtmlComment('New Aufenthalt instance!!!');
-				self::$instance = new Aufenthalt();
-				$_SESSION['Aufenthalt'] = self::$instance;
-			}
-			else
-			{
-				self::$instance = $_SESSION['Aufenthalt'];
-//				PrintHtmlComment("session Aufenthalt.");
-			}
+			$_SESSION['Aufenthalt'] = new Aufenthalt();
 		}
-		return self::$instance;
+		return $_SESSION['Aufenthalt'];
 	}
 	
 	public function &Controller()

@@ -23,6 +23,20 @@ body {
 	float:right;
 }
 
+#showPlainTextWindow
+{
+	position:absolute;
+	z-index: 50;
+	width:300px;
+	background-color:#003366;
+	border: 1px solid white;
+}
+#showPlainTextField
+{
+	width:400px;
+	height:400px;
+}
+
 #TitleSeite
 {
 	position:absolute;

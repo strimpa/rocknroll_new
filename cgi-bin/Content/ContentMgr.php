@@ -61,7 +61,8 @@ class ContentMgr
 	
 	public function RenderHeader()
 	{
-		$this->content->RenderHeader();
+		if(NULL!=$this->content)
+			$this->content->RenderHeader();
 	}
 	
 	public function RenderContent()

@@ -37,6 +37,7 @@ print <<<EOD
 	<script src="/MiniGal/js/mootools.js" type="text/javascript"></script>
 	<script src="/MiniGal/js/mediaboxAdv-1.3.4b.js" type="text/javascript"></script>
 EOD;
+	print "<title>$this->title</title>";
 	}
 	
 	public function RenderParagraphs(&$contentDiv)
@@ -104,29 +105,26 @@ class DelegateArticle extends Article
 			case Article::DELEGATE_ARTICLE_LINKS:
 				include 'links.php';
 				break;
+			case Article::DELEGATE_ARTICLE_ORDER:
+				Aufenthalt::GetInstance()->GetAblauf()->aktuellerBestellSchritt();
+				break;
 		}
 	}
 	
 	public function RenderParagraphs(&$contentDiv)
 	{
 		$builder = ContentMgr::GetInstance()->GetBuilder();
-		if($this->type == Article::DELEGATE_ARTICLE_ORDER)
-		{
-			Aufenthalt::GetInstance()->GetAblauf()->aktuellerBestellSchritt($contentDiv);
-		}
-		else 
-		{
-			ob_start();
-			$this->RenderDelegate();
-			$str=ob_get_contents();
-			ob_end_clean();	
-			$importdoc = new DOMDocument();
-			$importdoc->encoding = 'UTF-8';
-			$importdoc->loadHTML('<?xml encoding="UTF-8">'.$str);
-			$doc = $builder->GetDoc();
-			$text = $doc->importNode($importdoc->documentElement, true);
-			$contentDiv->appendChild($text);
-		}
+		ob_start();
+		$this->RenderDelegate();
+		$str=ob_get_contents();
+		ob_end_clean();	
+		$importdoc = new DOMDocument();
+		$importdoc->encoding = 'UTF-8';
+		$importdoc->loadHTML('<?xml encoding="UTF-8">'.$str);
+		$doc = $builder->GetDoc();
+		$text = $doc->importNode($importdoc->documentElement, true);
+		$contentDiv->appendChild(new DOMComment("Begin import"));
+		$contentDiv->appendChild($text);
 	}
 }
 

@@ -18,10 +18,13 @@
 		$.fn.loadContent("folder", function(result)
 		{
 			$(result).find("row").first().children().each(function(){
+				var picFrame = $('<div class="folderBrowserPicFrame">'); 
 				var pic = $('<img />');
 				pic.attr("class","folderBrowsePic"); 
 				pic.attr("src",$(this).text()); 
-				picHolder.append(pic);
+				picFrame.append(pic);
+				picFrame.append($("<i>"+$(this).text()+"</i>"));
+				picHolder.append(picFrame);
 				pic.click(function(){
 					console.log("targetPicElem:"+targetPicElem);
 					$(targetPicElem).attr("src", $(this).attr("src"));

@@ -4,8 +4,7 @@ require_once("Order/Bestellung.php");
 /**
 *	Diese Klasse beschreibt einen Benutzer
 */
-class Benutzer
-{
+class Benutzer{
 	var $anrede;
 	var $vorName;
 	var $nachName;
@@ -24,9 +23,17 @@ class Benutzer
 	var $sessionNummer;
 	var $kundenNummer;
 	var $Abonnent;
+	var $aufenthalt;
 	var $kommentar;
 	var $bestellDatum;
 	
+	function GetWholeName()
+	{
+		$wholeName =($this->anrede." ".$this->vorName." ".$this->nachName);
+		//print "whole anem : $wholeName"; 
+		return $wholeName;
+	}
+
 	function GetMember($id)
 	{
 		switch (strtolower($id))
@@ -70,6 +77,7 @@ class Benutzer
 	function Benutzer($args=NULL){
 		if(!is_array($args)){
 			//echo "Deklaration ohne Werte";
+			$this->aufenthalt = $args;
 			$this->nachName="";
 			$this->kundenNummer="";
 			$this->Abonnent=false;
@@ -77,6 +85,7 @@ class Benutzer
 			$this->kundenNummer=$args[0];
 			$this->nachName=$args[1];
 			$this->Abonnent=true;
+			$this->aufenthalt = "";
 		}
 		$this->vorName="";
 		$this->adresse="";
@@ -96,13 +105,13 @@ class Benutzer
 
 	
 	function printUserShort(){
-		return "
+		$retVal = "
 		<table border=\"0\" cellspacing=\"2\" cellpadding=\"2\" width=\"600px\">
                 <TR bgcolor=\"#666699\">
                   <TD colspan=\"2\"><strong>Pers&ouml;nliche Daten:</strong></TD>
                 </TR>
                 <TR bgcolor=\"#336699\">
-                  <TD width=\"200\" ALIGN=\"right\">vorheriger Abonnent</TD>
+                  <TD width=\"200\" ALIGN=\"right\">Bereits Abonnent</TD>
                   <TD>$this->Abonnent</TD>
                 </TR>
                 <TR bgcolor=\"#336699\">
@@ -153,36 +162,41 @@ class Benutzer
                   <TD colspan=\"2\"><strong>Zahlungsart:</strong></TD>
                 </TR>
                 <TR bgcolor=\"#336699\">
-                  <TD ALIGN=\"right\" valign=\"top\">gew�hlte Methode:</TD>
+                  <TD ALIGN=\"right\" valign=\"top\">gew&auml;hlte Methode:</TD>
                   <TD>
 				";
 				if(	$this->bezahlung=="lastschrift") {
-					print "
+					$retVal .=  "
 						<strong>Lastschriftverfahren.</strong><br>
 						Bankinstitut:      $this->bankInstitut <br>
 						Kontonummer:        ";
 					for($ind=0;$ind<strlen($this->ktnr);$ind++){
-						if($ind<4)print(substr($this->ktnr,$ind,1));
-						else print("X");
+						if($ind<4) 
+							$retVal .= (substr($this->ktnr,$ind,1));
+						else 
+							$retVal .= ("X");
 					}
-					print "		<br>
+					$retVal .=  "		<br>
 						Bankleitzahl: ";
 					for($ind=0;$ind<strlen($this->blz);$ind++){
-						if($ind<4)print(substr($this->blz,$ind,1));
-						else print("X");
+						if($ind<4)
+							$retVal .= (substr($this->blz,$ind,1));
+						else 
+							$retVal .= ("X");
 					}
-					print "<br>";
-				} else print"
+					$retVal .=  "<br>";
+				} else $retVal .= "
 						<strong>&Uuml;berweisung</strong> auf<br>
-									Rock&Roll Musikmagazin:<br>
+									Rock&amp;Roll Musikmagazin:<br>
 									Volksbank Oldenburg<br>
 									Kto-Nr.: 140 325 026<br>
 									BLZ: 280 900 45
 				";
-				print "
+				$retVal .=  "
                   </TD>
                 </TR>
             </TABLE>";
+		return $retVal;
 	}
 
 	
@@ -190,31 +204,26 @@ class Benutzer
 		$rueckgabe = true;
 		// Muss Eingaben abfragen.
 		$this->Abonnent = (isset($_POST['schonKunde'])?$_POST['schonKunde']:"nein");
-		$this->nachName = $_POST['Nachname'];
-		$this->bezahlung = $_POST['bezahlung'];
-		$this->anrede = $_POST['anrede'];
-		$this->vorName = $_POST['Vorname'];
-		$this->adresse = $_POST['Postadresse'].$_POST['Postadresse2'];
-		$this->postleitzahl = $_POST['Postleitzahl'];
-		$this->ort = $_POST['Ort'];
+		$this->nachName = EncodeUmlaute($_POST['Nachname']);
+		$this->bezahlung = EncodeUmlaute($_POST['bezahlung']);
+		$this->anrede = EncodeUmlaute($_POST['anrede']);
+		$this->vorName = EncodeUmlaute($_POST['Vorname']);
+		$this->adresse = EncodeUmlaute($_POST['Postadresse'].$_POST['Postadresse2']);
+		$this->postleitzahl = EncodeUmlaute($_POST['Postleitzahl']);
+		$this->ort = EncodeUmlaute($_POST['Ort']);
 		$this->land = ($_POST['Land']=="germany"?$_POST['Land']:($_POST['Land']=="sonstigesEU"?$_POST['sonstigesLandEU']:$_POST['sonstigesLand']));
-		$this->telHome=$_POST['Telefon'];
-		$this->eMail = $_POST['EMail'];
-		$this->bankInstitut = $_POST['Bankinstitut'];
-		$this->ktnr = $_POST['Kontonummer'];
-		$this->blz = $_POST['Bankleitzahl'];
-		$this->kundenNummer = $_POST['kundenNr'];
+		$this->telHome=EncodeUmlaute($_POST['Telefon']);
+		$this->eMail = EncodeUmlaute($_POST['EMail']);
+		$this->bankInstitut = EncodeUmlaute($_POST['Bankinstitut']);
+		$this->ktnr = EncodeUmlaute($_POST['Kontonummer']);
+		$this->blz = EncodeUmlaute($_POST['Bankleitzahl']);
+		$this->kundenNummer = EncodeUmlaute($_POST['kundenNr']==NULL?"":$_POST['kundenNr']);
 		
-		$this->aktuelleBestellung->kommentar.="\n ".
+		Aufenthalt::GetInstance()->GetAblauf()->aktuelleBestellung->kommentar.="\n ".
 			($this->bezahlung=="lastschrift"?"Der Benutzer m�chte das Geld per Lastschrift eingezogen bekommen":"Der Benutzer bezahlt per &Uuml;berweisung");
 
 		return $rueckgabe;
 	}
 	
-	function holeStatus(){
-	}
-	
-	function logOut(){
-	}
 }
 ?>

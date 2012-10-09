@@ -50,7 +50,7 @@ class Verbindung
 	function verbinde()
 	{
 		if(null!=$this->db)
-			return;
+			return true;
 global $db_serv;
 	// MySQL Datenbank Name
 global $db_name;
@@ -229,6 +229,11 @@ global $db_pass;
 		$sql .= ';';
 //        print("<!-- sql:".$sql." //-->\n");
 		$result = mysql_query($sql);
+		if(FALSE==$result)
+		{
+			print mysql_error();
+			return NULL;
+		}
 		$fields = mysql_num_fields($result);
 		$rowArray = array();	
 		for ($i=0; $i < $fields; $i++)
@@ -527,11 +532,10 @@ global $db_pass;
 	{
 		$rueckGabe = "";
 		$abbruch=false;
-		$bestellNamensArray = array("kundenID", "kundenNrBesteller", "bestellungen", "kommentar", "bestellDatum");
+		$bestellNamensArray = array("kundenID", "bestellungen", "kommentar", "bestellDatum");
 		$bestellAusGabeArray = array(	
 		// Eingabewerte mit auszugebenden Werten vergleichen
 			($kundenID),
-			($user->kundenNummer == "" ? NULL : $user->kundenNummer),
 			(($bestellSumme=$aktuelleBestellung->dbText) == "" ? $abbruch=true : $bestellSumme),
 			($aktuelleBestellung->kommentar == "" ? NULL : $aktuelleBestellung->kommentar),
 			($aktuelleBestellung->bestellDatum == "" ? NULL : $aktuelleBestellung->bestellDatum));
@@ -564,7 +568,7 @@ global $db_pass;
 			$result = mysql_query($sql);
 			//printf ("Ver�nderte Datens�tze: %d\n", mysql_affected_rows());
 			if(!$result){
-				throw new Exception("Nicht erfolgreich beim schreiben der Datensaetze.");
+				throw new Exception("Nicht erfolgreich beim schreiben der Datens&auml;tze:".mysql_error());
 			} 
 		} else {
 			throw new Exception("<P>".

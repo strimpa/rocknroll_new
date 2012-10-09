@@ -306,7 +306,10 @@ class TablePara implements iParagraph
 						else if($type=="time")
 						{
 							$timepieces = explode(":", $value);
-							$myElement->nodeValue = $timepieces[0].":".$timepieces[1]." Uhr";
+							if(!($timepieces[0]=="00" || $timepieces[1]=="00"))
+							{
+								$myElement->nodeValue = $timepieces[0].":".$timepieces[1]." Uhr";
+							}
 						}
 						else
 						{

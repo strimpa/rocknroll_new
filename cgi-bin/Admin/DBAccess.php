@@ -61,7 +61,7 @@
 	
 //	PrintHtmlComment("fuckin DBAccess!");
 	
-	$pattern = '/(pages|submenus|paragraphs|events|links|pictures|navigation|folder|bestellung|archive)/';
+	$pattern = '/(pages|submenus|paragraphs|events|links|pictures|navigation|folder|bestellung|kunden|archive)/';
 	$resultEntryID = null;
 	if(0!=preg_match($pattern, $query, $matches, PREG_OFFSET_CAPTURE))
 	{
