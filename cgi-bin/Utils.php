@@ -243,6 +243,19 @@ function IsAssoc($myarray)
 	return array_keys($myarray) !== range(0, count($myarray) - 1);
 }
 
+function SafeDBString($res)
+{
+	  $res = str_replace("ü","&uuml;",$res);
+	  $res = str_replace("ä","&auml;",$res);
+	  $res = str_replace('ö',"&ouml;",$res);
+	  $res = str_replace('Ü',"&Uuml;",$res);
+	  $res = str_replace('Ä',"&Auml;",$res);
+	  $res = str_replace('Ö',"&Ouml;",$res);
+	  $res = str_replace("ß", "&szlig;",$res);
+	  $res = mysql_escape_string($res);
+	  return $res;
+}
+
 function EncodeUmlaute($string)
 {
 	  $res = htmlentities($string);
@@ -253,6 +266,7 @@ function EncodeUmlaute($string)
 	  $res = str_replace("&Auml;",'Ä',$res);
 	  $res = str_replace("&Ouml;",'Ö',$res);
 	  $res = str_replace("&szlig;",'ß',$res);
+	  $res = mysql_escape_string($res);
 	  return $res;
 }
 
@@ -260,6 +274,7 @@ function SafeJSONString($in)
 {
 	$out = htmlentities($in);
 	$out = str_replace("\n","<br />",$out);
+  	$out = mysql_escape_string($out);
 	return $out;
 }
 

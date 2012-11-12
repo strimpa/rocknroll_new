@@ -51,7 +51,7 @@
 			if(null==ids)
 				ids = "id";
 			
-			var excludeFields = ["id", "type", "location", "angelegtVon", "anlegeDatum"];
+			var excludeFields = ["id", "type", "angelegtVon", "anlegeDatum"];
 			var tableHolder = document.createElement("span");
 			var table = document.createElement("table");
 			table.setAttribute("class", "adminTable");
@@ -160,6 +160,11 @@
 					textRowButton.setAttribute("value", "T");
 					textRowButton.setAttribute("id", row["id"]);
 					delTd.appendChild(textRowButton);
+					var markRowCheck = document.createElement("input");
+					markRowCheck.setAttribute("type", "checkbox");
+					markRowCheck.setAttribute("class", "markRowCheck");
+					markRowCheck.setAttribute("id", row["id"]);
+					delTd.appendChild(markRowCheck);
 
 					rowDiv.appendChild(delTd);
 					$(delRowButton).click(function(evnt)
@@ -200,7 +205,8 @@
 							textWin.css("left", $(this).offset().left+30);
 						}
 					});
-
+					
+					var colCOunt = 0;
 					for(colHash in row)
 					{
 						if($.inArray(colHash, excludeFields)!=-1)
@@ -337,10 +343,48 @@
 							dataTd.appendChild(dataDiv);
 							dataDiv.textContent = col;
 						}
+						colCOunt++;
 					}
 					table.appendChild(rowDiv);
 					var eventId = $(this).find("id").text();
 				}
+				var rowTr = document.createElement("tr");
+				var delTd = document.createElement("td");
+				delTd.setAttribute("colspan", colCOunt);
+				delTd.setAttribute("class", "adminTableTd");
+				var delRowsButton = document.createElement("input");
+				delRowsButton.setAttribute("type", "button");
+				delRowsButton.setAttribute("class", "deleteButton");
+				delRowsButton.setAttribute("value", "Loesche alle markierten Zeilen");
+				delTd.appendChild(delRowsButton);
+				rowTr.appendChild(delTd);
+				table.appendChild(rowTr);
+
+				$(delRowsButton).click(function(evnt)
+				{
+					if(!confirm("Sicher dass du die Eintraege loeschen moechtest?"))
+						return;
+
+					var tabellenliste  = tableName.split(",");
+					var idliste  = ids.split(",");
+					
+					$(this).parents(".adminTable").find(".markRowCheck").each(function()
+					{
+						if($(this).attr("checked"))
+						{
+							for(var ti=0; ti<tabellenliste.length; ti++)
+							{
+								var table = tabellenliste[ti];
+								var theID = idliste[ti];
+								var delData = {};
+								delData[theID] = $(this).attr("id");
+								$.fn.loadContent(table, triggerParagraphCreation, delData, "data", {del:true});
+							}
+						}
+					});
+						
+				});
+
 			}, requirements, "xml", params);
 			
 			return tableHolder;

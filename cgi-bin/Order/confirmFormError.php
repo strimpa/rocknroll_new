@@ -1,4 +1,4 @@
-<div id="layer1" style="background:url(/images/bestellen_error.png) #003366 no-repeat top right; width:730px">
+<div id="layer1" style="background:url(/images/bestellen_error.png) no-repeat top right; width:730px">
 <table width="100%"  border="0" cellpadding="10">
   <tr>
     <td width="347" height="271"><h2 align="left">Uh oh! </h2>
@@ -14,9 +14,5 @@
       <h2 align="left">&nbsp;</h2>
       </td>
   </tr>
-  <tr>
-    <td height="165" colspan="2"><blockquote>
-      <h2 align="left">Schritt 3: Best&auml;tigung aller Eingaben:</h2>
-        <table border="1" cellspacing="20" class="semanRahmen" noshade>
-          <tr>
-            <td>
+  <tr colspan="2">
+    <td>

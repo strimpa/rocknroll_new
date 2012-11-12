@@ -14,7 +14,8 @@ class BestellAblauf{
 	var $stateName = array("Aufgeben der Bestellung", "Benutzeregistrierung", "Best&auml;tigen der Bestellung", "Best&auml;tigung");
 	var $inland_preise = array();
 	var $ausland_preise = array();
-	var $portos = array();
+	var $inland_portos = array();
+	var $ausland_portos = array();
 	var $aktuelleBestellung;
 	var $bestellungAufgegeben;
 
@@ -29,20 +30,44 @@ class BestellAblauf{
 	
 	function holepreise(){
 		// print "************************".$_SERVER['DOCUMENT_ROOT']."/cgi-bin/preis-definition.txt";
-		if(($fp = fopen($_SERVER['DOCUMENT_ROOT']."/cgi-bin/preis-definition.txt", 'r'))!=null){
+		if(($fp = fopen($_SERVER['DOCUMENT_ROOT']."/cgi-bin/preis-definition.txt", 'r'))!=null)
+		{
+			$this->inland_preise = array();
+			$this->ausland_preise = array();
+			$this->inland_portos = array();
+			$this->ausland_portos = array();
 			$index=0;
 			$keys = array_keys(Bestellung::$Produkte);
 			while (!feof($fp)) {
 				$buffer = fgets($fp);
-  				if($buffer!="")
+  				if(strlen($buffer)>2)
 				{
-					$splitString = explode(" ", $buffer);
-					$currKey = $keys[$index];
-					$this->inland_preise[$currKey] = $splitString[0];
-					$this->ausland_preise[$currKey] = $splitString[1];
+					$splitString = explode("\t", $buffer);
+					if($index<9)
+					{
+						$currKey = $keys[$index];
+//						print "Preise key:$currKey:$buffer";
+						$this->inland_preise[$currKey] = $splitString[0];
+						$this->ausland_preise[$currKey] = $splitString[1];
+					}
+					else if($index==9)
+					{
+						$currKey = "Index";
+//						print "key:$currKey:$buffer";
+						$this->inland_portos[$currKey] = $splitString[0];
+						$this->ausland_portos[$currKey] = $splitString[1];
+					}
+					else 
+					{
+						$currKey = $index-9;
+//						print "key:$currKey:$buffer";
+						$this->inland_portos[$currKey] = $splitString[0];
+						$this->ausland_portos[$currKey] = $splitString[1];
+					}
 					$index++;
 				}
 			}
+			fclose($fp);
 			return TRUE;
 		}
 		else 
@@ -135,6 +160,8 @@ class BestellAblauf{
 	/*******************************************************************/
 		} else {
 			$this->bestellungAufgegeben = false;
+			$back = $this->holepreise();
+
 			require_once("bestellFormKopf.htm");
 			print "<font color=\"#FF0000\">".$ausgabePuffer."</font>";
 			require_once("bestellForm.php");
@@ -218,7 +245,7 @@ class BestellAblauf{
 
 	function pruefeFormElemente($formNummer, &$rueckGabe)
 	{
-		$nummernPruefString = "/\d+/";
+		$nummernPruefString = "/[\d\s]+/";
 		$emailPruefString = "/\S*@\S*\.\S*/";
 		$ausgabenPruefString = "/[^\d\s,]/";
 		$aboPruefString = "/[^\d]/";
@@ -239,11 +266,14 @@ class BestellAblauf{
 
 					if(	isset($_POST['bezahlung']) && $_POST['bezahlung']=="lastschrift")
 					{
-						if($_POST['Bankinstitut'] == "" ) $rueckGabe.="Bitte geben Sie das Bankinstitut ein.<br>";
+						if($_POST['Bankinstitut'] == "" ) 
+							$rueckGabe.="Bitte geben Sie das Bankinstitut ein.<br>";
 						$ktnrRichtig = preg_match($nummernPruefString, $_POST['Kontonummer']);
-						if(!$ktnrRichtig) $rueckGabe.="Bitte geben Sie nur Nummern in das Kontonummerfeld ein.<br>";
+						if(!$ktnrRichtig) 	
+							$rueckGabe.="Bitte geben Sie nur Nummern in das Kontonummerfeld ein.<br>";
 						$blzRichtig = preg_match($nummernPruefString, $_POST['Bankleitzahl']);
-						if(!$blzRichtig) $rueckGabe.="Bitte geben Sie nur Nummern in das Bankleitzahlfeld ein.<br>";
+						if(!$blzRichtig) 
+							$rueckGabe.="Bitte geben Sie nur Nummern in das Bankleitzahlfeld ein.<br>";
 					}
 				break;
 			case BestellAblauf::STEP_BESTELLUNG:

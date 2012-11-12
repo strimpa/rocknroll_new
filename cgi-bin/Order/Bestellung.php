@@ -23,6 +23,8 @@ class Bestellung{
 	var $bestellDatum;
 	var $dbText;
 	var $anzahlAusgaben;
+	var $preise;
+	var $portos;
 	
 	function Bestellung($bestellungen, $ausGabeNr, $insAusland, $datum, $kommentar)
 	{
@@ -31,30 +33,59 @@ class Bestellung{
 		$this->destination = $insAusland;
 		$this->bestellDatum = $datum;
 		$this->kommentar = EncodeUmlaute($kommentar);
-		$this->anzahlAusgaben = array();
+		$this->anzahlAusgaben = array(
+			"Abo"=>6, 
+			"Heft"=>1, 
+			"AktHeft"=>1,
+			"ProHeft"=>1, 
+			"KlPaket"=>10, 
+			"AboKlPaket"=>6,  
+			"GrPaket"=>50,  
+			"AboGrPaket"=>6,  
+			"Index"=>1
+		);
 		$this->gesamtPreis = 0;
+	}
+	
+	function GetPorto($key)
+	{
+		if(!array_key_exists($key, $this->portos))
+			return $this->portos[count($this->portos)-1];
+		return $this->portos[$key];
 	}
 	
 	function gibDBText()
 	{
 		$rueckGabe = "";
 		$this->gesamtPreis = 0;
-		$preise = Aufenthalt::GetInstance()->GetAblauf()->inland_preise;
+		$this->preise = Aufenthalt::GetInstance()->GetAblauf()->inland_preise;
+		$this->portos = Aufenthalt::GetInstance()->GetAblauf()->inland_portos;
 		if($this->destination != 'inland')
-			$preise=Aufenthalt::GetInstance()->GetAblauf()->ausland_preise;
+		{
+			$this->preise=Aufenthalt::GetInstance()->GetAblauf()->ausland_preise;
+			$this->portos=Aufenthalt::GetInstance()->GetAblauf()->ausland_portos;
+		}
 
 		foreach($this->bestellt as $key=>$bestellung)
 		{
-			if(array_key_exists($key, $preise))
+			if(array_key_exists($key, $this->preise))
 			{
-				$this->anzahlAusgaben[$key] = 1;
+				//$this->anzahlAusgaben[$key] = 1;
 				if($key=="Heft")
 				{
 					$keywords = preg_split("/[\s,]+/", $this->ausgabeNr["Heft"]);
 					$this->anzahlAusgaben[$key] = (count($keywords)>0?count($keywords):1);
+					$produktPreis = $this->preise[$key] * $this->anzahlAusgaben[$key];
 				}
-				$this->gesamtPreis += $preise[$key] * $this->anzahlAusgaben[$key];
-//				$this->portoErgebnis=($this->portoErgebnis<$this->Porto[$bestellung]?$this->Porto[$bestellung]:$this->portoErgebnis);
+				else
+					$produktPreis = $this->preise[$key];
+					
+				if("Index"==$key)
+					$portoErgebnis = $this->GetPorto("Index");
+				else
+					$portoErgebnis = $this->GetPorto($this->anzahlAusgaben[$key]);
+				
+				$this->gesamtPreis += $produktPreis + $portoErgebnis;
 				$rueckGabe .= Bestellung::$Produkte[$key];
 				if($key=="Abo")
 					$rueckGabe .= " ab Ausgabe ".$this->ausgabeNr["Abo"];
@@ -69,9 +100,6 @@ class Bestellung{
 	{
 		$ablauf = Aufenthalt::GetInstance()->GetAblauf();
 		$this->dbText = $this->gibDBText();
-		$preise = $ablauf->inland_preise;
-		if($this->destination != 'inland')
-			$preise=$ablauf->ausland_preise;
 		
 		// bestellTebelle	
 		$mitBerechnung = (($this->destination!='noneuausland') ? true : false);
@@ -79,20 +107,20 @@ class Bestellung{
 			<strong>Sie haben folgende Artikel ausgew&auml;hlt.</strong> <br>";
 	
 		$rueckGabe .= "
-			<table border=\"0\" cellspacing=\"2\" cellpadding=\"2\" width=\"600px\">
+			<table border=\"0\" cellspacing=\"2\" cellpadding=\"2\" width=\"630px\">
 			<thead>
 				<tr bgcolor=\"#336699\"> 
-				  <td width=40%> <strong>Produkt:</strong> 
+				  <td width=\"200px\"> <strong>Produkt:</strong> 
 				  </td>
-				  <td width=40%><strong>Ab Ausgabe Nr.</strong>
+				  <td><strong>Ab Ausgabe Nr.</strong>
 				  </td>
-				  <td width=40%><strong>Anzahl</strong>
+				  <td width=\"40px\"><strong>Anzahl</strong>
 				  </td>";	
 		if($mitBerechnung)
 			$rueckGabe .= "
-			  <td width=40%><strong>Preis pro St&uuml;ck</strong></td>
-			  <td width=40%><strong>Porto <a href=\"portoliste.htm\" target=\"_blank\" rel=\"lightbox['portoliste']\" ><img src=\"/images/toolTipHelp.gif\" /></a></strong></td>
-			  <td width=20%><strong>Preis inkl. P+V</strong></td>";
+			  <td width=\"80px\"><strong>Preis Produktanzahl (in &euro;)</strong></td>
+			  <td width=\"80px\"><strong>Porto <a href=\"/Preistabelle.htm\" target=\"_blank\" rel=\"lightbox['portoliste']\" ><img src=\"/images/toolTipHelp.gif\" /></a> (in &euro;)</strong></td>
+			  <td width=\"80px\"><strong>Preis inkl. P+V</strong> (in &euro;)</td>";
 			  
 		/*******************************
 		Zeilen mit berechnung		
@@ -111,24 +139,31 @@ class Bestellung{
 						$abAusgabe = $this->ausgabeNr[$key];
 					$rueckGabe .= "
 					<tr bgcolor=\"#336699\"> 
-					  <td width=40%>".Bestellung::$Produkte[$key]." 
-					  </td>
-					  <td width=40%>".$abAusgabe."</td>
-					  <td width=40%>".$this->anzahlAusgaben[$key]."</td>";
+					  <td>".Bestellung::$Produkte[$key]."</td>
+					  <td>$abAusgabe</td>
+					  <td>".$this->anzahlAusgaben[$key]."</td>";
+
 					if($mitBerechnung)
 					{
-					  $porto = 0;
-					  $portoString = "?";
-					  if($this->destination!="noneuausland")
-					  {
-					  	$porto = $ablauf->portos[$this->destination][$this->anzahlAusgaben[$key]];
-					  	$portoString = sprintf("%3.2f", $porto);
-					  }
-					  $rueckGabe .= "
-					  <td width=40%>".sprintf("%3.2f", $preise[$key])."</td>
-					  <td width=40%>".$portoString."</td>
-					  <td width=20% align=\"right\">".
-						sprintf("%3.2f", $preise[$key]*$this->anzahlAusgaben[$key]+$porto)."</td>";
+						//$this->anzahlAusgaben[$key] = 1;
+						if($key=="Heft")
+						{
+							$keywords = preg_split("/[\s,]+/", $this->ausgabeNr["Heft"]);
+							$this->anzahlAusgaben[$key] = (count($keywords)>0?count($keywords):1);
+							$produktPreis = $this->preise[$key] * $this->anzahlAusgaben[$key];
+						}
+						else
+							$produktPreis = $this->preise[$key];
+							
+						if("Index"==$key)
+							$portoErgebnis = $this->GetPorto("Index");
+						else
+							$portoErgebnis = $this->GetPorto($this->anzahlAusgaben[$key]);
+						
+						$rueckGabe .= "
+						<td>".sprintf("%3.2f", $produktPreis)."</td>
+						<td>".sprintf("%3.2f", $portoErgebnis)."</td>
+						<td align=\"right\">".sprintf("%3.2f", $produktPreis + $portoErgebnis)."</td>";
 					}
 					$rueckGabe .= "
 					</tr>";
@@ -142,7 +177,7 @@ class Bestellung{
 			<tr bgcolor=\"#666699\"> 
 				<td colspan=\"2\">&nbsp;</td>
 				<td colspan=\"3\">Komplett Preis</td>
-				<td align=\"right\"><strong	>".sprintf("%3.2f", $this->gesamtPreis)."</strong></td>
+				<td align=\"right\"><strong	>".sprintf("%3.2f", $this->gesamtPreis)." &euro;</strong></td>
 			<tr>";
 /*			<tr bgcolor=\"#336699\"> 
 				<td colspan=\"2\">&nbsp;</td>
@@ -155,6 +190,9 @@ class Bestellung{
 				<td border=\"1\" align=\"right\"><b>".sprintf("%3.2f", ($this->portoErgebnis+$this->gesamtPreis))."</td>
 			<tr>";
 */		$rueckGabe .= "
+			<tr bgcolor=\"#336699\"> 
+				<td colspan=\"6\">Ihr Kommentar:<p />".$this->kommentar."</td>
+			<tr>
 			</tbody>
 		</table>
 		

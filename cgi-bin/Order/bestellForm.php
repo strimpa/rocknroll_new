@@ -37,7 +37,7 @@ Ggf. entstehende Bankgeb&uuml;hren bei &Uuml;berweisungen aus dem Ausland m&uuml
   </tr>
 	<tr>
 	  <td bgcolor="#336699">
-        <input name="ProHeft" type="checkbox" id="ProHeft" value="ON" />
+        <input name="ProHeft" type="checkbox" id="ProHeft" value="ON" <?php if(isset($_POST['ProHeft'])) print "checked"; ?> />
       </td>
 	  <td bgcolor="#336699"><strong>Probeheft</strong></td>
 	  <td bgcolor="#336699">&nbsp;</td>
@@ -47,7 +47,7 @@ Ggf. entstehende Bankgeb&uuml;hren bei &Uuml;berweisungen aus dem Ausland m&uuml
   </tr>
 	<tr>
 	  <td bgcolor="#336699">
-        <input name="AktHeft" type="checkbox" id="AktHeft" value="ON" />
+        <input name="AktHeft" type="checkbox" id="AktHeft" value="ON" <?php if(isset($_POST['AktHeft'])) print "checked"; ?> />
       </td>
 	  <td bgcolor="#336699"><strong>Aktuelle Ausgabe </strong></td>
 	  <td bgcolor="#336699">&nbsp;</td>
@@ -57,7 +57,7 @@ Ggf. entstehende Bankgeb&uuml;hren bei &Uuml;berweisungen aus dem Ausland m&uuml
   </tr>
 	<tr>
       <td bgcolor="#336699"><p style="line-height: 100%" align="left">
-          <INPUT TYPE=CHECKBOX NAME="Heft" value="ON">
+          <INPUT TYPE=CHECKBOX NAME="Heft" value="ON" <?php if(isset($_POST['Heft'])) print "checked"; ?> />
        </td>
       <td bgcolor="#336699"><span style="line-height: 100%"><strong>Einzelne Ausgaben</strong></span></td>
       <td bgcolor="#336699">&nbsp;</td>
@@ -90,7 +90,7 @@ Ggf. entstehende Bankgeb&uuml;hren bei &Uuml;berweisungen aus dem Ausland m&uuml
   </tr>
 	<tr bgcolor="#336699">
 	  <td width="22"><p style="line-height: 100%" align="left">
-          <INPUT TYPE="CHECKBOX" NAME="Abo" value="ON">
+          <INPUT TYPE="CHECKBOX" NAME="Abo" value="ON" <?php if(isset($_POST['Abo'])) print "checked"; ?> />
 	  </td>
       <td width="108"><span style="line-height: 100%"><strong>Abonnement</strong></span></td>
       <td>6 Ausgaben</td>
@@ -111,7 +111,7 @@ Ggf. entstehende Bankgeb&uuml;hren bei &Uuml;berweisungen aus dem Ausland m&uuml
 	<tr>
 	  <td width=163 rowspan="4"><img src="/images/Pakete.gif" width="150" align="right"></td>
 	  <td bgcolor="#336699"><p style="line-height: 100%" align="left">
-          <input name="KlPaket" type="checkbox" id="KlPaket" value="ON" />
+          <input name="KlPaket" type="checkbox" id="KlPaket" value="ON" <?php if(isset($_POST['KlPaket'])) print "checked"; ?> />
 	  </td>
 	  <td bgcolor="#336699"><span style="line-height: 100%"><strong>kleines Probepaket </strong></span></td>
 	  <td bgcolor="#336699">10 verschiedene &auml;ltere Ausgaben nach unserer Wahl.  Sie k&ouml;nnen bevorzugte Nummern in das Textfeld am Ende des Bestellformulars eintragen. Wir versuchen es m&ouml;glich zu machen.</td>
@@ -122,7 +122,7 @@ Ggf. entstehende Bankgeb&uuml;hren bei &Uuml;berweisungen aus dem Ausland m&uuml
 	<tr bgcolor="#336699">
 	  <td colspan="2"><p style="line-height: 100%; margin-bottom: 0" align="left">&nbsp;</td>
 	  <td colspan="2">
-        <input name="AboKlPaket" type="checkbox" id="AboKlPaket" value="ON" />
+        <input name="AboKlPaket" type="checkbox" id="AboKlPaket" value="ON" <?php if(isset($_POST['AboKlPaket'])) print "checked"; ?> />
       Mit Abo ab aktueller Ausgabe zzgl.</td>
 	  <td align="right"><p style="line-height: 100%" align="right"><?php printf(" %4.2f &euro; ", Aufenthalt::GetInstance()->GetAblauf()->inland_preise["AboKlPaket"]); ?></td>
 	  <td align="right"><?php printf(" %4.2f &euro; ", Aufenthalt::GetInstance()->GetAblauf()->ausland_preise["AboKlPaket"]); ?></td>
@@ -130,7 +130,7 @@ Ggf. entstehende Bankgeb&uuml;hren bei &Uuml;berweisungen aus dem Ausland m&uuml
     
 	<tr>
 	  <td bgcolor="#336699"><p style="line-height: 100%; margin-bottom: 0" align="left">
-          <input name="GrPaket" type="checkbox" id="GrPaket" value="ON" />
+          <input name="GrPaket" type="checkbox" id="GrPaket" value="ON" <?php if(isset($_POST['GrPaket'])) print "checked"; ?> />
 	  </td>
 	  <td bgcolor="#336699"><span style="line-height: 100%; margin-bottom: 0"><strong>gro&szlig;es Probepaket </strong></span></td>
 	  <td colspan="2" bgcolor="#336699">50 verschiedene &auml;ltere Ausgaben nach unserer Wahl.  Sie k&ouml;nnen bevorzugte Nummern in das Textfeld am Ende des Bestellformulars eintragen. Wir versuchen es m&ouml;glich zu machen.&nbsp;</td>
@@ -140,7 +140,7 @@ Ggf. entstehende Bankgeb&uuml;hren bei &Uuml;berweisungen aus dem Ausland m&uuml
 	<tr bgcolor="#336699">
 	  <td colspan="2"><p style="line-height: 100%; margin-bottom: 0" align="left">&nbsp;</td>
 	  <td colspan="2">
-        <input name="AboGrPaket" type="checkbox" id="AboGrPaket" value="ON" />
+        <input name="AboGrPaket" type="checkbox" id="AboGrPaket" value="ON" <?php if(isset($_POST['AboGrPaket'])) print "checked"; ?> />
       Mit Abo ab aktueller Ausgabe zzgl.</td>
 	  <td align="right"><p style="line-height: 100%" align="right"><?php printf(" %4.2f &euro; ", Aufenthalt::GetInstance()->GetAblauf()->inland_preise["AboGrPaket"]); ?></td>
 	  <td align="right"><?php printf(" %4.2f &euro; ", Aufenthalt::GetInstance()->GetAblauf()->ausland_preise["AboGrPaket"]); ?></td>
@@ -156,7 +156,7 @@ Ggf. entstehende Bankgeb&uuml;hren bei &Uuml;berweisungen aus dem Ausland m&uuml
   	</tr>
 	<tr bgcolor="#336699">
 	  <td width="22"><p style="line-height: 100%" align="left">
-          <INPUT TYPE=CHECKBOX NAME="Index" value="ON">
+          <INPUT TYPE=CHECKBOX NAME="Index" value="ON" <?php if(isset($_POST['Index'])) print "checked"; ?> />
 	  </td>
       <td width="108"><span style="line-height: 100%"><strong>Der Index</strong></span></td>
       <td colspan="2">Inhaltsverzeichnis aller Magazine von Ausgabe 1 bis 200.</td>

@@ -204,23 +204,23 @@ class Benutzer{
 		$rueckgabe = true;
 		// Muss Eingaben abfragen.
 		$this->Abonnent = (isset($_POST['schonKunde'])?$_POST['schonKunde']:"nein");
-		$this->nachName = EncodeUmlaute($_POST['Nachname']);
-		$this->bezahlung = EncodeUmlaute($_POST['bezahlung']);
-		$this->anrede = EncodeUmlaute($_POST['anrede']);
-		$this->vorName = EncodeUmlaute($_POST['Vorname']);
-		$this->adresse = EncodeUmlaute($_POST['Postadresse'].$_POST['Postadresse2']);
-		$this->postleitzahl = EncodeUmlaute($_POST['Postleitzahl']);
-		$this->ort = EncodeUmlaute($_POST['Ort']);
+		$this->nachName = SafeDBString($_POST['Nachname']);
+		$this->bezahlung = SafeDBString($_POST['bezahlung']);
+		$this->anrede = SafeDBString($_POST['anrede']);
+		$this->vorName = SafeDBString($_POST['Vorname']);
+		$this->adresse = SafeDBString($_POST['Postadresse'].$_POST['Postadresse2']);
+		$this->postleitzahl = SafeDBString($_POST['Postleitzahl']);
+		$this->ort = SafeDBString($_POST['Ort']);
 		$this->land = ($_POST['Land']=="germany"?$_POST['Land']:($_POST['Land']=="sonstigesEU"?$_POST['sonstigesLandEU']:$_POST['sonstigesLand']));
-		$this->telHome=EncodeUmlaute($_POST['Telefon']);
-		$this->eMail = EncodeUmlaute($_POST['EMail']);
-		$this->bankInstitut = EncodeUmlaute($_POST['Bankinstitut']);
-		$this->ktnr = EncodeUmlaute($_POST['Kontonummer']);
-		$this->blz = EncodeUmlaute($_POST['Bankleitzahl']);
-		$this->kundenNummer = EncodeUmlaute($_POST['kundenNr']==NULL?"":$_POST['kundenNr']);
+		$this->telHome=SafeDBString($_POST['Telefon']);
+		$this->eMail = SafeDBString($_POST['EMail']);
+		$this->bankInstitut = SafeDBString($_POST['Bankinstitut']);
+		$this->ktnr = SafeDBString($_POST['Kontonummer']);
+		$this->blz = SafeDBString($_POST['Bankleitzahl']);
+		$this->kundenNummer = SafeDBString($_POST['kundenNr']==NULL?"":$_POST['kundenNr']);
 		
 		Aufenthalt::GetInstance()->GetAblauf()->aktuelleBestellung->kommentar.="\n ".
-			($this->bezahlung=="lastschrift"?"Der Benutzer m�chte das Geld per Lastschrift eingezogen bekommen":"Der Benutzer bezahlt per &Uuml;berweisung");
+			($this->bezahlung=="lastschrift"?"Der Benutzer m&ouml;chte das Geld per Lastschrift eingezogen bekommen":"Der Benutzer bezahlt per &Uuml;berweisung");
 
 		return $rueckgabe;
 	}
