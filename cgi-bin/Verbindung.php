@@ -282,7 +282,7 @@ global $db_pass;
         		continue;
         	if($fieldIndex>0)
         		$sql .= ",";
-			$escapedValue = mysql_real_escape_string($values[$fieldIndex]);
+			$escapedValue = SafeDBString($values[$fieldIndex]);
         	$sql .= "`".$fields[$fieldIndex]."` = '".$escapedValue."'";
         }
         
@@ -326,7 +326,7 @@ global $db_pass;
 	        		continue;
 	        	if($fieldIndex>0)
 	        		$sql .= ",";
-				$escapedValue = mysql_real_escape_string($values[$fieldIndex]);
+				$escapedValue = SafeDBString($values[$fieldIndex]);
 	        	$sql .= "'".$escapedValue."'";
 	        }
 	        

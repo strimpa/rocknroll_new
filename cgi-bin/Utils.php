@@ -270,9 +270,9 @@ function EncodeUmlaute($string)
 	  return $res;
 }
 
-function SafeJSONString($in)
+function SafeJSONString($out)
 {
-	$out = htmlentities($in);
+//	$out = htmlentities($out);
 	$out = str_replace("\n","<br />",$out);
   	$out = mysql_escape_string($out);
 	return $out;

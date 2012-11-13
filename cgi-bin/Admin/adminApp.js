@@ -341,7 +341,7 @@
 						{
 							var dataDiv = document.createElement("div");
 							dataTd.appendChild(dataDiv);
-							dataDiv.textContent = col;
+							dataDiv.innerHTML = col;
 						}
 						colCOunt++;
 					}
