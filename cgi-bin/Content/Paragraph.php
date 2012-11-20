@@ -313,6 +313,7 @@ class TablePara implements iParagraph
 						}
 						else
 						{
+							$value = EncodeUmlaute($value);
 							$myElement->nodeValue = htmlspecialchars($value);
 						}
 					}

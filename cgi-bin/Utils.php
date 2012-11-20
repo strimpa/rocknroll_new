@@ -256,9 +256,8 @@ function SafeDBString($res)
 	  return $res;
 }
 
-function EncodeUmlaute($string)
+function EncodeUmlaute($res)
 {
-	  $res = htmlentities($string);
 	  $res = str_replace("&uuml;","ü",$res);
 	  $res = str_replace("&auml;","ä",$res);
 	  $res = str_replace("&ouml;",'ö',$res);
@@ -266,7 +265,6 @@ function EncodeUmlaute($string)
 	  $res = str_replace("&Auml;",'Ä',$res);
 	  $res = str_replace("&Ouml;",'Ö',$res);
 	  $res = str_replace("&szlig;",'ß',$res);
-	  $res = mysql_escape_string($res);
 	  return $res;
 }
 
@@ -274,7 +272,7 @@ function SafeJSONString($out)
 {
 //	$out = htmlentities($out);
 	$out = str_replace("\n","<br />",$out);
-  	$out = mysql_escape_string($out);
+  	$out = SafeDBString($out);
 	return $out;
 }
 
