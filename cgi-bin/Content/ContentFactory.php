@@ -136,7 +136,7 @@ class ContentFactory
 					$type = Article::DELEGATE_ARTICLE_ORDER;
 					break;
 				case "guestbook":
-					$url = "http://www.rock-around.de/system-cgi/guestbook/guestbook.php?action=view";
+					$url = "	";
 					break;
 			} 
 			$newPage = new ContentPage($pageData, $type, $url);

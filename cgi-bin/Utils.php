@@ -407,7 +407,7 @@ function EnterXMLintoTable($tablename, $filename)
 				array_push($fieldArray,$cell->tagName);
 				if ($cell->tagName == 'date') 
 				{
-					$test = date_create_from_format("d.m.Y", $val);
+					$test = DateTime::createFromFormat("d.m.Y", $val);
 					if(FALSE != $test)
 						$val = date_format($test, 'Y-m-d'); // 2011-03-03 00:00:00;
 				}

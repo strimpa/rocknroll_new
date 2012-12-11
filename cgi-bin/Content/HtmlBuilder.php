@@ -40,7 +40,7 @@ class HtmlBuilder
 	public function &AddMenuEntry($menuTuple, $index, $safePic=false)
 	{
 	    $link = $this->doc->createElement( 'a' );
-	    $anchorTarget = "#paragraph_".MakeSafeString($menuTuple->url);
+	    $anchorTarget = "#paragraph_".MakeSafeString(EncodeUmlaute($menuTuple->url));
 	    $link->setAttribute("href", $anchorTarget);
 	    $ele = $this->doc->createElement( 'div' );
 	    $index = sprintf("%02d", $index+1);
@@ -75,7 +75,7 @@ class HtmlBuilder
 	    if(NULL!=$class)
 	    	$div->setAttribute("class", $class);
 	    if(NULL!=$inhalt)
-		    $div->nodeValue = htmlspecialchars($inhalt);
+		    $div->nodeValue = $inhalt;
 	    return $div;
 	}
 	
