@@ -154,6 +154,7 @@ class TablePara implements iParagraph
 	private $picAlign;
 	private $tableType; 
 	private $category;
+	private $sortBy;
 	private $eventTypePicPath = "/images/layout/";
 
 	public function PicPara($align)
@@ -167,6 +168,7 @@ class TablePara implements iParagraph
 		$this->height = $dataAssoc["height"];
 		$this->tableType = $dataAssoc["table"];
 		$this->category = $dataAssoc["category"];
+		$this->sortBy = $dataAssoc["sortBy"];
 	}
 	
 	private function CreateStyleString($offset)
@@ -366,6 +368,10 @@ class TablePara implements iParagraph
 		if(array_key_exists("date", $tableDef[0]))
 		{
 			$reqArray["orderBy"] = "date";
+		}
+		else if(array_key_exists("issue", $tableDef[0]))
+		{
+			$reqArray["orderBy"] = "issue";
 		}
 
 		$dbResult = Aufenthalt::GetInstance()->DBConn()->GetTableContent($reqArray);

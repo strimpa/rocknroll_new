@@ -300,11 +300,12 @@
 										$(dataDiv).attr("field", colHash);
 										
 										$(dataDiv).spinner({
-											onClose: function(value, inst) 
+											change: function(ev, ui) 
 											{
 												var theId = this.getAttribute("rowId");
 												var field = this.getAttribute("field");
-											    var dbData = eval("({"+field+": \""+value+"\"})"); 
+												var val = $(this).spinner("value");
+											    var dbData = eval("({"+field+": \""+val+"\"})"); 
 											    $.fn.loadContent(tableName, null, dbData, "data", {edit:true,req:("id="+theId)});
 											}
 										});
