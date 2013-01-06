@@ -1,11 +1,11 @@
-27.80 	26.80 	// Abo Inland
+32.80 	32.0 	// Abo Inland
 4.8 	4.8 	// Einzelheft Inland
 4.8 	4.8 	// aktuelles Heft Inland
 3.8 	3.8 	// Probeheft Inland
-27.80 	26.80 	// kl Probepaket Inland
-22.80 	21.80 	// probepaket klein abo
+30.0	30.0 	// kl Probepaket Inland
+17.80 	22.0 	// probepaket klein abo
 157 	165 	// grosses Probepaket Inland
-22.80 	21.80 	// probepaket gross abo
+27.80 	27.0 	// probepaket gross abo
 5 	7 	// Index Inland
 
 2	3	// porto Index

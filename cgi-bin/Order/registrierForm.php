@@ -68,13 +68,13 @@
                       <TD ALIGN="right" class="normalFont"> Land </TD>
                       <TD class="normalFont"><p />
                         <label onclick=" javascript:setPayment('germany')">
-                          <input name="Land" type="radio" value="inland" checked="checked" />
+                          <input name="Land" type="radio" value="inland" <?php if(isset($_POST['destination']) && $_POST['destination']=="inland") print "checked=\"checked\"" ?> />
                           Germany</label>
                         <br />
                         <label onclick="javascript:setPayment('else')">
-                          <input type="radio" name="Land" value="euausland" />
+                          <input type="radio" name="Land" value="euausland" <?php if(isset($_POST['destination']) && $_POST['destination']=="euausland") print "checked=\"checked\"" ?> />
                           EU</label>
-                        <input name="sonstigesLandEU" type="text" id="sonstigesLandEU" />
+                        <input name="sonstigesLandEU" type="text" id="sonstigesLandEU" <?php if(isset($_POST['destination']) && $_POST['destination']=="sonstigesLandEU") print "checked=\"checked\"" ?> />
                         <br />
                         <label onclick="javascript:setPayment('else')">
                           <input type="radio" name="Land" value="noneuausland" />

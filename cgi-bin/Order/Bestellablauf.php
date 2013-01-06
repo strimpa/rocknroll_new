@@ -178,8 +178,8 @@ class BestellAblauf{
 		$this->aktuelleBestellung = new Bestellung(
 		$_POST,
 		array(
-			"Abo"=>EncodeUmlaute($_POST['AboAbAusgabe']==""?"":$_POST['AboAbAusgabe']), 
-			"Heft"=>EncodeUmlaute($_POST['EinzelheftAusgabeNr']==""?"":$_POST['EinzelheftAusgabeNr'])
+			"Abo"=>SafeDBString($_POST['AboAbAusgabe']==""?"":$_POST['AboAbAusgabe']), 
+			"Heft"=>SafeDBString($_POST['EinzelheftAusgabeNr']==""?"":$_POST['EinzelheftAusgabeNr'])
 			),
 		$_POST['destination'],
 		date("Y-m-d"),
