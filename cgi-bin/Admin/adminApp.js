@@ -379,10 +379,11 @@
 								var theID = idliste[ti];
 								var delData = {};
 								delData[theID] = $(this).attr("id");
-								$.fn.loadContent(table, triggerParagraphCreation, delData, "data", {del:true});
+								$.fn.loadContent(table, null, delData, "data", {del:true});
 							}
 						}
 					});
+					triggerParagraphCreation();
 						
 				});
 
@@ -518,8 +519,9 @@
 
 					$(addEntryButton).click(function()
 					{
-						var data = {category:theCategory};
-						$.fn.loadContent(theTable, triggerParagraphCreation, data, "data", {write:true});
+						var data = {category:theCategory,table:theTable};
+						editTableTrigger(data);
+//						$.fn.loadContent(theTable, triggerParagraphCreation, data, "data", {write:true});
 					});
 					$(delEntriesButton).click(function()
 					{
@@ -754,7 +756,6 @@
 		
 		function refreshPages(callback)
 		{
-			$("#errorOutput").empty();
 			$.fn.loadContent("pages", function(result)
 			{
 				contentCache = $(result);
@@ -1103,12 +1104,6 @@
 				optn.textContent = title + " - " + id;
 			    $("#insertParagraphSelect").append(optn);
 			});		
-			$(response).find("error").each(function()
-		    {
-				var anError = document.createElement("div");
-				$(anError).append(this);
-			    $("#errorOutput").append(anError);
-			});		
 		}
 		
 		triggerParagraphCreation = function()
@@ -1116,20 +1111,33 @@
 			refreshPages(populateParagraphs);
 		};
 		
-		function editTableTrigger(defaultData)
+		editTableTrigger = function (defaultData)
 		{
-			TableEntryDialog.createDialog(document, function()
+			var theTable = defaultData['table'];
+			var enterData = function(data)
 			{
-				var data = {}; 
-				TableEntryDialog.getData(data);
 				var theId = defaultData['id'];
 				if(data['newCategory']!="")
 					data['category'] = data['newCategory'];
 				data.newCategory = null;	
 				if(null!=theId)
-					$.fn.loadContent(defaultData['table'], triggerParagraphCreation, data, "data", {edit:true,req:("id="+theId)});
+					$.fn.loadContent(theTable, triggerParagraphCreation, data, "data", {edit:true,req:("id="+theId)});
 				else
-					$.fn.loadContent(defaultData['table'], triggerParagraphCreation, data, "data", {write:true});
+					$.fn.loadContent(theTable, triggerParagraphCreation, data, "data", {write:true});
+			};
+			
+			var theDialog = EventTableEntryDialog;
+			switch(theTable)
+			{
+				case "archive":
+					theDialog = ArchivTableEntryDialog;
+					break;
+			}
+			theDialog.createDialog(document, function()
+			{
+				var data = {}; 
+				theDialog.getData(data);
+				enterData(data);
 			}, defaultData);
 		}
 		
@@ -1464,6 +1472,9 @@
 		$("#paragraphDropDown").change(selectParaForSubMenu);
 		$("#upMenuItemButton").click(moveMenuItemHandler);
 		$("#downMenuItemButton").click(moveMenuItemHandler);
+		$("#errorOutputDelete").click(function(evt){
+			$("#errorOutput").empty();
+		});
 		refreshPages(populateContentDropDown);
 	}
 
@@ -1496,10 +1507,34 @@
 		
 //		alert("url:"+url);
 
-		$.post(url, data, callback)
+		var cb = function(response)
+		{
+			try{
+				xmlDoc = $.parseXML( response );
+				if(null!=xmlDoc)
+				{
+					console.log("yeah response is xml.");
+					$(xmlDoc).find("error").each(function()
+				    {
+						var anError = document.createElement("div");
+						$(anError).append(this);
+				    	console.log("an error:"+$(anError).text());
+					    $("#errorOutput").append(anError);
+					});		
+				}
+			}
+			catch(e)
+			{
+				console.log("Couldn't parse response to jQuery object.");
+			}
+			if(null!=callback)
+				callback(response);
+		};
+
+		$.post(url, data, cb);
 //		.success($.fn.loadCallback)
-		.error($.fn.loadCallback)
-		.complete($.fn.loadCallback);
+//		.error($.fn.loadCallback)
+//		.complete($.fn.loadCallback);
 	}
 	$.fn.Init = function() 
 	{

@@ -1,4 +1,7 @@
 <?php
+	global $build_errors;
+	$build_errors = array();
+		
 
 	include("../Utils.php");
 	include("../Aufenthalt.php");
@@ -220,8 +223,6 @@
 				
 				set_error_handler('handleError', E_WARNING|E_ERROR);
 				
-				$build_errors = array();
-				
 				foreach($result as $row)
 				{
 					try{
@@ -298,7 +299,7 @@
 	}
 	else
 	{
-		print "invalid request!";
+		print "invalid table request!";
 	}
 
 

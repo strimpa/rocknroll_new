@@ -11,7 +11,7 @@ function MyHtmlSpecialVars_decode($string)
 
 function PrintHtmlComment($string)
 {
-	//print ("<!-- ".$string."//-->\n");
+	print ("<!-- ".$string."//-->\n");
 }
 
 function FilenameFromUrl(&$params=NULL)
@@ -209,7 +209,7 @@ function GetFolderContent($assetFolder)
 		case "images":
 		{
 			$suffix = "images/";
-			PrintHtmlComment("suffix: $suffix");
+			PrintHtmlComment("default_dir: $default_dir, suffix: $suffix");
 			$extensions = array("jpg", "gif", "png");
 		}
 	}

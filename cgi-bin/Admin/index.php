@@ -75,9 +75,10 @@
 		Bestehenden Absatz einfuegen:<select id="insertParagraphSelect" class="fullSizeControl">
 				<option></option>
 		</select>
-		<fieldset id="errorOutput">
+		<fieldset>
 			<legend>Parsing Fehler:</legend>
-			
+			<input type="button" id="errorOutputDelete" value="Loeschen" />
+			<div id="errorOutput"></div>
 		</fieldset>
 	</div>
 	<div id="admincontent">

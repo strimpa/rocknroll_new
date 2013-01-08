@@ -238,6 +238,7 @@ DateField.prototype.createControl = function(doc, presetValues)
 DateField.prototype.init = function()
 {
 	$(this.control).datepicker({dateFormat:'yy-mm-dd'});
+	$(this.control).datepicker( "setDate", "0" );
 //	if(this.control.getAttribute("value")=="")
 //		$(this.control).datepicker("value", 300);
 }
@@ -725,27 +726,67 @@ TableGroup.init = function(presetValues)
 	}, null, "data", {selector:"category",distinct:true});
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
-var TableEntryDialog = new EditDialog("TableEntryDialog", "In Tabelle einfuegen.");
-TableEntryDialog.controls = new Array(
+var EventTableEntryDialog = new EditDialog("EventTableEntryDialog", "In Tabelle einfuegen.");
+EventTableEntryDialog.controls = new Array(
 		new ComboBox("category",  "Die Kategorie des Eintrages."),
 		new TextField("newCategory",  "Neue Kategorie erstellen. Ueberschreibt obige Auswahl."),
 		new TextField("title", "Der Titel des Eintrages."),
-		new PicBrowse("picUrl", "Event Bild"),
+		new PicBrowse("pic", "Event Bild"),
 		new DateField("date", "Das Datum des Events."),
-		new ComboBox("type",  "Typ der Veranstaltung.", "Ausstellung|Konzert|Jubilaeum", true),
 		new TextField("description", "Beschreibung des Events."),
 		new TextField("venue", "Ort des Events."),
 		new TimeField("time", "Anfangszeit des Events."),
 		new TextField("misc", "Verschiedenes ueber das Event.")
 );
-TableEntryDialog.init = function(initData)
+function getEventCategoryCallback(result)
 {
-	var myCategory = "";
-	switch(initData['table'])
-	{
-		case "links":
-			myCategory = "";
-			break;
-	}
+	$(EventTableEntryDialog.controls[0].control).empty();
+
+	optn = document.createElement("OPTION");
+	optn.textContent = "";
+	$(EventTableEntryDialog.controls[0].control).append(optn);
+	
+	$(result).find("category").each(function(){
+		optn = document.createElement("OPTION");
+		optn.textContent = $(this).text();
+		$(EventTableEntryDialog.controls[0].control).append(optn);
+	});
+	$(EventTableEntryDialog.controls[0].control).attr("value", $(EventTableEntryDialog.controls[0].control).attr("initVal"));
+}
+EventTableEntryDialog.init = function(initData)
+{
+	$(EventTableEntryDialog.controls[0].control).attr("initVal", initData['category']);
+	$.fn.loadContent(initData['table'], getEventCategoryCallback, null, "data", {selector:"category",distinct:true});
+	Group.prototype.init.call(this, initData);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+var ArchivTableEntryDialog = new EditDialog("EventTableEntryDialog", "In Tabelle einfuegen.");
+ArchivTableEntryDialog.controls = new Array(
+		new ComboBox("category",  "Die Kategorie des Eintrages."),
+		new TextField("newCategory",  "Neue Kategorie erstellen. Ueberschreibt obige Auswahl."),
+		new Spinner("issue", "Die Ausgabenummer."),
+		new PicBrowse("pic", "Cover"),
+		new TextField("content", "Inhalt des Heftes.")
+);
+function getEventCategoryCallback(result)
+{
+	$(ArchivTableEntryDialog.controls[0].control).empty();
+
+	optn = document.createElement("OPTION");
+	optn.textContent = "";
+	$(ArchivTableEntryDialog.controls[0].control).append(optn);
+	
+	$(result).find("category").each(function(){
+		optn = document.createElement("OPTION");
+		optn.textContent = $(this).text();
+		$(ArchivTableEntryDialog.controls[0].control).append(optn);
+	});
+	$(ArchivTableEntryDialog.controls[0].control).attr("value", $(ArchivTableEntryDialog.controls[0].control).attr("initVal"));
+}
+ArchivTableEntryDialog.init = function(initData)
+{
+	$(ArchivTableEntryDialog.controls[0].control).attr("initVal", initData['category']);
+	$.fn.loadContent(initData['table'], getEventCategoryCallback, null, "data", {selector:"category",distinct:true});
 	Group.prototype.init.call(this, initData);
 }

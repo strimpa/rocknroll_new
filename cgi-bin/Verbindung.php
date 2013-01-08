@@ -145,6 +145,7 @@ global $db_pass;
 
 	public function GetTableContent($settings)
 	{
+		global $build_errors;
 		$backGabe = array();
 		if(!is_array($settings))
 		{
@@ -185,14 +186,11 @@ global $db_pass;
 		$sql .= ';';
 //        print("<!-- sql:".$sql." //-->\n");
 		$result = mysql_query($sql);
-//		print "<!-- Errors: ".mysql_error()."//-->";
+		array_push($build_errors,  "Errors: ".mysql_error());
 		if($result && mysql_num_rows($result)>0)
 		{
 			while($reihe = mysql_fetch_assoc($result))
 			{
-//				$keys = array_keys($reihe);
-//				foreach ($keys as $key)
-//	        		print("<!-- key:".$key." //-->\n");
 				array_push($backGabe, $reihe);
 			}
 		}
@@ -201,6 +199,7 @@ global $db_pass;
 
 	public function GetTableDef($settings)
 	{
+		global $build_errors;
 		$backGabe = array();
 		if(!is_array($settings))
 		{
@@ -229,9 +228,9 @@ global $db_pass;
 		$sql .= ';';
 //        print("<!-- sql:".$sql." //-->\n");
 		$result = mysql_query($sql);
+		array_push($build_errors,  "Errors: ".mysql_error());
 		if(FALSE==$result)
 		{
-			print mysql_error();
 			return NULL;
 		}
 		$fields = mysql_num_fields($result);
@@ -246,6 +245,7 @@ global $db_pass;
 
 	public function DropTableContent($settings)
 	{
+		global $build_errors;
 		$backGabe = array();
 		$this->verbinde();
 		
@@ -261,12 +261,13 @@ global $db_pass;
 		$sql .= ';';
 //        print("<!-- sql:".$sql." //-->\n");
 		$result = mysql_query($sql);
-//		print "<!-- Errors: ".mysql_error()."//-->";
+		array_push($build_errors,  "Errors: ".mysql_error());
 		return array($result);
 	}
 
 	public function SetTableContent($settings)
 	{
+		global $build_errors;
 		$backGabe = array();
 		$this->verbinde();
 		
@@ -293,12 +294,13 @@ global $db_pass;
 		$sql .= ';';
 //        print("<!-- sql:".$sql." //-->\n");
 		$result = mysql_query($sql);
-//		print "Errors: ".mysql_error();
+		array_push($build_errors,  "Errors: ".mysql_error());
 		return $result;
 	}
 	
 	public function InsertTableContent($settings)
 	{
+		global $build_errors;
 		$backGabe = array();
 		$this->verbinde();
 		
@@ -334,7 +336,7 @@ global $db_pass;
 		$sql .= ');';
 //        print("<!-- sql:".$sql." //-->\n");
 		$result = mysql_query($sql);
-//		print "Errors: ".mysql_error();
+		array_push($build_errors,  "Errors: ".mysql_error());
 		return array($result);
 	}
 
@@ -426,7 +428,7 @@ global $db_pass;
 		$result = mysql_query($sql);
 		if(!$result)
 			print "Aufgetretene Fehler: ".mysql_error();
-	return $result;
+		return $result;
 	}
 
 	/***********************************************************************************

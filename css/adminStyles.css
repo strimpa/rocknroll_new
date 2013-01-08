@@ -36,6 +36,10 @@ body {
 	width:400px;
 	height:400px;
 }
+#errorOutputDelete
+{
+	float:right;
+}
 
 #TitleSeite
 {
