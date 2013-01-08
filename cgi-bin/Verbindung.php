@@ -186,7 +186,9 @@ global $db_pass;
 		$sql .= ';';
 //        print("<!-- sql:".$sql." //-->\n");
 		$result = mysql_query($sql);
-		array_push($build_errors,  "Errors: ".mysql_error());
+		$errors = mysql_error();
+		if(strlen($errors)!=0)
+			array_push($build_errors,  "Errors: ".$errors);
 		if($result && mysql_num_rows($result)>0)
 		{
 			while($reihe = mysql_fetch_assoc($result))
@@ -228,7 +230,9 @@ global $db_pass;
 		$sql .= ';';
 //        print("<!-- sql:".$sql." //-->\n");
 		$result = mysql_query($sql);
-		array_push($build_errors,  "Errors: ".mysql_error());
+		$errors = mysql_error();
+		if(strlen($errors)!=0)
+			array_push($build_errors,  "Errors: ".$errors);
 		if(FALSE==$result)
 		{
 			return NULL;
@@ -261,7 +265,9 @@ global $db_pass;
 		$sql .= ';';
 //        print("<!-- sql:".$sql." //-->\n");
 		$result = mysql_query($sql);
-		array_push($build_errors,  "Errors: ".mysql_error());
+		$errors = mysql_error();
+		if(strlen($errors)!=0)
+			array_push($build_errors,  "Errors: ".$errors);
 		return array($result);
 	}
 
@@ -294,7 +300,9 @@ global $db_pass;
 		$sql .= ';';
 //        print("<!-- sql:".$sql." //-->\n");
 		$result = mysql_query($sql);
-		array_push($build_errors,  "Errors: ".mysql_error());
+		$errors = mysql_error();
+		if(strlen($errors)!=0)
+			array_push($build_errors,  "Errors: ".$errors);
 		return $result;
 	}
 	

@@ -769,7 +769,7 @@ ArchivTableEntryDialog.controls = new Array(
 		new PicBrowse("pic", "Cover"),
 		new TextField("content", "Inhalt des Heftes.")
 );
-function getEventCategoryCallback(result)
+function getArchivCategoryCallback(result)
 {
 	$(ArchivTableEntryDialog.controls[0].control).empty();
 
@@ -787,6 +787,6 @@ function getEventCategoryCallback(result)
 ArchivTableEntryDialog.init = function(initData)
 {
 	$(ArchivTableEntryDialog.controls[0].control).attr("initVal", initData['category']);
-	$.fn.loadContent(initData['table'], getEventCategoryCallback, null, "data", {selector:"category",distinct:true});
+	$.fn.loadContent(initData['table'], getArchivCategoryCallback, null, "data", {selector:"category",distinct:true});
 	Group.prototype.init.call(this, initData);
 }
