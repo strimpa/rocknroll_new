@@ -23,7 +23,7 @@
 			$returnString .= $tabs;
 			if($printName)
 				$returnString .= $currName.": ";
-			$returnString .= "\"".SafeJSONString(utf8_decode($currRoot))."\"";
+			$returnString .= "\"".SafeJSONString($currRoot)."\"";
 			$returnString = str_replace("\r\n", "<br />", $returnString);
 		}
 		else

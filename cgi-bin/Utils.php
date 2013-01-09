@@ -243,7 +243,7 @@ function IsAssoc($myarray)
 	return array_keys($myarray) !== range(0, count($myarray) - 1);
 }
 
-function SafeDBString($res)
+function DecodeUmlaute($res)
 {
 	  $res = str_replace("ü","&uuml;",$res);
 	  $res = str_replace("ä","&auml;",$res);
@@ -252,7 +252,6 @@ function SafeDBString($res)
 	  $res = str_replace('Ä',"&Auml;",$res);
 	  $res = str_replace('Ö',"&Ouml;",$res);
 	  $res = str_replace("ß", "&szlig;",$res);
-	  $res = mysql_escape_string($res);
 	  return $res;
 }
 
@@ -268,12 +267,23 @@ function EncodeUmlaute($res)
 	  return $res;
 }
 
-function SafeJSONString($out)
+function SafeDBString($res)
+{
+	  $res = htmlspecialchars_decode($res);
+	  $res = EncodeUmlaute($res);
+	  $res = htmlspecialchars($res);
+	  $res = DecodeUmlaute($res);
+	  $res = mysql_escape_string($res);
+	  return utf8_encode($res);
+}
+
+function SafeJSONString($res)
 {
 //	$out = htmlentities($out);
-	$out = str_replace("\n","<br />",$out);
-  	$out = SafeDBString($out);
-	return $out;
+	$res = str_replace("\n","<br />",$res);
+  	$res = DecodeUmlaute($res);
+	$res = mysql_escape_string($res);
+  	return $res;
 }
 
 function gibTabelleAlsXml($result, $name){
@@ -304,8 +314,8 @@ function gibTabelleAlsXml($result, $name){
 				$safeCellName = MakeSafeTagName($cellkey);
 				 $cell = $doc->createElement( $safeCellName );
 				 $row->appendChild($cell);
-				 $actualValue = EncodeUmlaute( utf8_decode($cellvalue) );
-				 $cell->nodeValue =$actualValue; 
+				 $actualValue = htmlspecialchars_decode( EncodeUmlaute( utf8_decode($cellvalue) ) );
+				 $cell->nodeValue =$actualValue;
 			}
 		}
 					
