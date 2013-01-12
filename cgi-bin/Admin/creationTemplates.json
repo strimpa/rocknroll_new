@@ -17,7 +17,7 @@
 		holder.append(picHolder);
 		$.fn.loadContent("folder", function(result)
 		{
-			$(result).find("row").first().children().each(function(){
+			$(result).find("row").children().children().each(function(){
 				var picFrame = $('<div class="folderBrowserPicFrame">'); 
 				var pic = $('<img />');
 				pic.attr("class","folderBrowsePic"); 

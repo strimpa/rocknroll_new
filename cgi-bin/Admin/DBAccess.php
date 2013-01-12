@@ -55,6 +55,52 @@
 		}
 	}		
 	
+	function RecurseXml($content, $currRoot, $fieldName, $doc)
+	{
+		$tagName = MakeSafeTagName($fieldName);
+		$col = $doc->createElement($tagName);
+//		print ("content: ".$content." |"); 
+		if(is_array($content))
+		{
+//			print "is array\n";
+			for($colIndex=0;$colIndex<count($content);$colIndex++)
+			{
+				$keyArray = array_keys($content);
+				$fieldName = $keyArray[$colIndex];
+				RecurseXml($content[$fieldName], $col, $fieldName, $doc);
+				$currRoot->appendChild($col);
+			}
+		}
+		else
+		{
+			if(IsXmlString($content))
+			{
+//				print "is xml\n";
+				$importdoc = new DOMDocument();
+				$importdoc->encoding = 'UTF-8';
+				$importdoc->loadHTML('<?xml version="1.0" encoding="UTF-8"?>\n'.$content);
+				
+				$node = $importdoc->getElementsByTagName("div")->item(0);
+				$text = FALSE;
+				if(null!=$node)
+					$text = $doc->importNode($node, true);
+				if(FALSE!=$text)
+					$col->appendChild($text);
+				else
+				{
+					$text = $doc->createTextNode("Fehler beim Text laden!");
+					$col->appendChild($text);
+				}
+			} 
+			else
+			{
+//				print "is string\n";
+				$col->nodeValue = htmlspecialchars($content);
+			}
+			$currRoot->appendChild($col);
+		}
+	}
+	
 	function ReplaceInvalidChars(&$string)	
 	{
 		$count = 0;		
@@ -151,7 +197,7 @@
 		}
 		else if(isset($params["folder"]))
 		{
-			$result = GetFolderContent($_POST['assetFolder']);
+			$result = GetFolderContent($_POST['assetFolder'], isset($params["recursive"]));
 		}
 		else if(isset($params["xmlinput"]))
 		{
@@ -214,6 +260,7 @@
 				$doc =  new DOMDocument(); //$imp->createDocument("", "", $dtd);
 				// Set other properties
 				$doc->encoding = 'UTF-8';
+				$doc->formatOutput = true;
 		//		$doc->standalone = false;
 				
 				$currRow = NULL;
@@ -223,58 +270,28 @@
 				
 				set_error_handler('handleError', E_WARNING|E_ERROR);
 				
-				foreach($result as $row)
-				{
-					try{
-						$currRow = $doc->createElement("row");
-						if(is_bool($row))
-						{
-							$currRow->nodeValue = $row;
-						}
-						else 
-						{
-							for($colIndex=0;$colIndex<count($row);$colIndex++)
-							{
-								$keyArray = array_keys($row);
-								$fieldName = $keyArray[$colIndex];
-								$tagName = MakeSafeTagName($fieldName);
-								$col = $doc->createElement($tagName);
-		
-								if(IsXmlString($row[$fieldName]))
-								{
-									$importdoc = new DOMDocument();
-									$importdoc->encoding = 'UTF-8';
-	//								ReplaceInvalidChars($row[$fieldName]);
-									$importdoc->loadHTML('<?xml version="1.0" encoding="UTF-8"?>\n'.$row[$fieldName]);
-		//							PrintHtmlComment("Xml string after import:".$importdoc->C14N());
-									
-									$node = $importdoc->getElementsByTagName("div")->item(0);
-									$text = FALSE;
-									if(null!=$node)
-										$text = $doc->importNode($node, true);
-									if(FALSE!=$text)
-										$col->appendChild($text);
-									else
-									{
-										$text = $doc->createTextNode("Fehler beim Text laden!");
-										$col->appendChild($text);
-									}
-								} 
-								else
-								{
-									$col->nodeValue = htmlspecialchars($row[$fieldName]);
-								}
-								$currRow->appendChild($col);
-							}
-				//			print("<test>".$currRow->nodeValue."</test>");
-				//			$doc->normalizeDocument();
-						}			
-						$rootElem->appendChild($currRow);
-					}
-					catch(Exception $e)
+				try{
+					RecurseXml($result, $rootElem, "row", $doc);
+					/*
+					foreach($result as $row)
 					{
-						array_push($build_errors, "Fehler beim lesen von html in Tabelle $query and id ".$row["id"].": ".$e->getMessage());
+							if(is_bool($row))
+							{
+								$currRow = $doc->createElement("row");
+								$currRow->nodeValue = $row;
+								$rootElem->appendChild($currRow);
+							}
+							else 
+							{
+								
+							}			
+						}
 					}
+					*/
+				}
+				catch(Exception $e)
+				{
+					array_push($build_errors, "Fehler beim lesen von html in Tabelle $query and id ".$row["id"].": ".$e->getMessage());
 				}
 				foreach($build_errors as $anError)
 				{

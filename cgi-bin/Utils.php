@@ -11,7 +11,7 @@ function MyHtmlSpecialVars_decode($string)
 
 function PrintHtmlComment($string)
 {
-	print ("<!-- ".$string."//-->\n");
+	//print ("<!-- ".$string."//-->\n");
 }
 
 function FilenameFromUrl(&$params=NULL)
@@ -76,7 +76,7 @@ function MakeSafeTagName($string)
 {
 	$value = preg_replace("/[^a-zA-Z0-9]/", "_", $string);
 	if(preg_match("/^[0-9]/", $value))
-		$value = "_".$value;
+		$value = "A_".$value;
 	return $value;
 }
 
@@ -197,42 +197,62 @@ function IsXmlString($subject)
 	return $isXML;
 }
 
-function GetFolderContent($assetFolder)
+function GetFolderContentRec($relPath, $extensions, $resursive)
+{
+	global $serverRoot;
+	global $httpRoot;
+	
+	$default_dir = $serverRoot.$relPath;
+	$fileList = array();
+	if(!($dp = opendir($default_dir))) 
+	{
+		print("Cannot open $default_dir.");
+		return $fileList;
+	}
+	while($file = readdir($dp)) 
+	{
+		$urlSafeFile = urlencode($file);
+		if($file[0]==".")
+			continue;
+		$temppath = $default_dir.$file; 
+		$safeFileName = MakeSafeTagName($file);
+		if(is_dir($temppath))
+		{
+			if($resursive)
+				$fileList[$safeFileName] = GetFolderContentRec($relPath.$file."/", $extensions, true);
+		}
+		else
+		{
+			$ext = substr($file, strrpos($file, '.') + 1);
+			if(FALSE !== array_search($ext, $extensions))
+			{
+				$fileList[$safeFileName] = $httpRoot.$relPath.$file;
+			}
+		}
+	}
+	return $fileList;
+}
+function GetFolderContent($assetFolder, $resursive)
 {
 	global $serverRoot;
 	global $httpRoot;
 	$default_dir = $serverRoot;
-	$suffix = "";
+	$suffix = $assetFolder."/";
 	$extensions = array("*");
 	switch($assetFolder)
 	{
 		case "images":
+		case "MiniGal/photos":
 		{
-			$suffix = "images/";
+//			$suffix = "images/";
 			PrintHtmlComment("default_dir: $default_dir, suffix: $suffix");
 			$extensions = array("jpg", "gif", "png");
 		}
 	}
 	$default_dir = $default_dir.$suffix;
-	if(!($dp = opendir($default_dir))) 
-		die("Cannot open $default_dir.");
-	$fileList = array();
-	while($file = readdir($dp)) 
-	{
-		if(is_dir($file)) 
-		{
-			continue;
-		}
-		else if($file != '.' && $file != '..') 
-		{
-			$ext = substr($file, strrpos($file, '.') + 1);
-			if(FALSE !== array_search($ext, $extensions))
-			{
-				$safeFileName = MakeSafeTagName($file);
-				$fileList[$safeFileName] = $httpRoot.$suffix.$file;
-			}				
-		}
-	}
+	
+	$fileList = GetFolderContentRec($suffix, $extensions, $resursive);
+	
 	$retArray = array();
 	array_push($retArray, $fileList);
 	return $retArray;
@@ -314,7 +334,7 @@ function gibTabelleAlsXml($result, $name){
 				$safeCellName = MakeSafeTagName($cellkey);
 				 $cell = $doc->createElement( $safeCellName );
 				 $row->appendChild($cell);
-				 $actualValue = htmlspecialchars_decode( EncodeUmlaute( utf8_decode($cellvalue) ) );
+				 $actualValue =  EncodeUmlaute( utf8_decode($cellvalue) );
 				 $cell->nodeValue =$actualValue;
 			}
 		}

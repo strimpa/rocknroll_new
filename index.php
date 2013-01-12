@@ -29,7 +29,6 @@ ContentMgr::GetInstance()->Genesis();
   fjs.parentNode.insertBefore(js, fjs);
 }(document, 'script', 'facebook-jssdk'));</script>
 
-
 <!-- Navigation //-->
 <!-- Navigation 		
 <div id="menuLeft">
@@ -71,22 +70,6 @@ ContentMgr::GetInstance()->Genesis();
 <?php 
 	ContentMgr::GetInstance()->RenderContent();
 ?>
-
-<div id="advertRight">
-	Werbung:
-	<hr noshade />
-	<SCRIPT charset="utf-8" type="text/javascript" src="http://ws.amazon.de/widgets/q?rt=tf_sw&ServiceVersion=20070822&MarketPlace=DE&ID=V20070822/DE/rockmaga-21/8002/ba8f7bfe-18ec-49cb-a596-3bc5b18a626e"> </SCRIPT> <NOSCRIPT><A HREF="http://ws.amazon.de/widgets/q?rt=tf_sw&ServiceVersion=20070822&MarketPlace=DE&ID=V20070822%2FDE%2Frockmaga-21%2F8002%2Fba8f7bfe-18ec-49cb-a596-3bc5b18a626e&Operation=NoScript">Amazon.de Widgets</A></NOSCRIPT>
-	<script type="text/javascript">
-		<!--
-			google_ad_client = "ca-pub-7125840293910524";
-			/* Hauptseite */
-			google_ad_slot = "2792988891";
-			google_ad_width = 160;
-			google_ad_height = 600;
-		//-->
-		</script>
-		<script type="text/javascript" src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
-	</script>
 
 </div>	
 </body>

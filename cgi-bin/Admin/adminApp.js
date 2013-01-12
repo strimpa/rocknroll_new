@@ -876,7 +876,7 @@
 			{
 				var subMenuEntry = document.createElement("div");
 				subMenuEntry.setAttribute("class", "listboxRow");
-				subMenuEntry.textContent = entryArray[entryIndex];
+				subMenuEntry.innerHTML = entryArray[entryIndex];
 				subMenuEntry.setAttribute("listboxIndex", entryIndex);
 				$(subMenuEntry).mouseover(listboxEntryMouseOver);
 				$(subMenuEntry).mouseout(listboxEntryMouseOut);
@@ -1229,6 +1229,69 @@
 						paraDiv.appendChild(utils.RenderTable("bestellung,kunden", typeJson, null, null, {joinFields:"kundenID=id"}, false, "kundenID,id"));
 						contentDiv.appendChild(paraDiv);
 					}, null, "data", {def:true,json:"types",joinFields:"kundenID=id"});
+				}
+				break;
+			case "galerie":
+				{
+					var paraDiv = document.createElement("div");
+					paraDiv.setAttribute("id", "paragraph_order");
+					paraDiv.setAttribute("class", "adminParagraph");
+					var folderSelect = document.createElement("select");
+					$(folderSelect).append("<option>Suche Ordner aus Liste aus...</option>");
+					var photoDiv = document.createElement("div");
+					var photoArray = new Array();
+					$.fn.loadContent("folder", function(result)
+					{
+						$(result).find("row").children().children().each(function(){
+							var folderName = this.nodeName;
+							console.log("folderName:"+folderName);
+							var pics = [];
+							$(this).children().each(function(){
+								var picture = $(this).text();
+								console.log("\tpic:"+picture);
+								pics.push(picture);
+							});
+							photoArray[folderName] = pics;
+							$(folderSelect).append($("<option>"+folderName+"</option>"));
+						});
+					}, {"assetFolder":"MiniGal/photos"}, "xml", {recursive:true});
+					$(folderSelect).change(function(){
+						$(photoDiv).empty();
+						var folder = this.value;
+						console.log("selectied folder:"+folder);
+						for(d in photoArray[folder])
+						{
+							var picFrame = $('<div class="folderBrowserPicFrame">'); 
+							var pic = $('<img />');
+							var picUrl = photoArray[folder][d];
+							pic.attr("class","folderBrowsePic"); 
+							pic.attr("src",picUrl);
+							pic.css("float", "left");
+							picFrame.append(pic);
+							picFrame.attr("title", picUrl);
+
+							var picText = $('<textarea />');
+							picText.css("height", "100px");
+							picText.css("width", "300px");
+							$(picFrame).append(picText);
+
+							var picButton = $('<input />');
+							picButton.attr("type", "button");
+							picButton.css("width", "300px");
+							picButton.attr("value", "Update");
+							$(picFrame).append(picButton);
+
+							$(picFrame).css("clear", "both");
+							$(photoDiv).append(picFrame);
+							
+							picButton.click(function(){
+								console.log($(this).prev().attr("value"));
+							});
+						}
+					});
+					paraDiv.appendChild(folderSelect);
+					paraDiv.appendChild(photoDiv);
+					contentDiv.appendChild(paraDiv);
 				}
 				break;
 			default:
