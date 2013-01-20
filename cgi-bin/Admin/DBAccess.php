@@ -157,7 +157,7 @@
 //				PrintHtmlComment("edit:".$reqTuple[0].",".$reqTuple[1]);
 			}
 			// foreach ($_POST as $key => $value) {
-				// PrintHtmlComment('$_POST['.$key.']:'.$value);
+				// Print ('$_POST['.$key.']:'.$value);
 			// }
 			$result = Aufenthalt::GetInstance()->DBConn()->SetTableContent(
 				array(

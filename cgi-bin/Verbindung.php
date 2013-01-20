@@ -276,8 +276,10 @@ global $db_pass;
 		global $build_errors;
 		$backGabe = array();
 		$this->verbinde();
+		print ("SetTableContent");
 		
 		$reqString = $this->GetReqString($settings, 'requirements');
+		print ("SetTableContent2");
 		
 		// UPDATE  `rocknroll`.`submenus` SET  `links` =  'The first entry,The second entry,The third entry' WHERE  `submenus`.`id` =1;
 		$sql = "UPDATE `".$settings['table']."` SET "; 
@@ -292,13 +294,15 @@ global $db_pass;
 			$escapedValue = SafeDBString($values[$fieldIndex]);
         	$sql .= "`".$fields[$fieldIndex]."` = '".$escapedValue."'";
         }
+ 		print ("SetTableContent3");
         
 		if($reqString != "")
 		{
 			$sql .= ' WHERE '.$reqString;
 		}
 		$sql .= ';';
-//        print("<!-- sql:".$sql." //-->\n");
+ 		print ("SetTableContent4");
+        print("sql:".$sql);
 		$result = mysql_query($sql);
 		$errors = mysql_error();
 		if(strlen($errors)!=0)
@@ -344,7 +348,9 @@ global $db_pass;
 		$sql .= ');';
 //        print("<!-- sql:".$sql." //-->\n");
 		$result = mysql_query($sql);
-		array_push($build_errors,  "Errors: ".mysql_error());
+		$errors = mysql_error();
+		if(strlen($errors)!=0)
+			array_push($build_errors,  "Errors: ".$errors);
 		return array($result);
 	}
 

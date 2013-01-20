@@ -258,6 +258,11 @@ function GetFolderContent($assetFolder, $resursive)
 	return $retArray;
 }
 
+// function WriteExifCOmment($fileUrl, $comment)
+// {
+	// exif_ UserComment
+// }
+
 function IsAssoc($myarray)
 {
 	return array_keys($myarray) !== range(0, count($myarray) - 1);
