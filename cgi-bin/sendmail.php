@@ -7,9 +7,16 @@ $message .= "E-mail: ".$_POST['email']."\n\n";
 $message .= "Nachricht\n\n: ".$_POST['message'];
 $message .= "Bestellung: ".$_POST['postvars'];
 
+// To send HTML mail, the Content-type header must be set
+$headers  = 'MIME-Version: 1.0' . "\r\n";
+$headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
+
+// Additional headers
+$headers .= 'From: R&R website mail script <mail@rocknroll-magazin.de>' . "\r\n";
+
 if(isset($_POST['email']) && $_POST['email']!="")
 {
-	$success = mail($to, $subject, $message);
+	$success = mail($to, $subject, $message, $headers);
 	if($success)
 		echo "Ihre Nachricht wurde erfolgreich abgeschickt. Sie koennen dieses Fenster schliessen.";
 	else
