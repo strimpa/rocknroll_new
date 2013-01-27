@@ -9,9 +9,7 @@ class Bestellung{
 		"AktHeft"=>"Aktuelles Heft",
 		"ProHeft"=>"Probeheft", 
 		"KlPaket"=>"Kleines Probepaket", 
-		"AboKlPaket"=>"Abonnement im Probepaket",  
 		"GrPaket"=>"Gro&szlig;es Probepaket",  
-		"AboGrPaket"=>"Abonnement im Probepaket",  
 		"Index"=>"Index", 
 	);
 		
@@ -33,17 +31,6 @@ class Bestellung{
 		$this->destination = $insAusland;
 		$this->bestellDatum = $datum;
 		$this->kommentar = EncodeUmlaute($kommentar);
-		$this->anzahlAusgaben = array(
-			"Abo"=>6, 
-			"Heft"=>1, 
-			"AktHeft"=>1,
-			"ProHeft"=>1, 
-			"KlPaket"=>10, 
-			"AboKlPaket"=>6,  
-			"GrPaket"=>50,  
-			"AboGrPaket"=>6,  
-			"Index"=>1
-		);
 		$this->gesamtPreis = 0;
 	}
 	
@@ -60,7 +47,7 @@ class Bestellung{
 		$this->gesamtPreis = 0;
 		$this->preise = Aufenthalt::GetInstance()->GetAblauf()->inland_preise;
 		$this->portos = Aufenthalt::GetInstance()->GetAblauf()->inland_portos;
-		if($this->destination != 'inland')
+		if($this->destination != 'germany')
 		{
 			$this->preise=Aufenthalt::GetInstance()->GetAblauf()->ausland_preise;
 			$this->portos=Aufenthalt::GetInstance()->GetAblauf()->ausland_portos;
@@ -70,22 +57,9 @@ class Bestellung{
 		{
 			if(array_key_exists($key, $this->preise))
 			{
-				//$this->anzahlAusgaben[$key] = 1;
-				if($key=="Heft")
-				{
-					$keywords = preg_split("/[\s,]+/", $this->ausgabeNr["Heft"]);
-					$this->anzahlAusgaben[$key] = (count($keywords)>0?count($keywords):1);
-					$produktPreis = $this->preise[$key] * $this->anzahlAusgaben[$key];
-				}
-				else
-					$produktPreis = $this->preise[$key];
+				$produktPreis = $this->preise[$key];
 					
-				if("Index"==$key)
-					$portoErgebnis = $this->GetPorto("Index");
-				else
-					$portoErgebnis = $this->GetPorto($this->anzahlAusgaben[$key]);
-				
-				$this->gesamtPreis += $produktPreis + $portoErgebnis;
+				$this->gesamtPreis += $produktPreis;
 				$rueckGabe .= Bestellung::$Produkte[$key];
 				if($key=="Abo")
 					$rueckGabe .= " ab Ausgabe ".$this->ausgabeNr["Abo"];
@@ -112,19 +86,14 @@ class Bestellung{
 				<tr bgcolor=\"#336699\"> 
 				  <td width=\"200px\"> <strong>Produkt:</strong> 
 				  </td>
-				  <td><strong>Ab Ausgabe Nr.</strong>
+				  <td><strong>(Ab) Ausgabe(n) Nr.</strong>
 				  </td>
-				  <td width=\"40px\"><strong>Anzahl</strong>
-				  </td>";	
-		if($mitBerechnung)
-			$rueckGabe .= "
-			  <td width=\"80px\"><strong>Preis Produktanzahl (in &euro;)</strong></td>
-			  <td width=\"80px\"><strong>Porto <a href=\"/Preistabelle.htm\" target=\"_blank\" rel=\"lightbox['portoliste']\" ><img src=\"/images/toolTipHelp.gif\" /></a> (in &euro;)</strong></td>
 			  <td width=\"80px\"><strong>Preis inkl. P+V</strong> (in &euro;)</td>";
 			  
 		/*******************************
 		Zeilen mit berechnung		
 		********************************/
+		
 		$rueckGabe .= "
 			</tr>
 			</thead>
@@ -140,58 +109,46 @@ class Bestellung{
 					$rueckGabe .= "
 					<tr bgcolor=\"#336699\"> 
 					  <td>".Bestellung::$Produkte[$key]."</td>
-					  <td>$abAusgabe</td>
-					  <td>".$this->anzahlAusgaben[$key]."</td>";
+					  <td>$abAusgabe</td>";
 
-					if($mitBerechnung)
+					if($key=="Heft")
 					{
-						//$this->anzahlAusgaben[$key] = 1;
-						if($key=="Heft")
-						{
-							$keywords = preg_split("/[\s,]+/", $this->ausgabeNr["Heft"]);
-							$this->anzahlAusgaben[$key] = (count($keywords)>0?count($keywords):1);
-							$produktPreis = $this->preise[$key] * $this->anzahlAusgaben[$key];
-						}
-						else
-							$produktPreis = $this->preise[$key];
-							
-						if("Index"==$key)
-							$portoErgebnis = $this->GetPorto("Index");
-						else
-							$portoErgebnis = $this->GetPorto($this->anzahlAusgaben[$key]);
-						
-						$rueckGabe .= "
-						<td>".sprintf("%3.2f", $produktPreis)."</td>
-						<td>".sprintf("%3.2f", $portoErgebnis)."</td>
-						<td align=\"right\">".sprintf("%3.2f", $produktPreis + $portoErgebnis)."</td>";
+						$keywords = preg_split("/[\s,]+/", $this->ausgabeNr["Heft"]);
+						$this->anzahlAusgaben[$key] = (count($keywords)>0?count($keywords):1);
+						if($this->anzahlAusgaben[$key]>1)
+							$mitBerechnung = false;
 					}
+					$produktPreis = $this->preise[$key];
 					$rueckGabe .= "
+					<td align=\"right\">".sprintf("%3.2f", $produktPreis)."</td>
 					</tr>";
 				}
 			}
 		if($mitBerechnung)
+		{
 			$rueckGabe .= "
 			<tr> 
 				<td colspan=\"5\">&nbsp;</td>
 			<tr>
 			<tr bgcolor=\"#666699\"> 
-				<td colspan=\"2\">&nbsp;</td>
-				<td colspan=\"3\">Komplett Preis</td>
+				<td>&nbsp;</td>
+				<td>Komplett Preis</td>
 				<td align=\"right\"><strong	>".sprintf("%3.2f", $this->gesamtPreis)." &euro;</strong></td>
 			<tr>";
-/*			<tr bgcolor=\"#336699\"> 
-				<td colspan=\"2\">&nbsp;</td>
-				<td colspan=\"2\">Complete Porto</td>
-				<td align=\"right\"><b>".sprintf("%3.2f", $this->portoErgebnis)."</td>
+		}
+		else
+		{
+			$rueckGabe .= "
+			<tr> 
+				<td colspan=\"5\">&nbsp;</td>
 			<tr>
 			<tr bgcolor=\"#666699\"> 
-				<td colspan=\"2\">&nbsp;</td>
-				<td colspan=\"2\">Complete Bill</td>
-				<td border=\"1\" align=\"right\"><b>".sprintf("%3.2f", ($this->portoErgebnis+$this->gesamtPreis))."</td>
+				<td colspan=\"5\">Eine automatische Berechnung des Gesamtpreises ist nicht m&ouml;glich. Portokosten sinken mit mehreren Heftbestellungen oder sind nicht kalkulierbar f&uuml;r Bestellungen au&szlig;erhalb der EU.</td>
 			<tr>";
-*/		$rueckGabe .= "
+		}
+		$rueckGabe .= "
 			<tr bgcolor=\"#336699\"> 
-				<td colspan=\"6\">Ihr Kommentar:<p />".$this->kommentar."</td>
+				<td colspan=\"3\">Ihr Kommentar:<p />".$this->kommentar."</td>
 			<tr>
 			</tbody>
 		</table>
@@ -202,58 +159,53 @@ class Bestellung{
 		/*******************************
 		Bank zeuch		
 		********************************/
-		if($ablauf->bestellungAufgegeben){
-			if($this->destination=='inland'){
-				if(Aufenthalt::GetInstance()->GetUser()->bezahlung=="lastschrift"){
-					$rueckGabe .= "Sie haben gew&auml;hlt per Lastschrift zu zahlen.
-									Vielen Dank. Wir werden den oben stehenden Betrag von ihrem Konto einziehen und ihre Bestellung schnellstm&ouml;glich abschicken.";
-				} else {
-					$rueckGabe .= "Sie haben gew&auml;hlt per &Uuml;berweisung zu bezahlen. Bitte veranlassen sie eine Transaktion auf folgendes Konto:
-								<blockquote>
-									Rock&amp;Roll Musikmagazin:<br>
-									Volksbank Oldenburg<br>
-									Kto-Nr.: 34 32 502 600
-									BLZ: 280 618 22	
-								</blockquote>
-								For transactions from abroad please don't forget to enter:
-								<blockquote>
-									BIC: GENODEF 1EDE <br />
-									IBAN: DE02 2806 1822 3432 5026 00	
-								</blockquote>
-								Ihre Bestellung ist unterwegs sobald der Zahlungseingang auf unserem Konto best&auml;tigt wurde.
-								";
-				}
-			}else{
-				if($ablauf->aufenthalt->aktuellerNutzer->bezahlung=="lastschrift")
-					$rueckGabe .= "
-					<strong>You chose to pay by direct debit. 
-					We are sorry to say that we don't offer this posibility for customers from abroad. 
-					Sorry for any inconvenience.</strong>";
-				$rueckGabe .= "
-				
-				Orders from <strong>ABROAD</strong> of germany result in <strong>HIGHER SHIPPING COSTS</strong>. We will bill these as well. Eventually occuring costs of bank-transactions must be payed by the client. <br>
-				The Payment is ONLY posible per TRANSACTION.
-				<blockquote>
-					Rock&amp;Roll Musikmagazin:<br>
-					Volksbank Oldenburg<br>
-					Kto-Nr.: 34 32 502 600
-					BLZ: 280 618 22	
-				</blockquote>
-				For transactions from abroad please don't forget to enter:
-				<blockquote>
-					BIC: GENODEF 1EDE <br />
-					IBAN: DE02 2806 1822 3432 5026 00	
-				</blockquote>
-				Ihre Bestellung ist unterwegs sobald der Zahlungseingang auf unserem Konto best&auml;tigt wurde.
-				<br>";
+		if($this->destination=='germany'){
+			if(Aufenthalt::GetInstance()->GetUser()->bezahlung=="lastschrift"){
+				$rueckGabe .= "Sie haben gew&auml;hlt per Lastschrift zu zahlen.
+								Vielen Dank. Wir werden den oben stehenden Betrag von ihrem Konto einziehen und ihre Bestellung schnellstm&ouml;glich abschicken.";
+			} else {
+				$rueckGabe .= "Sie haben gew&auml;hlt per &Uuml;berweisung zu bezahlen. Bitte veranlassen sie eine Transaktion auf folgendes Konto:
+							<blockquote>
+								Rock&amp;Roll Musikmagazin:<br>
+								Volksbank Oldenburg<br>
+								Kto-Nr.: 34 32 502 600
+								BLZ: 280 618 22	
+							</blockquote>
+							For transactions from abroad please don't forget to enter:
+							<blockquote>
+								BIC: GENODEF 1EDE <br />
+								IBAN: DE02 2806 1822 3432 5026 00	
+							</blockquote>
+							Ihre Bestellung ist unterwegs sobald der Zahlungseingang auf unserem Konto best&auml;tigt wurde.
+							";
 			}
+		}else{
+			if(Aufenthalt::GetInstance()->GetUser()->bezahlung=="lastschrift")
+				$rueckGabe .= "<p id=\"noDirectDebit\" />
+				<strong>You chose to pay by direct debit. 
+				We are sorry to say that we don't offer this posibility for customers from abroad. 
+				Sorry for any inconvenience.</strong>";
+			$rueckGabe .= "
+			
+			Orders from <strong>ABROAD</strong> of germany result in <strong>HIGHER SHIPPING COSTS</strong>. We will bill these as well. Eventually occuring costs of bank-transactions must be payed by the client. <br>
+			The Payment is ONLY posible per TRANSACTION.
+			<blockquote>
+				Rock&amp;Roll Musikmagazin:<br>
+				Volksbank Oldenburg<br>
+				Kto-Nr.: 34 32 502 600
+				BLZ: 280 618 22	
+			</blockquote>
+			For transactions from abroad please don't forget to enter:
+			<blockquote>
+				BIC: GENODEF 1EDE <br />
+				IBAN: DE02 2806 1822 3432 5026 00	
+			</blockquote>
+			Ihre Bestellung ist unterwegs sobald der Zahlungseingang auf unserem Konto best&auml;tigt wurde.
+			<br>";
+		}
 		/*******************************
 		Zurueck button		
 		********************************/
-		}else $rueckGabe .= "
-				
-				
-				<br>";
 	
 		// rechtlicher Text
 		//*********************************

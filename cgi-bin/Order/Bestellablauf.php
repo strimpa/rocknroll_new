@@ -43,27 +43,11 @@ class BestellAblauf{
   				if(strlen($buffer)>2)
 				{
 					$splitString = explode("\t", $buffer);
-					if($index<9)
-					{
-						$currKey = $keys[$index];
-//						print "Preise key:$currKey:$buffer";
-						$this->inland_preise[$currKey] = $splitString[0];
-						$this->ausland_preise[$currKey] = $splitString[1];
-					}
-					else if($index==9)
-					{
-						$currKey = "Index";
-//						print "key:$currKey:$buffer";
-						$this->inland_portos[$currKey] = $splitString[0];
-						$this->ausland_portos[$currKey] = $splitString[1];
-					}
-					else 
-					{
-						$currKey = $index-9;
-//						print "key:$currKey:$buffer";
-						$this->inland_portos[$currKey] = $splitString[0];
-						$this->ausland_portos[$currKey] = $splitString[1];
-					}
+					$currKey = $keys[$index];
+					$splitString = array_filter($splitString);
+					//						print "Preise key:$currKey:$buffer";
+					$this->inland_preise[$currKey] = $splitString[0];
+					$this->ausland_preise[$currKey] = $splitString[1];
 					$index++;
 				}
 			}
@@ -92,9 +76,9 @@ class BestellAblauf{
 		$errorsOccured = false;
 		
 		if($this->bestellungAufgegeben)
-			$_POST['formFilled'] = BestellAblauf::STEP_BESTELLUNG;
+			$_POST['formFilled'] = BestellAblauf::STEP_BESTELLEN;
 		
-		if(!BackButtonPressed() && array_key_exists("formFilled", $_POST))
+		if(!BackButtonPressed() && array_key_exists("formFilled", $_POST) && !$this->bestellungAufgegeben)
 		{
 			switch($_POST['formFilled'])
 			{
@@ -153,6 +137,7 @@ class BestellAblauf{
 			{
 				$this->gibBestellungAuf();
 			}
+			print $this->aktuelleBestellung->zeigeBestellungen($this);
 			$this->InsertBackButton(BestellAblauf::STEP_BESTELLEN);
 			require_once("registrierForm.php");
 	/*******************************************************************/
@@ -184,8 +169,6 @@ class BestellAblauf{
 		$_POST['destination'],
 		date("Y-m-d"),
 		$_POST['Sonstiges']);
-
-		print $this->aktuelleBestellung->zeigeBestellungen($this);
 	}
 	
 	function holeBenutzerDaten($key, $equals=NULL)

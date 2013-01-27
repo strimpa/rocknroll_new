@@ -7,7 +7,7 @@ Ggf. entstehende Bankgeb&uuml;hren bei &Uuml;berweisungen aus dem Ausland m&uuml
 	<tr bgcolor="#336699">
 	  <td colspan="7">
 	  
-	  	<input name="destination" type=radio value=inland checked /><strong> Inland </strong><br />
+	  	<input name="destination" type=radio value=germany checked /><strong> Inland </strong><br />
 	    <input name="destination" type=radio value=euausland /><strong> EU Ausland</strong><br />
 	    <input name="destination" type=radio value=noneuausland /><strong> Non-EU Ausland (No price calculation)</strong>		  </td>
   </tr>
@@ -24,7 +24,7 @@ Ggf. entstehende Bankgeb&uuml;hren bei &Uuml;berweisungen aus dem Ausland m&uuml
 	  <td width=232 bgcolor="#336699">&nbsp;</td>
 	  <td width=82 align="right" bgcolor="#336699"> <strong>(ab) Ausgabe(n) Nr. </strong>
 	  </td>
-	  <td width="65" align="right"><p style="line-height: 100%" align=right><b> Inland</b></td>
+	  <td width="65" align="right"><p style="line-height: 100%" align=right><b> Deutschland</b></td>
 	  <td width="55" align="right"><p style="line-height: 100%" align=right><b> Ausland</b></td>
 	</tr>
 	<tr>	
@@ -70,8 +70,7 @@ Ggf. entstehende Bankgeb&uuml;hren bei &Uuml;berweisungen aus dem Ausland m&uuml
   </tr>
 	<tr>
       <td colspan="2">&nbsp;</td>
-      <td>&nbsp;</td>
-      <td align="right" colspan="3"> * Mehrere Eingaben mit Kommata</td>
+      <td align="right" colspan="4"> * Bei der Bestellung mehrerer Exemplare reduziert sich der Gesamtpreis, da die Portokosten variieren. Au&szlig;erdem sind Magazine aus den Jahren vor 2011 preisg&uuml;nstiger. Geben Sier hier ihre Wunschliste ein. Mehrere Eingaben mit Kommata.</td>
   </tr>
 	<tr>
 	  <td colspan="3">&nbsp;</td>
@@ -102,14 +101,13 @@ Ggf. entstehende Bankgeb&uuml;hren bei &Uuml;berweisungen aus dem Ausland m&uuml
   </tr>
 	<tr>
 	  <td colspan="2">&nbsp;</td>
-	  <td>&nbsp;</td>
-	  <td colspan="3" align="left">* keine Angabe = ab der aktuellen Ausgabe </td>
+	  <td colspan="4" align="left">* wenn keine Angabe = dann ab der aktuellen Ausgabe </td>
   </tr>
 	<tr>
 	  <td colspan="7">&nbsp;</td>
   </tr>
 	<tr>
-	  <td width=163 rowspan="4"><img src="/images/Pakete.gif" width="150" align="right"></td>
+	  <td width=163 rowspan="2"><img src="/images/Pakete.gif" width="150" align="right"></td>
 	  <td bgcolor="#336699"><p style="line-height: 100%" align="left">
           <input name="KlPaket" type="checkbox" id="KlPaket" value="ON" <?php if(isset($_POST['KlPaket'])) print "checked"; ?> />
 	  </td>
@@ -119,14 +117,6 @@ Ggf. entstehende Bankgeb&uuml;hren bei &Uuml;berweisungen aus dem Ausland m&uuml
 	  <td align="right" bgcolor="#336699"><p style="line-height: 100%" align="right"><?php printf(" %4.2f &euro; ", Aufenthalt::GetInstance()->GetAblauf()->inland_preise["KlPaket"]); ?></td>
 	  <td align="right" bgcolor="#336699"><?php printf(" %4.2f &euro; ", Aufenthalt::GetInstance()->GetAblauf()->ausland_preise["KlPaket"]); ?></td>
 	</tr>
-	<tr bgcolor="#336699">
-	  <td colspan="2"><p style="line-height: 100%; margin-bottom: 0" align="left">&nbsp;</td>
-	  <td colspan="2">
-        <input name="AboKlPaket" type="checkbox" id="AboKlPaket" value="ON" <?php if(isset($_POST['AboKlPaket'])) print "checked"; ?> />
-      Mit Abo ab aktueller Ausgabe zzgl.</td>
-	  <td align="right"><p style="line-height: 100%" align="right"><?php printf(" %4.2f &euro; ", Aufenthalt::GetInstance()->GetAblauf()->inland_preise["AboKlPaket"]); ?></td>
-	  <td align="right"><?php printf(" %4.2f &euro; ", Aufenthalt::GetInstance()->GetAblauf()->ausland_preise["AboKlPaket"]); ?></td>
-    </tr>
     
 	<tr>
 	  <td bgcolor="#336699"><p style="line-height: 100%; margin-bottom: 0" align="left">
@@ -137,18 +127,10 @@ Ggf. entstehende Bankgeb&uuml;hren bei &Uuml;berweisungen aus dem Ausland m&uuml
 	  <td align="right" bgcolor="#336699"><p style="line-height: 100%" align="right"><?php printf(" %4.2f &euro; ", Aufenthalt::GetInstance()->GetAblauf()->inland_preise["GrPaket"]); ?></td>
 	  <td align="right" bgcolor="#336699"><?php printf(" %4.2f &euro; ", Aufenthalt::GetInstance()->GetAblauf()->ausland_preise["GrPaket"]); ?></td>
     </tr>
-	<tr bgcolor="#336699">
-	  <td colspan="2"><p style="line-height: 100%; margin-bottom: 0" align="left">&nbsp;</td>
-	  <td colspan="2">
-        <input name="AboGrPaket" type="checkbox" id="AboGrPaket" value="ON" <?php if(isset($_POST['AboGrPaket'])) print "checked"; ?> />
-      Mit Abo ab aktueller Ausgabe zzgl.</td>
-	  <td align="right"><p style="line-height: 100%" align="right"><?php printf(" %4.2f &euro; ", Aufenthalt::GetInstance()->GetAblauf()->inland_preise["AboGrPaket"]); ?></td>
-	  <td align="right"><?php printf(" %4.2f &euro; ", Aufenthalt::GetInstance()->GetAblauf()->ausland_preise["AboGrPaket"]); ?></td>
-    </tr>
     
 	<tr>
 	  <td rowspan="3"><img src="/images/Index_.jpg" width="100" align="center"></td>
-	  <td colspan="2">&nbsp;</td>
+	  <td colspan="9">&nbsp;</td>
 	  <td>&nbsp;</td>
 	  <td align="right">&nbsp;</td>
 	  <td align="right">&nbsp;</td>

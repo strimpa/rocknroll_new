@@ -166,25 +166,32 @@ class Benutzer{
                   <TD>
 				";
 				if(	$this->bezahlung=="lastschrift") {
-					$retVal .=  "
-						<strong>Lastschriftverfahren.</strong><br>
-						Bankinstitut:      $this->bankInstitut <br>
-						Kontonummer:        ";
-					for($ind=0;$ind<strlen($this->ktnr);$ind++){
-						if($ind<4) 
-							$retVal .= (substr($this->ktnr,$ind,1));
-						else 
-							$retVal .= ("X");
+					if($this->land!="germany")
+					{
+						$retVal .=  "
+							<strong>Direct Debit payment <i>not</i> possible outside of germany (Please <a href=\"#noDirectDebit\">see below</a>).</strong>";
 					}
-					$retVal .=  "		<br>
-						Bankleitzahl: ";
-					for($ind=0;$ind<strlen($this->blz);$ind++){
-						if($ind<4)
-							$retVal .= (substr($this->blz,$ind,1));
-						else 
-							$retVal .= ("X");
+					else {
+						$retVal .=  "
+							<strong>Lastschriftverfahren.</strong><br>
+							Bankinstitut:      $this->bankInstitut <br>
+							Kontonummer:        ";
+						for($ind=0;$ind<strlen($this->ktnr);$ind++){
+							if($ind<4) 
+								$retVal .= (substr($this->ktnr,$ind,1));
+							else 
+								$retVal .= ("X");
+						}
+						$retVal .=  "		<br>
+							Bankleitzahl: ";
+						for($ind=0;$ind<strlen($this->blz);$ind++){
+							if($ind<4)
+								$retVal .= (substr($this->blz,$ind,1));
+							else 
+								$retVal .= ("X");
+						}
+						$retVal .=  "<br>";
 					}
-					$retVal .=  "<br>";
 				} else $retVal .= "
 						<strong>&Uuml;berweisung</strong> auf<br>
 									Rock&amp;Roll Musikmagazin:<br>
@@ -211,7 +218,7 @@ class Benutzer{
 		$this->adresse = SafeDBString($_POST['Postadresse'].$_POST['Postadresse2']);
 		$this->postleitzahl = SafeDBString($_POST['Postleitzahl']);
 		$this->ort = SafeDBString($_POST['Ort']);
-		$this->land = ($_POST['Land']=="germany"?$_POST['Land']:($_POST['Land']=="sonstigesEU"?$_POST['sonstigesLandEU']:$_POST['sonstigesLand']));
+		$this->land = ($_POST['Land']=="germany"?$_POST['Land']:($_POST['Land']=="euausland"?$_POST['sonstigesLandEU']:$_POST['sonstigesLand']));
 		$this->telHome=SafeDBString($_POST['Telefon']);
 		$this->eMail = SafeDBString($_POST['EMail']);
 		$this->bankInstitut = SafeDBString($_POST['Bankinstitut']);

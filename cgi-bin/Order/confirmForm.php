@@ -1,5 +1,5 @@
 <div id="layer1" style="background:url(/images/bestellen03.png) no-repeat top right; width:630px">
-<table width="100%"  border="0" cellpadding="10">
+<table width="100%"  border="0" cellpadding="0">
   <tr>
     <td width="347" height="271"><h2 align="left">Fast geschafft! </h2>
       <p align="left">Bitte &uuml;berpr&uuml;fen Sie ein letztes Mal Ihre Daten in der unten stehenden Tabelle bevor Sie fortfahren. <br>
