@@ -294,12 +294,15 @@ function EncodeUmlaute($res)
 
 function SafeDBString($res)
 {
-	  $res = htmlspecialchars_decode($res);
+	  //$res = htmlspecialchars_decode($res);
 	  $res = EncodeUmlaute($res);
-	  $res = htmlspecialchars($res);
+	  //$res = htmlspecialchars($res);
 	  $res = DecodeUmlaute($res);
 	  $res = mysql_escape_string($res);
-	  return utf8_encode($res);
+	  $res = str_replace("& ", "&amp; ",$res);
+	  if(!mb_detect_encoding($res, 'UTF-8', true))
+	  	$res = utf8_encode($res);
+	  return $res;
 }
 
 function SafeJSONString($res)
