@@ -22,7 +22,7 @@ var $zeigeDatum;
 		$result = Aufenthalt::GetInstance()->DBConn()->getLinkSections();
 		$builder = ContentMgr::GetInstance()->GetBuilder();
 		print "<ul>";
-		while($row = mysql_fetch_row($result))
+		while($row = mysqli_fetch_row($result))
 		{
 			$formString =$builder->BuildFormForLink($row[0]); 
 			print "<li>$formString</li>";
@@ -45,7 +45,7 @@ var $zeigeDatum;
 			";
 		$bgToggle=false;
 		$linkindex=0;
-		while($row = mysql_fetch_row($result)){
+		while($row = mysqli_fetch_row($result)){
 			print "<tr>\n";
 			$descr = htmlentities(utf8_decode($row[1]));
 			$link = $row[2];

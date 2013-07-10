@@ -33,7 +33,6 @@ class Aufenthalt
 	{
 		if(!isset($_SESSION['Aufenthalt']))
 		{
-//				PrintHtmlComment('New Aufenthalt instance!!!');
 			$_SESSION['Aufenthalt'] = new Aufenthalt();
 		}
 		return $_SESSION['Aufenthalt'];

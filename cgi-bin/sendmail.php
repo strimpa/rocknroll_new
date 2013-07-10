@@ -2,10 +2,10 @@
 $to = 'mail@rocknroll-magazin.de';
 
 $subject = 'Webmail form submit';
-$message = $_POST['realname']." hat eine Nachricht geschrieben.\n\n";
-$message .= "E-mail: ".$_POST['email']."\n\n";
-$message .= "Nachricht\n\n: ".$_POST['message'];
-$message .= "Bestellung: ".$_POST['postvars'];
+$message = $_POST['realname']." hat eine Nachricht geschrieben.<br />";
+$message .= "E-mail: ".$_POST['email']."<br />";
+$message .= "Nachricht:<br />".$_POST['message']."<br />";
+$message .= "Bestellung: <br />".$_POST['postvars'];
 
 // To send HTML mail, the Content-type header must be set
 $headers  = 'MIME-Version: 1.0' . "\r\n";

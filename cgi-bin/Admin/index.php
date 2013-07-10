@@ -38,12 +38,19 @@
 		</select>
 		<input id="pageTitle" class="fullSizeControl" type="text" value="" readonly="true" />
 		<input id="menuPriority" class="shortControl" type="text" value="" readonly="true" />
+		<input id="refreshButton" class="createButton" type="button" value="Refresh" />
 	</fieldset>
 	<fieldset class="RightGroupBox">
 		<legend>Neu erstellen:</legend>
 		<input id="createPageButton" class="createButton" type="button" value="Neu" />
 		<input id="editPageButton" class="editButton" type="button" value="Bearbeiten" style="width:75px;" />
 		<input id="deletePageButton" class="deleteButton" type="button" value="Loeschen" style="width:70px;" />
+	</fieldset>
+</div>
+<div class="editfield" id="settings">
+	<fieldset class="LeftGroupBox">
+		<legend>Ansicht</legend>
+		Anzahl Tabellenspalten:<input id="spinNumTableCols" value="5"/>
 	</fieldset>
 </div>
 <span id="TitleNavigation"><img src="images/Navigation.png" /></span>

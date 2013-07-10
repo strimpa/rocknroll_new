@@ -53,6 +53,14 @@ body {
 	height:60px;
 }
 
+#settings
+{
+	top:0px;
+	left:800px;
+	width:400px;
+	height:220px;
+}
+
 #TitleNavigation
 {
 	position:absolute;
@@ -98,6 +106,12 @@ body {
 	visibility:hidden;
 }
 
+.adminParaTitle
+{
+	font-weight:bold;
+	color:white;
+}
+
 #errorOutput
 {
 	color:#FF0000;
@@ -131,7 +145,7 @@ body {
 }
 .fullSizeControl
 {
-	width:140px;
+	width:120px;
 }
 
 .controlDiv
@@ -251,16 +265,21 @@ body {
 {
 	overflow:hidden;
 	border:1px solid gray;
+	padding: 5px;
 }
 .adminTable
 {
-	width:700px;
 	border-spacing:0px;
+	clear:both;
 	padding:2px;
 }	
 .adminTableTd
 {
 	border:1px solid gray;
+}
+.title_row
+{
+	color:white;
 }
 .adminParagraph
 {

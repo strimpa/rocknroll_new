@@ -41,34 +41,296 @@
 	/////////////////////////////////////////////////////////////////////////
 	// view
 	/////////////////////////////////////////////////////////////////////////
+	var excludeFields = ["id", "type", "angelegtVon", "anlegeDatum"];
+	var maxCols = 7;
 	
 	var utils = 
 	{
-		RenderTable : function(tableName, types, requirements, fields, params, doControls, ids)
+		RenderTableRow : function(row, name, table, types, tableName, ids, renderControls)
 		{
-			if(null==doControls)
-				doControls=true
+
+			var headRow = document.createElement("tr");
+			headRow.setAttribute("id", "title_tr_"+name);
+			headRow.setAttribute("class", "title_row");
+			table.appendChild(headRow);
+			var rowDiv = document.createElement("tr");
+			rowDiv.setAttribute("id", "tr_"+name);
+			table.appendChild(rowDiv);
+			var headCol = document.createElement("td");
+			headCol.textContent = "Eintrag bearbeiten";
+			headRow.appendChild(headCol);
+			var delTd = document.createElement("td");
+			delTd.setAttribute("class", "adminTableTd");
+			var delRowButton = document.createElement("input");
+			delRowButton.setAttribute("type", "button");
+			delRowButton.setAttribute("class", "deleteButton");
+			delRowButton.setAttribute("value", "X");
+			delRowButton.setAttribute("id", row["id"]);
+			delTd.appendChild(delRowButton);
+			var textRowButton = document.createElement("input");
+			textRowButton.setAttribute("type", "button");
+			textRowButton.setAttribute("class", "editButton");
+			textRowButton.setAttribute("value", "T");
+			textRowButton.setAttribute("id", row["id"]);
+			delTd.appendChild(textRowButton);
+			var markRowCheck = document.createElement("input");
+			markRowCheck.setAttribute("type", "checkbox");
+			markRowCheck.setAttribute("class", "markRowCheck");
+			markRowCheck.setAttribute("id", row["id"]);
+			delTd.appendChild(markRowCheck);
+			rowDiv.appendChild(delTd);
+
+			$(delRowButton).click(function(evnt)
+			{
+				if(!confirm("Sicher dass du den Eintrag loeschen moechtest?"))
+					return;
+				var tabellenliste  = tableName.split(",");
+				var idliste  = ids.split(",");
+				for(var ti=0; ti<tabellenliste.length; ti++)
+				{
+					var table = tabellenliste[ti];
+					var theID = idliste[ti];
+					var delData = {};
+					delData[theID] = this.id;
+					$.fn.loadContent(table, triggerParagraphCreation, delData, "data", {del:true});
+				}
+			});
+			
+			var colCOunt = 0;
+			var endColCount = 0;
+			var rowCOunt = 0;
+			for(colHash in row)
+			{
+				if($.inArray(colHash, excludeFields)!=-1)
+					continue;
+					
+				if(colCOunt >= maxCols)
+				{
+					headRow = document.createElement("tr");
+					headRow.setAttribute("id", "title_tr_"+name);
+					headRow.setAttribute("class", "title_row");
+					table.appendChild(headRow);
+					rowDiv = document.createElement("tr");
+					rowDiv.setAttribute("id", "tr_"+name);
+					table.appendChild(rowDiv);
+					rowCOunt+=2;
+					colCOunt = 0;
+				}
+			
+				var col = row[colHash];
+				var headCol = document.createElement("td");
+				headCol.textContent = colHash;
+				headRow.appendChild(headCol);
+
+				var dataTd = document.createElement("td");
+				dataTd.setAttribute("class", "adminTableTd")
+				dataTd.setAttribute("id", name);
+				rowDiv.appendChild(dataTd);
+				
+				if(renderControls)
+				{
+					if("pic"==colHash)
+					{
+						var picHolder = new PicBrowse("picUrl", "Verwendetes Bild.");
+						var dataDiv = picHolder.createControl(document, {"picUrl":col});
+						dataTd.appendChild(dataDiv);
+						$(picHolder.control).attr("value", col);
+						$(picHolder.control).attr("rowId", row["id"]);
+						$(picHolder.control).attr("field", colHash);
+						picHolder.init(null, function(){
+							var theId = this.getAttribute("rowId");
+							var field = this.getAttribute("field");
+							var value = this.src;
+							console.log("result of dummy search:"+value.search(/noImageDummy/));
+							if(-1!=value.search(/noImageDummy/))
+								value = "";
+						    var dbData = eval("({"+field+": \""+value+"\"})"); 
+						    $.fn.loadContent(tableName, null, dbData, "data", {edit:true,req:("id="+theId)});
+						});
+					}
+					else
+					{
+						switch(types[colHash])
+						{
+							case "varchar":
+							case "blob":
+							case "text":
+							{
+								var dataDiv = document.createElement("div");
+								$(dataDiv).html(col);
+								dataTd.appendChild(dataDiv);
+							
+								$(dataDiv).editable(function(value, settings) { 
+								    var dbData = eval("({"+settings.submitdata.field+": \""+value+"\"})"); 
+								    $.fn.loadContent(tableName, null, dbData, "data", {edit:true,req:("id="+settings.submitdata.id)});
+								    return(value);
+								}, { 
+								    // type    : 'textarea',
+									// submit  : 'OK',
+									submitdata: {id: row["id"], field:colHash},
+								});
+							}
+							break;
+							case "date":
+							{
+								var dataDiv = document.createElement("input");
+								dataTd.appendChild(dataDiv);
+								$(dataDiv).attr("value", col);
+								$(dataDiv).attr("rowId", row["id"]);
+								$(dataDiv).attr("field", colHash);
+								
+								
+								$(dataDiv).datepicker({
+									dateFormat:"yy-mm-dd",
+									onClose: function(value, inst) 
+									{
+										var theId = this.getAttribute("rowId");
+										var field = this.getAttribute("field");
+										var dateParts = value.split(".");
+										var sqlDate = value;
+										if(dateParts.length>1)
+										{
+											sqlDate = dateParts[2]+"-"+dateParts[1]+"-"+dateParts[0];
+										}
+									    var dbData = eval("({"+field+": \""+sqlDate+"\"})"); 
+									    $.fn.loadContent(tableName, null, dbData, "data", {edit:true,req:("id="+theId)});
+									}
+								});
+								$(dataDiv).datepicker( "setDate" , col );
+								$(dataDiv).datepicker( "option", "dateFormat", "dd.mm.yy" );
+							}
+							break;
+							case "int":
+							case "float":
+							{
+								var dataDiv = document.createElement("input");
+								dataTd.appendChild(dataDiv);
+								$(dataDiv).attr("value", col);
+								$(dataDiv).attr("rowId", row["id"]);
+								$(dataDiv).attr("field", colHash);
+								
+								$(dataDiv).spinner({
+									change: function(ev, ui) 
+									{
+										var theId = this.getAttribute("rowId");
+										var field = this.getAttribute("field");
+										var val = $(this).spinner("value");
+									    var dbData = eval("({"+field+": \""+val+"\"})"); 
+									    $.fn.loadContent(tableName, null, dbData, "data", {edit:true,req:("id="+theId)});
+									}
+								});
+							}
+							break;
+							case "tinyint":
+							{
+								var dataDiv = document.createElement("input");
+								dataDiv.setAttribute("type", "checkbox");
+								dataTd.appendChild(dataDiv);
+								if(col=="1")
+									$(dataDiv).attr("checked", true);
+								$(dataDiv).attr("rowId", row["id"]);
+								$(dataDiv).attr("id", colHash + row["id"]);
+								$(dataDiv).attr("field", colHash);
+								
+								$(dataDiv).change(function(ev, ui) 
+									{
+										var theId = this.getAttribute("rowId");
+										var field = this.getAttribute("field");
+										var val = this.checked ? "1" : "0";
+										console.log("checkbox "+field+" is checked:"+val);
+									    var dbData = eval("({"+field+": \""+val+"\"})"); 
+									    $.fn.loadContent(tableName, null, dbData, "data", {edit:true,req:("id="+theId)});
+									});
+							}
+							break;
+							case "time":
+							{
+								var dataDiv = document.createElement("input");
+								dataTd.appendChild(dataDiv);
+								$(dataDiv).attr("value", col);
+								$(dataDiv).attr("rowId", row["id"]);
+								$(dataDiv).attr("field", colHash);
+								
+								$(dataDiv).timeEntry({
+									show24Hours: true, 
+									showSeconds: false,
+									spinnerImage: '../../images/jquery_ui/spinnerDefault.png'
+								});
+									
+								$(dataDiv).change(function(e) 
+								{
+									var theId = this.getAttribute("rowId");
+									var field = this.getAttribute("field");
+									var value = $(this).attr("value");
+								    var dbData = eval("({"+field+": \""+value+"\"})"); 
+								    $.fn.loadContent(tableName, null, dbData, "data", {edit:true,req:("id="+theId)});
+								});
+							}
+							break;
+						}
+					}
+				}
+				else
+				{
+					var dataDiv = document.createElement("div");
+					dataTd.appendChild(dataDiv);
+					dataDiv.innerHTML = col;
+				}
+				if(endColCount<maxCols)
+					endColCount++;
+				colCOunt++;
+			}
+			while(colCOunt<endColCount)
+			{
+				var dataTd = document.createElement("td");
+				dataTd.setAttribute("class", "adminTableTd")
+				rowDiv.appendChild(dataTd);
+				colCOunt++;
+			}
+			if(rowCOunt>0)
+			{
+				delTd.setAttribute("rowspan", rowCOunt+1);
+			}
+			
+			// create plain textgrab 
+			$(textRowButton).click(function(){
+				console.log("click:"+$("#showPlainTextWindow"));
+				
+				if(null!=document.getElementById("showPlainTextWindow"))
+				{
+					console.log("destroying");
+					$("#showPlainTextWindow").remove();
+				}
+				else
+				{
+					console.log("create");
+					var textWin = $("<div id='showPlainTextWindow' ></div>");
+					var textArea = $("<textarea id='showPlainTextField' />");
+					textWin.append(textArea);
+					$(this).parents("table").find("#"+name).each(function(){
+						var tdText = $(this).text();
+						if(tdText != "Click to edit")
+							textArea.append(tdText+"\n")
+					});
+					$("body").append(textWin);
+					textWin.css("top", $(this).offset().top);
+					textWin.css("left", $(this).offset().left+30);
+				}
+			});
+//			var eventId = $(this).find("id").text();
+			return endColCount+1;
+		},
+		
+		RenderTable : function(tableName, types, requirements, fields, params, ids, doControls)
+		{
 			if(null==ids)
 				ids = "id";
+			if(null==doControls)
+				doControls = true;
 			
-			var excludeFields = ["id", "type", "angelegtVon", "anlegeDatum"];
 			var tableHolder = document.createElement("span");
 			var table = document.createElement("table");
 			table.setAttribute("class", "adminTable");
-			var colTypes = types[0]; 
-			var headRow = document.createElement("tr");
-			var headCol = document.createElement("th");
-			headCol.textContent = "Loesche Eintrag";
-			headRow.appendChild(headCol);
-			for(headIndex in colTypes)
-			{
-				if($.inArray(headIndex, excludeFields)!=-1)
-					continue;
-				var headCol = document.createElement("th");
-				headCol.textContent = headIndex;
-				headRow.appendChild(headCol);
-			}
-			table.appendChild(headRow);
 			if(params)
 				params.json = "results";
 			else
@@ -138,216 +400,14 @@
 				manipIframe();
 			});
 				
+			var suposedTodoControls = doControls;
 			$.fn.loadContent(tableName, function(result)
 			{
 				var json = eval(result);
+				var colCOunt = 0;
 				for(rowHash in json)
 				{
-					var row = json[rowHash];
-					var rowDiv = document.createElement("tr");
-					rowDiv.setAttribute("id", "tr_"+rowHash);
-					var delTd = document.createElement("td");
-					delTd.setAttribute("class", "adminTableTd");
-					var delRowButton = document.createElement("input");
-					delRowButton.setAttribute("type", "button");
-					delRowButton.setAttribute("class", "deleteButton");
-					delRowButton.setAttribute("value", "X");
-					delRowButton.setAttribute("id", row["id"]);
-					delTd.appendChild(delRowButton);
-					var textRowButton = document.createElement("input");
-					textRowButton.setAttribute("type", "button");
-					textRowButton.setAttribute("class", "editButton");
-					textRowButton.setAttribute("value", "T");
-					textRowButton.setAttribute("id", row["id"]);
-					delTd.appendChild(textRowButton);
-					var markRowCheck = document.createElement("input");
-					markRowCheck.setAttribute("type", "checkbox");
-					markRowCheck.setAttribute("class", "markRowCheck");
-					markRowCheck.setAttribute("id", row["id"]);
-					delTd.appendChild(markRowCheck);
-
-					rowDiv.appendChild(delTd);
-					$(delRowButton).click(function(evnt)
-					{
-						if(!confirm("Sicher dass du den Eintrag loeschen moechtest?"))
-							return;
-						var tabellenliste  = tableName.split(",");
-						var idliste  = ids.split(",");
-						for(var ti=0; ti<tabellenliste.length; ti++)
-						{
-							var table = tabellenliste[ti];
-							var theID = idliste[ti];
-							var delData = {};
-							delData[theID] = this.id;
-							$.fn.loadContent(table, triggerParagraphCreation, delData, "data", {del:true});
-						}
-					});
-					
-					$(textRowButton).click(function(){
-						console.log("click:"+$("#showPlainTextWindow"));
-						
-						if(null!=document.getElementById("showPlainTextWindow"))
-						{
-							console.log("destroying");
-							$("#showPlainTextWindow").remove();
-						}
-						else
-						{
-							console.log("create");
-							var textWin = $("<div id='showPlainTextWindow' ></div>");
-							var textArea = $("<textarea id='showPlainTextField' />");
-							textWin.append(textArea);
-							$(this).parent().parent().children().each(function(){
-								textArea.append($(this).text()+"\n")
-							});
-							$("body").append(textWin);
-							textWin.css("top", $(this).offset().top);
-							textWin.css("left", $(this).offset().left+30);
-						}
-					});
-					
-					var colCOunt = 0;
-					for(colHash in row)
-					{
-						if($.inArray(colHash, excludeFields)!=-1)
-							continue;
-					
-						var col = row[colHash];
-						var dataTd = document.createElement("td");
-						dataTd.setAttribute("class", "adminTableTd")
-						rowDiv.appendChild(dataTd);
-						
-						if(doControls)
-						{
-							if("pic"==colHash)
-							{
-								var picHolder = new PicBrowse("picUrl", "Verwendetes Bild.");
-								var dataDiv = picHolder.createControl(document, {"picUrl":col});
-								dataTd.appendChild(dataDiv);
-								$(picHolder.control).attr("value", col);
-								$(picHolder.control).attr("rowId", row["id"]);
-								$(picHolder.control).attr("field", colHash);
-								picHolder.init(null, function(){
-									var theId = this.getAttribute("rowId");
-									var field = this.getAttribute("field");
-									var value = this.src;
-									console.log("result of dummy search:"+value.search(/noImageDummy/));
-									if(-1!=value.search(/noImageDummy/))
-										value = "";
-								    var dbData = eval("({"+field+": \""+value+"\"})"); 
-								    $.fn.loadContent(tableName, null, dbData, "data", {edit:true,req:("id="+theId)});
-								});
-							}
-							else
-							{
-								switch(colTypes[colHash])
-								{
-									case "string":
-									case "blob":
-									{
-										var dataDiv = document.createElement("div");
-										$(dataDiv).html(col);
-										dataTd.appendChild(dataDiv);
-									
-										$(dataDiv).editable(function(value, settings) { 
-										    var dbData = eval("({"+settings.submitdata.field+": \""+value+"\"})"); 
-										    $.fn.loadContent(tableName, null, dbData, "data", {edit:true,req:("id="+settings.submitdata.id)});
-										    return(value);
-										}, { 
-										    // type    : 'textarea',
-											// submit  : 'OK',
-											submitdata: {id: row["id"], field:colHash},
-										});
-									}
-									break;
-									case "date":
-									{
-										var dataDiv = document.createElement("input");
-										dataTd.appendChild(dataDiv);
-										$(dataDiv).attr("value", col);
-										$(dataDiv).attr("rowId", row["id"]);
-										$(dataDiv).attr("field", colHash);
-										
-										
-										$(dataDiv).datepicker({
-											dateFormat:"yy-mm-dd",
-											onClose: function(value, inst) 
-											{
-												var theId = this.getAttribute("rowId");
-												var field = this.getAttribute("field");
-												var dateParts = value.split(".");
-												var sqlDate = value;
-												if(dateParts.length>1)
-												{
-													sqlDate = dateParts[2]+"-"+dateParts[1]+"-"+dateParts[0];
-												}
-											    var dbData = eval("({"+field+": \""+sqlDate+"\"})"); 
-											    $.fn.loadContent(tableName, null, dbData, "data", {edit:true,req:("id="+theId)});
-											}
-										});
-										console.log(col);
-										$(dataDiv).datepicker( "setDate" , col );
-										$(dataDiv).datepicker( "option", "dateFormat", "dd.mm.yy" );
-									}
-									break;
-									case "int":
-									case "float":
-									{
-										var dataDiv = document.createElement("input");
-										dataTd.appendChild(dataDiv);
-										$(dataDiv).attr("value", col);
-										$(dataDiv).attr("rowId", row["id"]);
-										$(dataDiv).attr("field", colHash);
-										
-										$(dataDiv).spinner({
-											change: function(ev, ui) 
-											{
-												var theId = this.getAttribute("rowId");
-												var field = this.getAttribute("field");
-												var val = $(this).spinner("value");
-											    var dbData = eval("({"+field+": \""+val+"\"})"); 
-											    $.fn.loadContent(tableName, null, dbData, "data", {edit:true,req:("id="+theId)});
-											}
-										});
-									}
-									break;
-									case "time":
-									{
-										var dataDiv = document.createElement("input");
-										dataTd.appendChild(dataDiv);
-										$(dataDiv).attr("value", col);
-										$(dataDiv).attr("rowId", row["id"]);
-										$(dataDiv).attr("field", colHash);
-										
-										$(dataDiv).timeEntry({
-											show24Hours: true, 
-											showSeconds: false,
-											spinnerImage: '../../images/jquery_ui/spinnerDefault.png'
-										});
-											
-										$(dataDiv).change(function(e) 
-										{
-											var theId = this.getAttribute("rowId");
-											var field = this.getAttribute("field");
-											var value = $(this).attr("value");
-										    var dbData = eval("({"+field+": \""+value+"\"})"); 
-										    $.fn.loadContent(tableName, null, dbData, "data", {edit:true,req:("id="+theId)});
-										});
-									}
-									break;
-								}
-							}
-						}
-						else
-						{
-							var dataDiv = document.createElement("div");
-							dataTd.appendChild(dataDiv);
-							dataDiv.innerHTML = col;
-						}
-						colCOunt++;
-					}
-					table.appendChild(rowDiv);
-					var eventId = $(this).find("id").text();
+					colCOunt = utils.RenderTableRow(json[rowHash], rowHash, table, types, tableName, ids, suposedTodoControls)
 				}
 				var rowTr = document.createElement("tr");
 				var delTd = document.createElement("td");
@@ -399,10 +459,6 @@
 
 			paraDiv.setAttribute("class", "adminParagraph");
 			var paraID = paragraphData.find("id").text();
-
-			var titleIDDiv = document.createElement("div");
-			titleIDDiv.textContent = "Absatz "+paraID;
-			paraDiv.appendChild(titleIDDiv);
 
 			//paraDiv.style.height = metaData['height'] + "px";
 //			heightobj.offset += parseInt(metaData['height']);
@@ -538,7 +594,7 @@
 						var reqs = null;
 						if(theCategory!="")
 							reqs = {category:theCategory}
-						var table = utils.RenderTable(theTable,typeJson,reqs);
+						var table = utils.RenderTable(theTable,typeJson[0],reqs);
 						tableDiv.appendChild(table);
 					}, null, "data", {def:true,json:"types"});
 
@@ -1096,7 +1152,7 @@
 			optn = document.createElement("OPTION");
 		    $("#insertParagraphSelect").append(optn);
 		    //output(response);
-			$(response).find("row").each(function()
+			$(response).find("row").children().each(function()
 		    {
 		    	var id = $(this).find( 'id').text();
 		    	var title = $(this).find( 'title').text();
@@ -1206,7 +1262,7 @@
 								var paraDiv = document.createElement("div");
 								paraDiv.setAttribute("id", "paragraph_"+section);
 								paraDiv.setAttribute("class", "adminParagraph");
-								paraDiv.appendChild(utils.RenderTable("links", typeJson, {category:section}, null));
+								paraDiv.appendChild(utils.RenderTable("links", typeJson[0], {category:section}, null));
 								tableDiv.appendChild(paraDiv);
 							};
 							$(categorySelect).change(function(){
@@ -1218,6 +1274,28 @@
 					}, null, "data", {def:true,json:"types"});
 				}
 				break;
+			case "approve":
+				{
+					$.fn.loadContent("links", function(result)
+					{
+						var typeJson = eval(result);
+						var paraDiv = document.createElement("div");
+						paraDiv.setAttribute("id", "paragraph_order");
+						paraDiv.setAttribute("class", "adminParagraph");
+						paraDiv.appendChild(utils.RenderTable("links", typeJson[0], {approved:0}));
+						contentDiv.appendChild(paraDiv);
+					}, null, "data", {def:true,json:"types"});
+					$.fn.loadContent("events", function(result)
+					{
+						var typeJson = eval(result);
+						var paraDiv = document.createElement("div");
+						paraDiv.setAttribute("id", "paragraph_order");
+						paraDiv.setAttribute("class", "adminParagraph");
+						paraDiv.appendChild(utils.RenderTable("events", typeJson[0], {approved:0}));
+						contentDiv.appendChild(paraDiv);
+					}, null, "data", {def:true,json:"types"});
+				}
+				break;
 			case "bestellen":
 				{
 					$.fn.loadContent("bestellung,kunden", function(result)
@@ -1226,7 +1304,7 @@
 						var paraDiv = document.createElement("div");
 						paraDiv.setAttribute("id", "paragraph_order");
 						paraDiv.setAttribute("class", "adminParagraph");
-						paraDiv.appendChild(utils.RenderTable("bestellung,kunden", typeJson, null, null, {joinFields:"kundenID=id"}, false, "kundenID,id"));
+						paraDiv.appendChild(utils.RenderTable("bestellung,kunden", typeJson[0], null, null, {joinFields:"kundenID=id"}, "kundenID,id", false));
 						contentDiv.appendChild(paraDiv);
 					}, null, "data", {def:true,json:"types",joinFields:"kundenID=id"});
 				}
@@ -1308,6 +1386,10 @@
 				    	console.log("is valid paraArray[paraIndex]");
 						var paraDiv = document.createElement("div");
 						paraDiv.setAttribute("id", "paragraph_"+paraArray[paraIndex]);
+						var titleIDDiv = document.createElement("div");
+						titleIDDiv.setAttribute("class", "adminParaTitle");
+						titleIDDiv.textContent = "Absatz ID:"+paraArray[paraIndex];
+						contentDiv.appendChild(titleIDDiv);
 				    	$.fn.loadContent("paragraphs", function(result)
 				    	{
 				    		try{
@@ -1329,8 +1411,7 @@
 										optn = document.createElement("OPTION");
 										optn.textContent = $(this).text();
 									    $("#paragraphDropDown").append(optn);
-								    })
-								    
+								    });
 								    utils.renderPargraphHTML(myParagraph, $(this), localParaIndex);
 								});
 							}catch(err)
@@ -1338,7 +1419,9 @@
 								$(paraDiv).append("Der Ansatz konnte nicht gerendert werden. Ueberpruefen sie bitte das eingegebene html.");
 							}
 				    	}, {id:paraArray[paraIndex]}, "data");
-							contentDiv.appendChild(paraDiv);
+						
+						// append
+						contentDiv.appendChild(paraDiv);
 				    }
 
 				    $.fn.loadContent("paragraphs", populateAllParagraphSelect, null, "xml");
@@ -1537,6 +1620,16 @@
 		$("#downMenuItemButton").click(moveMenuItemHandler);
 		$("#errorOutputDelete").click(function(evt){
 			$("#errorOutput").empty();
+		});
+		$("#refreshButton").click(triggerParagraphCreation);
+		$("#spinNumTableCols").spinner({
+			value: maxCols,
+			change: function(ev, ui) 
+			{
+				var val = $(this).spinner("value");
+				maxCols = val;
+				console.log("utils.maxCols:"+maxCols);
+			}
 		});
 		refreshPages(populateContentDropDown);
 	}

@@ -731,12 +731,13 @@ EventTableEntryDialog.controls = new Array(
 		new ComboBox("category",  "Die Kategorie des Eintrages."),
 		new TextField("newCategory",  "Neue Kategorie erstellen. Ueberschreibt obige Auswahl."),
 		new TextField("title", "Der Titel des Eintrages."),
+		new TextField("artists", "Die Kuenstler die an dem Event teilnehmen."),
 		new PicBrowse("pic", "Event Bild"),
 		new DateField("date", "Das Datum des Events."),
 		new TextField("description", "Beschreibung des Events."),
 		new TextField("venue", "Ort des Events."),
 		new TimeField("time", "Anfangszeit des Events."),
-		new TextField("misc", "Verschiedenes ueber das Event.")
+		new TextField("url", "Website mit info bezueglich des Events.")
 );
 function getEventCategoryCallback(result)
 {
@@ -764,7 +765,7 @@ EventTableEntryDialog.init = function(initData)
 var ArchivTableEntryDialog = new EditDialog("EventTableEntryDialog", "In Tabelle einfuegen.");
 ArchivTableEntryDialog.controls = new Array(
 		new ComboBox("category",  "Die Kategorie des Eintrages."),
-		new TextField("newCategory",  "Neue Kategorie erstellen. Ueberschreibt obige Auswahl."),
+		new TextField("newCategory",  "Neue Kategorie erstellen (KLEINBUCHSTABEN!). Ueberschreibt obige Auswahl."),
 		new Spinner("issue", "Die Ausgabenummer."),
 		new PicBrowse("pic", "Cover"),
 		new TextField("content", "Inhalt des Heftes.")

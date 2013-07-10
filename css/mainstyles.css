@@ -82,6 +82,17 @@ body {
 	overflow:hidden;
 	z-index:4; 
 }
+#popup
+{
+	position:absolute;
+	top:0px;
+	background-color:#01274C;
+	padding:10px;
+	width:80%;
+	height:600px;
+	overflow:hidden;
+	background: url(/images/randomPic.php?prefix=layout/contentBG) no-repeat fixed 50px center;
+}
 
 #content
 {
@@ -447,6 +458,10 @@ a:hover{
 .errorText
 {
 	color:#FF0000;
+}
+.errorField
+{
+	border:1px solid #FF0000;
 }
 
 .hiddenFormButton

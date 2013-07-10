@@ -1,5 +1,5 @@
 <?php
-include("cgi-bin/Drawing.php");
+//include("cgi-bin/Drawing.php");
 interface iParagraph
 {
 	const eTYPE_PIC_RIGHT=0, eTYPE_PIC_LEFT=1, eTYPE_TABLE=2, eTYPE_ORDER=3;
@@ -335,6 +335,31 @@ class TablePara implements iParagraph
 			}
 		}
 	}
+
+	public function GetTableResults()
+	{
+		$configXML = new DOMDocument();
+		$configXML->load($this->tableType.".xml");
+		
+		$root = $configXML->firstChild;
+//		try{
+		$dbTable = $root->getAttribute("name");
+		$reqArray = array("table"=>$dbTable);
+		if(""!=$this->category)
+			$reqArray["requirements"] = array("category"=>$this->category);
+
+		$tableDef = Aufenthalt::GetInstance()->DBConn()->GetTableDef($reqArray);
+		if(array_key_exists("date", $tableDef[0]))
+		{
+			$reqArray["orderBy"] = "date";
+		}
+		else if(array_key_exists("issue", $tableDef[0]))
+		{
+			$reqArray["orderBy"] = "issue";
+		}
+
+		return Aufenthalt::GetInstance()->DBConn()->GetTableContent($reqArray);
+	}
 	
 	public function Render(&$parentNode, &$currentOffset)
 	{
@@ -361,8 +386,9 @@ class TablePara implements iParagraph
 //		try{
 		$dbTable = $root->getAttribute("name");
 		$reqArray = array("table"=>$dbTable);
+		$reqArray["requirements"] = array("approved"=>1);
 		if(""!=$this->category)
-			$reqArray["requirements"] = array("category"=>$this->category);
+			$reqArray["requirements"]["category"] = $this->category;
 
 		$tableDef = Aufenthalt::GetInstance()->DBConn()->GetTableDef($reqArray);
 		if(array_key_exists("date", $tableDef[0]))
@@ -375,6 +401,7 @@ class TablePara implements iParagraph
 		}
 
 		$dbResult = Aufenthalt::GetInstance()->DBConn()->GetTableContent($reqArray);
+		//$dbResult = $this->GetTableResults();
 		$doc = $builder->GetDoc();
 		
 		$table = $doc->createElement("table");
@@ -399,4 +426,5 @@ class TablePara implements iParagraph
 		$currentOffset += ($this->height + iParagraph::PARAGRAPH_PADDING);
 	}
 }
+
 ?>
