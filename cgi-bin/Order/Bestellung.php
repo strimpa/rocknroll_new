@@ -181,7 +181,7 @@ class Bestellung{
 			}
 		}else{
 			if(Aufenthalt::GetInstance()->GetUser()->bezahlung=="lastschrift")
-				$rueckGabe .= "<p id=\"noDirectDebit\" />
+				$rueckGabe .= "<p name=\"noDirectDebit\" />
 				<strong>You chose to pay by direct debit. 
 				We are sorry to say that we don't offer this posibility for customers from abroad. 
 				Sorry for any inconvenience.</strong>";
