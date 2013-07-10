@@ -102,8 +102,10 @@ class BestellAblauf{
 		{
 			$this->bestellungAufgegeben=true;
 			require_once("endKopf.htm");
-			print Aufenthalt::GetInstance()->GetUser()->printUserShort();
-			print $this->aktuelleBestellung->zeigeBestellungen($this);
+			$summary = Aufenthalt::GetInstance()->GetUser()->printUserShort();
+			$summary .= $this->aktuelleBestellung->zeigeBestellungen($this);
+			print $summary;
+			SendDebugMail("Eine Bestellung wurde aufgegeben: <br />".$summary);
 			require_once("emailForm.php");
 	/*******************************************************************/
 	// nach zweiter Best�tigung ist die Flagvariable vorhanden und auf y
