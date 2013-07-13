@@ -23,6 +23,7 @@ class Bestellung{
 	var $anzahlAusgaben;
 	var $preise;
 	var $portos;
+	var $bezahlVerfahren;
 	
 	function Bestellung($bestellungen, $ausGabeNr, $insAusland, $datum, $kommentar)
 	{
@@ -32,6 +33,8 @@ class Bestellung{
 		$this->bestellDatum = $datum;
 		$this->kommentar = EncodeUmlaute($kommentar);
 		$this->gesamtPreis = 0;
+		$this->dbText = $this->gibDBText();
+		$this->bezahlVerfahren = "Ueberweisung";
 	}
 	
 	function GetPorto($key)
@@ -39,6 +42,11 @@ class Bestellung{
 		if(!array_key_exists($key, $this->portos))
 			return $this->portos[count($this->portos)-1];
 		return $this->portos[$key];
+	}
+	
+	function SetBezahlVerfahren($verfahren)
+	{
+		$this->bezahlVerfahren = $verfahren;
 	}
 	
 	function gibDBText()
@@ -52,28 +60,40 @@ class Bestellung{
 			$this->preise=Aufenthalt::GetInstance()->GetAblauf()->ausland_preise;
 			$this->portos=Aufenthalt::GetInstance()->GetAblauf()->ausland_portos;
 		}
+		
+		$mitBerechnung = true;
 
 		foreach($this->bestellt as $key=>$bestellung)
 		{
 			if(array_key_exists($key, $this->preise))
 			{
 				$produktPreis = $this->preise[$key];
-					
+				
 				$this->gesamtPreis += $produktPreis;
 				$rueckGabe .= Bestellung::$Produkte[$key];
 				if($key=="Abo")
 					$rueckGabe .= " ab Ausgabe ".$this->ausgabeNr["Abo"];
+				if($key=="Heft")
+				{
+					$keywords = preg_split("/[\s,]+/", $this->ausgabeNr["Heft"]);
+					$this->anzahlAusgaben[$key] = (count($keywords)>0?count($keywords):1);
+					if($this->anzahlAusgaben[$key]>1)
+						$mitBerechnung = false;
+					$rueckGabe .= " ab Ausgabe ".$this->ausgabeNr["Heft"];
+				}
 				$rueckGabe .= "<br>";
 			}
 		}
-		$rueckGabe .= ". berechneter Preis: ".sprintf("%3.2f", $this->gesamtPreis)."&euro;";
-		return $rueckGabe;
+		if($mitBerechnung)
+			$rueckGabe .= ". berechneter Preis: ".sprintf("%3.2f", $this->gesamtPreis)."&euro;";
+		else
+			$rueckGabe .= "Keine Preisberechnung hat stattgefunden.";
+		return $rueckGabe;	
 	}
 	
 	function zeigeBestellungen()
 	{
 		$ablauf = Aufenthalt::GetInstance()->GetAblauf();
-		$this->dbText = $this->gibDBText();
 		
 		// bestellTebelle	
 		$mitBerechnung = (($this->destination!='noneuausland') ? true : false);
@@ -88,7 +108,7 @@ class Bestellung{
 				  </td>
 				  <td><strong>(Ab) Ausgabe(n) Nr.</strong>
 				  </td>
-			  <td width=\"80px\"><strong>Preis inkl. P+V</strong> (in &euro;)</td>";
+			  <td width=\"80px\"><strong>Preis pro St&uuml;ck (in &euro;)</strong></td>";
 			  
 		/*******************************
 		Zeilen mit berechnung		
@@ -146,6 +166,7 @@ class Bestellung{
 				<td colspan=\"5\">Eine automatische Berechnung des Gesamtpreises ist nicht m&ouml;glich. Portokosten sinken mit mehreren Heftbestellungen oder sind nicht kalkulierbar f&uuml;r Bestellungen au&szlig;erhalb der EU.</td>
 			<tr>";
 		}
+		//$this->kommentar
 		$rueckGabe .= "
 			<tr bgcolor=\"#336699\"> 
 				<td colspan=\"3\">Ihr Kommentar:<p />".$this->kommentar."</td>

@@ -580,11 +580,22 @@ global $db_pass;
 	{
 		$rueckGabe = "";
 		$abbruch=false;
+		
+		$bestellDBString = $aktuelleBestellung->dbText;
+		if(strlen($bestellDBString)<=0)
+		{
+			throw new Exception("<P>".
+				"Es Konnte nicht in die Bestell-Datenbank geschrieben werden, bitte versuchen Sie es sp&auml;ter ".
+				"noch einmal und/oder berichten sie bitte den Fehler:<br> <a href=\"mailto:schreib@gunnardroege.de\">Mail an Webmaster</a><br>".
+				"Vielen Dank f�r Ihr Verst&auml;ndnis.<br>");
+		}
+		$bestellDBString.="\nBezahlverfahren: ".$aktuelleBestellung->bezahlVerfahren;
+		
 		$bestellNamensArray = array("kundenID", "bestellungen", "kommentar", "bestellDatum");
 		$bestellAusGabeArray = array(	
 		// Eingabewerte mit auszugebenden Werten vergleichen
 			($kundenID),
-			(($bestellSumme=$aktuelleBestellung->dbText) == "" ? $abbruch=true : $bestellSumme),
+			$bestellDBString,
 			($aktuelleBestellung->kommentar == "" ? NULL : $aktuelleBestellung->kommentar),
 			($aktuelleBestellung->bestellDatum == "" ? NULL : $aktuelleBestellung->bestellDatum));
 		

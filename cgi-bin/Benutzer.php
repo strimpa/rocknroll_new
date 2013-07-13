@@ -226,8 +226,7 @@ class Benutzer{
 		$this->blz = SafeDBString($_POST['Bankleitzahl']);
 		$this->kundenNummer = SafeDBString($_POST['kundenNr']==NULL?"":$_POST['kundenNr']);
 		
-		Aufenthalt::GetInstance()->GetAblauf()->aktuelleBestellung->kommentar.="\n ".
-			($this->bezahlung=="lastschrift"?"Der Benutzer m&ouml;chte das Geld per Lastschrift eingezogen bekommen":"Der Benutzer bezahlt per &Uuml;berweisung");
+		Aufenthalt::GetInstance()->GetAblauf()->aktuelleBestellung->SetBezahlVerfahren($this->bezahlung);
 
 		return $rueckgabe;
 	}
