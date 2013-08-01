@@ -528,6 +528,10 @@ function EnterXMLintoTable($tablename, $filename)
 			}
 			if($cell->tagName=="id")
 				$idValue = $cell->textContent;
+			else if($cell->tagName=="approved")
+			{
+				/* Don't do anythoing as we set that manually below! */
+			}
 			else {
 				$val = $cell->textContent;
 				array_push($fieldArray,$cell->tagName);
@@ -541,6 +545,8 @@ function EnterXMLintoTable($tablename, $filename)
 				print "there's a value:".$cell->tagName.":".$val."\n";
 			}
 		}
+		array_push($fieldArray,"approved");
+		array_push($valueArray,1);
 		$params = array(
 				'table'=>$tablename, 
 				'fields'=>$fieldArray, 
