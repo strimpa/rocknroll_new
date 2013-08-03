@@ -9,6 +9,7 @@
 <link href="../../css/dot-luv/jquery-ui-1.8.12.custom.css" rel="stylesheet" type="text/css" />
 <link href="../../css/microgallery_style.css" rel="stylesheet" type="text/css" />
 <link href="../../css/jquery.timeentry.css" rel="stylesheet" type="text/css" />
+<link href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" rel="stylesheet" type="text/css" />
 
 <script type="text/javascript" src="../../script/jquery-1.5.1.min.js"></script>
 <script type="text/javascript" src="../../script/ui/jquery.ui.core.js"></script>
@@ -16,6 +17,7 @@
 <script type="text/javascript" src="../../script/ui/jquery.ui.button.js"></script>
 <script type="text/javascript" src="../../script/ui/jquery.ui.spinner.js"></script>
 <script type="text/javascript" src="../../script/ui/jquery.ui.datepicker.js"></script>
+<script type="text/javascript" src="../../script/ui/jquery.ui.progressbar.js"></script>
 
 <script type="text/javascript" src="../../script/tiny_mce/jquery.tinymce.js"></script>
 <!--<script type="text/javascript" src="../../script/jquery.microgallery.js"></script>-->

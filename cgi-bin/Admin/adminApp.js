@@ -1,5 +1,12 @@
 ﻿// class to deal with content creation
 
+function sleep(ms)
+{
+	var dt = new Date();
+	dt.setTime(dt.getTime() + ms);
+	while (new Date().getTime() < dt.getTime());
+}
+	
 (function($)
 {
 	var currCallback = undefined;
@@ -399,16 +406,38 @@
 				}
 				manipIframe();
 			});
-				
+			
 			var suposedTodoControls = doControls;
+			$("#progresstitle").text("Loading: "+tableName);
 			$.fn.loadContent(tableName, function(result)
 			{
 				var json = eval(result);
 				var colCOunt = 0;
-				for(rowHash in json)
+				var rowCounter = 0;
+				var objkeys = [];
+				for(key in json)
 				{
-					colCOunt = utils.RenderTableRow(json[rowHash], rowHash, table, types, tableName, ids, suposedTodoControls)
+					console.log("key:"+key);
+					objkeys.push(key);
 				}
+				var keyIterator = 0;
+				function iterateJson(json, rowHash, table, types, tableName, ids, suposedTodoControls)
+				{
+					colCOunt = utils.RenderTableRow(json[rowHash], rowHash, table, types, tableName, ids, suposedTodoControls);
+					
+					rowCounter ++;
+					var progressVal = (100.0 * rowCounter); 
+					var lengthVal = 1.0 * json.length;
+					progressVal = Math.floor(progressVal/lengthVal);
+					console.log("progressVal:"+progressVal);
+					$("#progressbar").progressbar({value : progressVal});
+					$("#progresstitle").text("Loading: "+tableName+": "+progressVal+"%");
+//					alert(progressVal);
+					setTimeout(iterateJson, 50, json, objkeys[++keyIterator], table, types, tableName, ids, suposedTodoControls);
+				}
+				if(objkeys.length>0)
+					iterateJson(json, objkeys[0], table, types, tableName, ids, suposedTodoControls);
+				
 				var rowTr = document.createElement("tr");
 				var delTd = document.createElement("td");
 				delTd.setAttribute("colspan", colCOunt);
@@ -447,7 +476,11 @@
 						
 				});
 
+//				progressbar.remove();
+
 			}, requirements, "xml", params);
+
+			$("#progresstitle").text("Loading: "+tableName+"... DONE!");
 			
 			return tableHolder;
 		},
@@ -1208,6 +1241,12 @@
 		    $("#paragraphDropDown").append(optn);
 			var contentDiv = document.createElement("p");
 			contentDiv.setAttribute("class", "contentDiv");
+			var progressbar = $("<div id='progressbar'></div>");
+			$(contentDiv).prepend("<div id='progresstitle'></div>"); 
+			$(contentDiv).prepend(progressbar);
+			progressbar.progressbar({value:0,color: "green"});
+
+			$("#admincontent").append(contentDiv);
 			
 //			var heightobj = new Object();
 //			heightobj.offset = 0;
@@ -1427,7 +1466,6 @@
 				    $.fn.loadContent("paragraphs", populateAllParagraphSelect, null, "xml");
 				}
 			}
-			$("#admincontent").append(contentDiv);
 		}
 //		function importParagraphHTML(identifier)
 //		{

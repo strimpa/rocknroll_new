@@ -735,9 +735,11 @@ EventTableEntryDialog.controls = new Array(
 		new PicBrowse("pic", "Event Bild"),
 		new DateField("date", "Das Datum des Events."),
 		new TextField("description", "Beschreibung des Events."),
-		new TextField("venue", "Ort des Events."),
+		new TextField("location", "Ort des Events."),
+		new TextField("venue", "Veranstaltungsraum."),
 		new TimeField("time", "Anfangszeit des Events."),
-		new TextField("url", "Website mit info bezueglich des Events.")
+		new TextField("url", "Website mit info bezueglich des Events."),
+		new TextField("mail", "E-mail fuer mehr informationen.")
 );
 function getEventCategoryCallback(result)
 {
