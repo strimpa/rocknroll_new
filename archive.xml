@@ -2,7 +2,7 @@
 <table name="archive">
 	<row>
 		<data class="eventDate tableCellFontFancy" type="string">issue</data>
-		<data class="archivePicTd tableCellFontNormal" type="pic">cover</data>
+		<data class="archivePicTd tableCellFontNormal" type="pic">pic</data>
 		<data class="archiveContent tableCellFontNormal" type="string">content</data>
 	</row>
 </table>
