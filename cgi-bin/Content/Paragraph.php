@@ -242,7 +242,7 @@ class TablePara implements iParagraph
 					$text = preg_replace("/[^\w]/", "", $text);
 					if($text!="")
 					{
-						$value = $resultArray[$text];
+						$value = trim($resultArray[$text]);
 						if(""==$value && $currRoot->tagName=="div")
 						{
 							$myElement = NULL;

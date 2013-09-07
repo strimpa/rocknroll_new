@@ -95,32 +95,9 @@ function getfirstImage($dirname) {
 	return($imageName);
 }
 function readEXIF($file) {
-		$exif_data = "";
 		$exif_idf0 = exif_read_data ($file,'IFD0' ,0 );
-        $emodel = $exif_idf0['Model'];
-
-        $efocal = $exif_idf0['FocalLength'];
-        list($x,$y) = explode('/', $efocal);
-        $efocal = round($x/$y,0);
-       
-        $exif_exif = exif_read_data ($file,'EXIF' ,0 );
-        $eexposuretime = $exif_exif['ExposureTime'];
-       
-        $efnumber = $exif_exif['FNumber'];
-        list($x,$y) = explode('/', $efnumber);
-        $efnumber = round($x/$y,0);
-
-        $eiso = $exif_exif['ISOSpeedRatings'];
-               
-        $exif_date = exif_read_data ($file,'IFD0' ,0 );
-        $edate = $exif_date['DateTime'];
-		if (strlen($emodel) > 0 OR strlen($efocal) > 0 OR strlen($eexposuretime) > 0 OR strlen($efnumber) > 0 OR strlen($eiso) > 0) $exif_data .= "::";
-        if (strlen($emodel) > 0) $exif_data .= "$emodel";
-        if ($efocal > 0) $exif_data .= " | $efocal" . "mm";
-        if (strlen($eexposuretime) > 0) $exif_data .= " | $eexposuretime" . "s";
-        if ($efnumber > 0) $exif_data .= " | f$efnumber";
-        if (strlen($eiso) > 0) $exif_data .= " | ISO $eiso";
-        return($exif_data);
+        $comment = $exif_idf0['ImageDescription'];
+        return($comment);
 }
 function checkpermissions($file) {
 	global $messages;
@@ -215,6 +192,7 @@ if (file_exists($currentdir ."/captions.txt"))
 		  			if (preg_match("/.jpg$|.gif$|.png$/i", $file))
 		  			{
 						//Read EXIF
+						//$img_captions[$file] = "display_exif:".$display_exif;
 						if ($display_exif == 1) $img_captions[$file] .= readEXIF($currentdir . "/" . $file);
 
 						checkpermissions($currentdir . "/" . $file);
