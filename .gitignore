@@ -4,3 +4,6 @@ script/rock-around.de   127.0.0.3   db85283_2   paragraphs   phpMyAdmin 2.11.11.
 docs
 MiniGal/photos
 management
+MiniGal/photos
+script/ui
+cgi-bin/Admin/scripts/ui
