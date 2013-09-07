@@ -1,12 +1,6 @@
 ﻿// class to deal with content creation
+require(['creationTemplates']);
 
-function sleep(ms)
-{
-	var dt = new Date();
-	dt.setTime(dt.getTime() + ms);
-	while (new Date().getTime() < dt.getTime());
-}
-	
 (function($)
 {
 	var currCallback = undefined;

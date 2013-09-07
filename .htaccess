@@ -1,7 +1,6 @@
-Options +FollowSymLinks
+#Options +FollowSymLinks
 
 RewriteEngine On
-#RewriteCond %{QUERY_STRING} !^cgi-bin
 RewriteRule ^index/([a-zA-Z0-9\/]*)$ index.php?$1
 #RewriteRule ^([a-zA-Z0-9\/]*)DBAccess/([a-zA-Z0-9\/]*)$ $1DBAccess.php?$2
 RewriteRule ^DBAccess/([a-zA-Z0-9\/\:\=\%]*)$ DBAccess.php?$1
