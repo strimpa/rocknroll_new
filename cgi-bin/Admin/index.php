@@ -20,13 +20,11 @@
 <script type="text/javascript" src="../../script/ui/jquery.ui.progressbar.js"></script>
 
 <script type="text/javascript" src="../../script/tiny_mce/jquery.tinymce.js"></script>
-<!--<script type="text/javascript" src="../../script/jquery.microgallery.js"></script>-->
 <script type="text/javascript" src="../../script/jquery.timeentry.min.js"></script>
 
 <script type="text/javascript" src="../../script/jquery.jeditable.mini.js"></script>
 
-<script type="text/javascript" src="creationTemplates.json"></script>
-<script type="text/javascript" src="adminApp.js"></script>
+<script data-main="scripts/main" src="scripts/require.js"></script>
 </head>
 
 <body> <!--  onload="adminApp.Init();" -->

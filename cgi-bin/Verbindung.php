@@ -190,7 +190,7 @@ global $db_pass;
 		}
 		
 		$sql .= ';';
-//        print("<!-- sql:".$sql." //-->\n");
+        print("<!-- sql:".$sql." //-->\n");
 		$result = mysqli_query($this->db, $sql);
 		$errors = mysqli_error($this->db);
 		if(strlen($errors)!=0)

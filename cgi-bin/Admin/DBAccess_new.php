@@ -1,6 +1,5 @@
 <?php
 	global $build_errors;
-	global $currRow;
 	$build_errors = array();
 		
 
@@ -56,6 +55,52 @@
 		}
 	}		
 	
+	function RecurseXml($content, $currRoot, $fieldName, $doc)
+	{
+		$tagName = MakeSafeTagName($fieldName);
+		$col = $doc->createElement($tagName);
+		print ("content".$content." :"); 
+		if(is_array($content))
+		{
+			print "is array\n";
+			for($colIndex=0;$colIndex<count($content);$colIndex++)
+			{
+				$keyArray = array_keys($content);
+				$fieldName = $keyArray[$colIndex];
+				RecurseXml($content[$colIndex], $col, "col", $doc);
+				$currRoot->appendChild($col);
+			}
+		}
+		else
+		{
+			if(IsXmlString($content))
+			{
+				print "is xml\n";
+				$importdoc = new DOMDocument();
+				$importdoc->encoding = 'UTF-8';
+				$importdoc->loadHTML('<?xml version="1.0" encoding="UTF-8"?>\n'.$content);
+				
+				$node = $importdoc->getElementsByTagName("div")->item(0);
+				$text = FALSE;
+				if(null!=$node)
+					$text = $doc->importNode($node, true);
+				if(FALSE!=$text)
+					$col->appendChild($text);
+				else
+				{
+					$text = $doc->createTextNode("Fehler beim Text laden!");
+					$col->appendChild($text);
+				}
+			} 
+			else
+			{
+				print "is string\n";
+				$col->nodeValue = htmlspecialchars($content);
+			}
+			$currRoot->appendChild($col);
+		}
+	}
+	
 	function ReplaceInvalidChars(&$string)	
 	{
 		$count = 0;		
@@ -75,7 +120,7 @@
 			{
 				Aufenthalt::GetInstance()->DBConn()->InsertTableContent(array('table'=>"submenus"));
 				// get submenu with highest id:
-				$_POST['menuRef'] =  mysqli_insert_id(Aufenthalt::GetInstance()->DBConn()->verbinde());
+				$_POST['menuRef'] =  mysql_insert_id();
 				$result = Aufenthalt::GetInstance()->DBConn()->InsertTableContent(
 					array(
 						'table'=>$query, 
@@ -92,7 +137,7 @@
 						'values'=>array_values($_POST)
 						));
 			}
-			$resultEntryID = mysqli_insert_id(Aufenthalt::GetInstance()->DBConn()->verbinde());
+			$resultEntryID = mysql_insert_id();
 		}
 		else if(isset($params["del"]) && $params["del"]==true)
 		{
@@ -112,7 +157,7 @@
 //				PrintHtmlComment("edit:".$reqTuple[0].",".$reqTuple[1]);
 			}
 			// foreach ($_POST as $key => $value) {
-				// Print ('$_POST['.$key.']:'.$value);
+				// PrintHtmlComment('$_POST['.$key.']:'.$value);
 			// }
 			$result = Aufenthalt::GetInstance()->DBConn()->SetTableContent(
 				array(
@@ -122,7 +167,7 @@
 					'values'=>array_values($_POST)
 					));
 			assert(count($result)==1);
-			$resultEntryID = mysqli_insert_id(Aufenthalt::GetInstance()->DBConn()->verbinde());
+			$resultEntryID = mysql_insert_id();
 		}
 		else if(isset($params["def"]))
 		{
@@ -215,7 +260,6 @@
 				$doc =  new DOMDocument(); //$imp->createDocument("", "", $dtd);
 				// Set other properties
 				$doc->encoding = 'UTF-8';
-				$doc->formatOutput = true;
 		//		$doc->standalone = false;
 				
 				$currRow = NULL;
@@ -223,12 +267,30 @@
 				$doc->appendChild($rootElem);
 				$print = "";
 				
+				set_error_handler('handleError', E_WARNING|E_ERROR);
+				
 				try{
 					RecurseXml($result, $rootElem, "row", $doc);
+					/*
+					foreach($result as $row)
+					{
+							if(is_bool($row))
+							{
+								$currRow = $doc->createElement("row");
+								$currRow->nodeValue = $row;
+								$rootElem->appendChild($currRow);
+							}
+							else 
+							{
+								
+							}			
+						}
+					}
+					*/
 				}
 				catch(Exception $e)
 				{
-					array_push($build_errors, "Fehler beim lesen von html in Tabelle $query and id ".$currRow.": ".$e->getMessage());
+					array_push($build_errors, "Fehler beim lesen von html in Tabelle $query and id ".$row["id"].": ".$e->getMessage());
 				}
 				foreach($build_errors as $anError)
 				{
@@ -237,6 +299,8 @@
 					$rootElem->appendChild($currError);
 				}
 
+				restore_error_handler();
+			
 				$output = $doc->saveXML();
 		//		$output = preg_replace("/[\n\r]/", "", $output);
 				print $output;
