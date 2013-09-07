@@ -3,7 +3,7 @@
 //require_once("cgi-bin/Aufenthalt.php");
 require_once("cgi-bin/Content/ContentMgr.php");
 session_start();
-//Aufenthalt::GetInstance()->DBConn()->schliesse();
+Aufenthalt::GetInstance()->DBConn()->schliesse();
 ContentMgr::GetInstance()->Genesis();
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
