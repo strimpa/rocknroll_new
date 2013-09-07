@@ -35,10 +35,10 @@ class Verbindung
 		
 		// MySQL Query mit der Syntax zum auslesen der Informationen einer
 		// gew�hlten MySQL Datenbank Tabelle
-		/*$this->tableResult = mysql_query("SELECT * FROM Termine");
+		/*$this->tableResult = mysqli_query("SELECT * FROM Termine");
 		
 		 MySQL Query Daten an ein indiziertes Array �bergeben
-		$tableData = mysql_fetch_row($this->tableResult);
+		$tableData = mysqli_fetch_row($this->tableResult);
 		
 		
 		foreach ($tableData as $value) {
@@ -49,8 +49,8 @@ class Verbindung
 	
 	function verbinde()
 	{
-		if(null!=$this->db)
-			return;
+		if(null!=$this->db)// && mysqli_ping($this->db))
+			return $this->db;
 global $db_serv;
 	// MySQL Datenbank Name
 global $db_name;
@@ -58,11 +58,17 @@ global $db_name;
 global $db_user;
 	// Passwort
 global $db_pass;
-		$this->db = mysql_connect($db_serv, $db_user, $db_pass) or die('Fehler beim Verbinden zum Datenbankserver!');
+		$this->db = mysqli_connect($db_serv, $db_user, $db_pass) or die('Fehler beim Verbinden zum Datenbankserver!');
 		// MySQL Datenbank w�hlen
-		mysql_select_db($db_name, $this->db) or die('Fehler beim Verbinden zur Datenbank!');
-		mysql_query("SET NAMES utf8", $this->db);
-		return true;
+		mysqli_select_db($this->db, $db_name) or die('Fehler beim Verbinden zur Datenbank!');
+		mysqli_query($this->db, "SET NAMES utf8");
+		return $this->db;
+	}
+	
+	function schliesse()
+	{
+//		mysqli_close($this->db);
+		$this->db = null;
 	}
 	
 	private function GetFieldString($params, $fieldParam)
@@ -145,6 +151,7 @@ global $db_pass;
 
 	public function GetTableContent($settings)
 	{
+		global $build_errors;
 		$backGabe = array();
 		if(!is_array($settings))
 		{
@@ -183,15 +190,15 @@ global $db_pass;
 		}
 		
 		$sql .= ';';
-//        print("<!-- sql:".$sql." //-->\n");
-		$result = mysql_query($sql);
-		if($result && mysql_num_rows($result)>0)
+        print("<!-- sql:".$sql." //-->\n");
+		$result = mysqli_query($this->db, $sql);
+		$errors = mysqli_error($this->db);
+		if(strlen($errors)!=0)
+			array_push($build_errors,  "Errors: ".$errors);
+		if($result && mysqli_num_rows($result)>0)
 		{
-			while($reihe = mysql_fetch_assoc($result))
+			while($reihe = mysqli_fetch_assoc($result))
 			{
-//				$keys = array_keys($reihe);
-//				foreach ($keys as $key)
-//	        		print("<!-- key:".$key." //-->\n");
 				array_push($backGabe, $reihe);
 			}
 		}
@@ -200,6 +207,8 @@ global $db_pass;
 
 	public function GetTableDef($settings)
 	{
+		global $build_errors;
+		$build_errors = array();
 		$backGabe = array();
 		if(!is_array($settings))
 		{
@@ -227,12 +236,42 @@ global $db_pass;
 		
 		$sql .= ';';
 //        print("<!-- sql:".$sql." //-->\n");
-		$result = mysql_query($sql);
-		$fields = mysql_num_fields($result);
+		$result = mysqli_query($this->db, $sql);
+		$errors = mysqli_error($this->db);
+		if(strlen($errors)!=0)
+			array_push($build_errors,  "Errors: ".$errors);
+		if(FALSE==$result)
+		{
+			return NULL;
+		}
+		$fields = mysqli_num_fields($result);
 		$rowArray = array();	
+		
+		$mysql_data_type_hash = array(
+		    1=>'tinyint',
+		    2=>'smallint',
+		    3=>'int',
+		    4=>'float',
+		    5=>'double',
+		    7=>'timestamp',
+		    8=>'bigint',
+		    9=>'mediumint',
+		    10=>'date',
+		    11=>'time',
+		    12=>'datetime',
+		    13=>'year',
+		    16=>'bit',
+		    //252 is currently mapped to all text and blob types (MySQL 5.0.51a)
+		    252=>'text',
+		    253=>'varchar',
+		    254=>'char',
+		    246=>'decimal'
+		);
+
 		for ($i=0; $i < $fields; $i++)
 		{
-			$rowArray[mysql_field_name($result, $i)] = mysql_field_type($result, $i);
+			$finfo = mysqli_fetch_field_direct($result, $i);
+			$rowArray[$finfo->name] = $mysql_data_type_hash[$finfo->type];
 		}
 		array_push($backGabe,$rowArray);
 		return $backGabe;
@@ -240,6 +279,7 @@ global $db_pass;
 
 	public function DropTableContent($settings)
 	{
+		global $build_errors;
 		$backGabe = array();
 		$this->verbinde();
 		
@@ -254,13 +294,16 @@ global $db_pass;
 		}
 		$sql .= ';';
 //        print("<!-- sql:".$sql." //-->\n");
-		$result = mysql_query($sql);
-		print "<!-- Errors: ".mysql_error()."//-->";
+		$result = mysqli_query($this->db, $sql);
+		$errors = mysqli_error($this->db);
+		if(strlen($errors)!=0)
+			array_push($build_errors,  "Errors: ".$errors);
 		return array($result);
 	}
 
 	public function SetTableContent($settings)
 	{
+		global $build_errors;
 		$backGabe = array();
 		$this->verbinde();
 		
@@ -276,7 +319,8 @@ global $db_pass;
         		continue;
         	if($fieldIndex>0)
         		$sql .= ",";
-        	$sql .= "`".$fields[$fieldIndex]."` = '".$values[$fieldIndex]."'";
+			$escapedValue = SafeDBString($values[$fieldIndex]);
+        	$sql .= "`".$fields[$fieldIndex]."` = '".$escapedValue."'";
         }
         
 		if($reqString != "")
@@ -284,21 +328,30 @@ global $db_pass;
 			$sql .= ' WHERE '.$reqString;
 		}
 		$sql .= ';';
-//        print("<!-- sql:".$sql." //-->\n");
-		$result = mysql_query($sql);
-//		print "<!-- Errors: ".mysql_error()."//-->";
+        //print("sql:".$sql);
+        // take out as otherwise writes into paragraph list in page table!
+		$result = mysqli_query($this->db, $sql);
+		$errors = mysqli_error($this->db);
+		if(strlen($errors)!=0)
+			array_push($build_errors,  "Errors: ".$errors);
 		return $result;
 	}
 	
 	public function InsertTableContent($settings)
 	{
+		global $build_errors;
+		$build_errors = array();
 		$backGabe = array();
 		$this->verbinde();
 		
 		// UPDATE  `rocknroll`.`submenus` SET  `links` =  'The first entry,The second entry,The third entry' WHERE  `submenus`.`id` =1;
 		$sql = "INSERT INTO `".$settings['table']."` (";
-        $keys = $settings['fields'];
-        $values = $settings['values'];
+        $fields = NULL;
+        $values = NULL;
+		if(array_key_exists('fields', $settings))
+	        $fields = $settings['fields'];
+		if(array_key_exists('values', $settings))
+	        $values = $settings['values'];
 		if(is_array($fields) && count($fields)>0)
 		{
 	        for($fieldIndex = 0; $fieldIndex<count($fields);$fieldIndex++)
@@ -307,7 +360,7 @@ global $db_pass;
 	        		continue;
 	        	if($fieldIndex>0)
 	        		$sql .= ",";
-	        	$sql .= "`".$keys[$fieldIndex]."`";
+	        	$sql .= "`".$fields[$fieldIndex]."`";
 	        }
 		}
 		$sql .= ') VALUES ('; 
@@ -319,14 +372,17 @@ global $db_pass;
 	        		continue;
 	        	if($fieldIndex>0)
 	        		$sql .= ",";
-	        	$sql .= "'".$values [$fieldIndex]."'";
+				$escapedValue = SafeDBString($values[$fieldIndex]);
+	        	$sql .= "'".$escapedValue."'";
 	        }
 	        
 		}
 		$sql .= ');';
-        print("<!-- sql:".$sql." //-->\n");
-		$result = mysql_query($sql);
-//		print "<!-- Errors: ".mysql_error()."//-->";
+//        print("<!-- sql:".$sql." //-->\n");
+		$result = mysqli_query($this->db, $sql);
+		$errors = mysqli_error($this->db);
+		if(strlen($errors)!=0)
+			array_push($build_errors,  "Errors: ".$errors);
 		return array($result);
 	}
 
@@ -336,14 +392,14 @@ global $db_pass;
 		$this->verbinde();
 		$sql = 'SELECT `title` '
         . ' FROM `pages` '; 
-		$result = mysql_query($sql);
-		if(mysql_num_rows($result)<1)
+		$result = mysqli_query($this->db, $sql);
+		if(mysqli_num_rows($result)<1)
 		{
 			 $backGabe = false;
 		}
 		else
 		{
-			while($reihe = mysql_fetch_row($result))
+			while($reihe = mysqli_fetch_row($result))
 			{
 				for($g=0;$g<count($reihe);$g++)
 				{
@@ -362,51 +418,51 @@ global $db_pass;
 
 	function gibLinksAusFuerRubrik($rubrik){
 		$this->verbinde();
-		$sql = "SELECT DISTINCT rubrik, beschreibung, url, anlegeDatum FROM links WHERE rubrik LIKE \"$rubrik\""; 
-		$result = mysql_query($sql);
+		$sql = "SELECT DISTINCT category, description, url, anlegeDatum FROM links WHERE category LIKE \"$rubrik\" AND approved != 0"; 
+		$result = mysqli_query($this->db, $sql);
 		if(!$result)
-			print "Aufgetretene Fehler: ".mysql_error();
+			print "Aufgetretene Fehler: ".mysqli_error($this->db);
 		return $result;
 	}
 
 	function getLinkSections(){
 		$this->verbinde();
-		$sql = "SELECT DISTINCT rubrik FROM links"; 
-		$result = mysql_query($sql);
+		$sql = "SELECT DISTINCT category FROM links"; 
+		$result = mysqli_query($this->db, $sql);
 		if(!$result)
-			print "Aufgetretene Fehler: ".mysql_error();
+			print "Aufgetretene Fehler: ".mysqli_error($this->db);
 		return $result;
 	}
 	
 	function gibLinksAusFuerSuche($eingabe){
 		$this->verbinde();
 		print "Sucheingabe \"$eingabe\"";
-		$sql = "SELECT DISTINCT `rubrik`,`beschreibung`,`url`,`anlegeDatum` FROM links WHERE LOCATE(\"".$eingabe."\", beschreibung) != 0 OR LOCATE(\"".$eingabe."\", url) != 0"; 
-		$result = mysql_query($sql);
-		if(mysql_num_rows($result)<1){
-			$sql = "SELECT DISTINCT `rubrik`,`beschreibung`,`url`,`anlegeDatum` FROM links WHERE LOCATE(\"".$eingabe."\", LCASE(beschreibung)) != 0 OR LOCATE(\"".$eingabe."\", LCASE(url)) != 0"; 
-			$result = mysql_query($sql);
+		$sql = "SELECT DISTINCT `category`,`description`,`url`,`anlegeDatum` FROM links WHERE LOCATE(\"".$eingabe."\", description) != 0 OR LOCATE(\"".$eingabe."\", url) != 0"; 
+		$result = mysqli_query($sql);
+		if(mysqli_num_rows($result)<1){
+			$sql = "SELECT DISTINCT `category`,`description`,`url`,`anlegeDatum` FROM links WHERE LOCATE(\"".$eingabe."\", LCASE(description)) != 0 OR LOCATE(\"".$eingabe."\", LCASE(url)) != 0"; 
+			$result = mysqli_query($this->db, $sql);
 		}
 		if(!$result)
-			print "Ausgabe: ".mysql_error();
+			print "Ausgabe: ".mysqli_error($this->db);
 		return $result;
 	}
 
-	function gibLinksEin($rubrik, $beschreibung, $link, $anlegeDatum){
+	function gibLinksEin($rubrik, $description, $link, $anlegeDatum){
 		$this->verbinde();
-		$sql = "INSERT INTO `links`(rubrik,beschreibung,url,angelegtVon) VALUES ('$rubrik','$beschreibung','$link','$_POST[adminName]')"; 
-		$result = mysql_query($sql);
+		$sql = "INSERT INTO `links`(category,description,url,angelegtVon) VALUES ('$rubrik','$description','$link','$_POST[adminName]')"; 
+		$result = mysqli_query($this->db, $sql);
 		if(!$result)
-			print "Aufgetretene Fehler: ".mysql_error();
+			print "Aufgetretene Fehler: ".mysqli_error($this->db);
 	return $result;
 	}
 
 	function gibErsteSortierungAus($tabellenName){
 		$this->verbinde();
 		$sql = "SELECT DISTINCT erstAuswahl FROM " . $tabellenName; 
-		$result = mysql_query($sql);
+		$result = mysqli_query($this->db, $sql);
 		if(!$result)
-			print "Aufgetretene Fehler: ".mysql_error();
+			print "Aufgetretene Fehler: ".mysqli_error($this->db);
 	return $result;
 	}
 
@@ -415,10 +471,10 @@ global $db_pass;
 			$spalten = "datum,kuenstler,stadt,location,uhrzeit,url,telNummer";
 		$this->verbinde();
 		$sql = "SELECT $spalten FROM $tabellenName ".$whereKlausel; 
-		$result = mysql_query($sql);
+		$result = mysqli_query($this->db, $sql);
 		if(!$result)
-			print "Aufgetretene Fehler: ".mysql_error();
-	return $result;
+			print "Aufgetretene Fehler: ".mysqli_error($this->db);
+		return $result;
 	}
 
 	/***********************************************************************************
@@ -434,8 +490,8 @@ global $db_pass;
         . ' WHERE `kundenNr` '
         . ' LIKE \'' . $user->kundenNummer . '\' AND `nachname` '
         . ' LIKE \'' . $user->nachName . '\' LIMIT 0, 30'; 
-		$result = mysql_query($sql);
-		if(mysql_num_rows($result)<1){
+		$result = mysqli_query($this->db, $sql);
+		if(mysqli_num_rows($result)<1){
 			 $backGabe = false;
 		 } 
 		 return $backGabe;
@@ -446,20 +502,19 @@ global $db_pass;
 		print $dieTabelle;
 		$this->verbinde();
 		$sql = 'TRUNCATE TABLE `kunden`';
-		$result = mysql_query($sql);
-		print "Aufgetretene Fehler: ".mysql_error();
+		$result = mysqli_query($this->db, $sql);
+		print "Aufgetretene Fehler: ".mysqli_error($this->db);
 		$sql = 'TRUNCATE TABLE `bestellung`';
-		$result = mysql_query($sql);
-		print "\n und".mysql_error();
+		$result = mysqli_query($sql);
+		print "\n und".mysqli_error($this->db);
 		if(!$result){
 			 $rueckGabe = false;
 		 } 
 		 return $rueckGabe;
 	}
 	
-	function gibUserInDB($user){
-		$rueckGabe = "";
-		$abbruch=false;
+	function gibUserInDB($user)
+	{
 		// namen der Tabellenspalten
 		$kundenNamensArray = array("kundenNr", "anrede", "vorname" , "nachname" , "adresse" , "ort" , "plz" , "land" , 
 							"telPrivat" , "email" , "bankName" , "blz" , "ktnr");
@@ -469,7 +524,7 @@ global $db_pass;
 			($user->kundenNummer == "" ? NULL : $user->kundenNummer),
 			($user->anrede == "" ? NULL : $user->anrede),
 			($user->vorName == "" ? NULL : $user->vorName),
-			($user->nachName == "" ? $abbruch=true : $user->nachName),
+			($user->nachName),
 			($user->adresse == "" ? NULL : $user->adresse),
 			($user->ort == "" ? NULL : $user->ort),
 			($user->postleitzahl == "" ? NULL : $user->postleitzahl),
@@ -479,47 +534,41 @@ global $db_pass;
 			($user->bankInstitut == "" ? NULL : $user->bankInstitut),
 			($user->blz == "" ? NULL : $user->blz),
 			($user->ktnr == "" ? NULL : $user->ktnr));
-		if(!$abbruch)
-		{
 		/**************************************************************
 		*          Userdaten
 		**************************************************************/
-			// Datenbankstring schreiben
-			$namensString = "";
-			$ausgabeString = "";
-			$beginnFlag=false;
-			for($k=0;$k<count($kundenNamensArray);$k++){
-				if(($kundenAusGabeArray[$k]!=NULL) || 
-				   ($kundenAusGabeArray[$k]!=0))
-				{
-					if($beginnFlag){
-						$namensString.=" , ";
-						$ausgabeString.=", ";
-					}
-					$beginnFlag=true;
-					$namensString.="`$kundenNamensArray[$k]`";
-					$ausgabeString.="'$kundenAusGabeArray[$k]'";
-				}
-			}
-			// Query
-			$sql = "INSERT INTO `kunden` ( " . $namensString . " ) VALUES ( " . $ausgabeString . " )";
-			
-			//Ergebnis		
-			$result = mysql_query($sql);
-			//echo mysql_affected_rows();
-			if(!$result)
+		// Datenbankstring schreiben
+		$namensString = "";
+		$ausgabeString = "";
+		$beginnFlag=false;
+		for($k=0;$k<count($kundenNamensArray);$k++){
+			if(($kundenAusGabeArray[$k]!=NULL) || 
+			   ($kundenAusGabeArray[$k]!=0))
 			{
-				$rueckGabe="".
-				"Es Konnte nicht in die Kunden-Datenbank geschrieben werden, bitte versuchen Sie es sp&auml;ter ".
-				"noch einmal und/oder berichten sie bitte den Fehler:<br> <a href=\"mailto:schreib@gunnardroege.de\">Mail an Webmaster</a><br>".
-				"Vielen Dank f&uuml;r Ihr Verst&auml;ndnis.<br>".mysql_error();
+				if($beginnFlag){
+					$namensString.=" , ";
+					$ausgabeString.=", ";
+				}
+				$beginnFlag=true;
+				$namensString.="`$kundenNamensArray[$k]`";
+				$ausgabeString.="'$kundenAusGabeArray[$k]'";
 			}
-		} 
-		else
-		{
-			$rueckGabe="Keine Verbindung.";
 		}
-		return $rueckGabe;
+		// Query
+		$sql = "INSERT INTO `kunden` ( " . $namensString . " ) VALUES ( " . $ausgabeString . " )";
+		
+		//Ergebnis		
+		$result = mysqli_query($this->db, $sql);
+		//echo mysqli_affected_rows();
+		if(!$result)
+		{
+			throw new Exception(
+			"Es Konnte nicht in die Kunden-Datenbank geschrieben werden, bitte versuchen Sie es sp&auml;ter ".
+			"noch einmal und/oder berichten sie bitte den Fehler:<br> <a href=\"mailto:schreib@gunnardroege.de\">Mail an Webmaster</a><br>".
+			"Vielen Dank f&uuml;r Ihr Verst&auml;ndnis.<br>".mysqli_error($this->db));
+		}
+		// get max id
+		return mysqli_insert_id($this->db);
 	}
 
 
@@ -527,21 +576,31 @@ global $db_pass;
 	**   Bestellung
 	***********************************************************************************/
 	
-	function gibBestellungInDB($user, $aktuelleBestellung)
+	function gibBestellungInDB($user, $aktuelleBestellung, $kundenID)
 	{
 		$rueckGabe = "";
 		$abbruch=false;
-		$bestellNamensArray = array("schonKunde", "nachNameBesteller", "kundenNrBesteller", "bestellungen", "kommentar", "bestellDatum");
+		
+		$bestellDBString = $aktuelleBestellung->dbText;
+		if(strlen($bestellDBString)<=0)
+		{
+			throw new Exception("<P>".
+				"Es Konnte nicht in die Bestell-Datenbank geschrieben werden, bitte versuchen Sie es sp&auml;ter ".
+				"noch einmal und/oder berichten sie bitte den Fehler:<br> <a href=\"mailto:schreib@gunnardroege.de\">Mail an Webmaster</a><br>".
+				"Vielen Dank f�r Ihr Verst&auml;ndnis.<br>");
+		}
+		$bestellDBString.="\nBezahlverfahren: ".$aktuelleBestellung->bezahlVerfahren;
+		
+		$bestellNamensArray = array("kundenID", "bestellungen", "kommentar", "bestellDatum");
 		$bestellAusGabeArray = array(	
 		// Eingabewerte mit auszugebenden Werten vergleichen
-			($user->Abonnent == "ja" ? $user->Abonnent : "nein"),
-			($user->nachName == "" ? $abbruch=true : $user->nachName),
-			($user->kundenNummer == "" ? NULL : $user->kundenNummer),
-			(($bestellSumme=$aktuelleBestellung->dbText) == "" ? $abbruch=true : $bestellSumme),
+			($kundenID),
+			$bestellDBString,
 			($aktuelleBestellung->kommentar == "" ? NULL : $aktuelleBestellung->kommentar),
 			($aktuelleBestellung->bestellDatum == "" ? NULL : $aktuelleBestellung->bestellDatum));
 		
-		if(!$abbruch){
+		if(!$abbruch)
+		{
 		/**************************************************************
 		*          Bestelldaten
 		**************************************************************/
@@ -565,13 +624,13 @@ global $db_pass;
 			$sql = "INSERT INTO `bestellung` ( " . $namensString . " ) VALUES ( " . $ausgabeString . " )";
 			
 			//Ergebnis		
-			$result = mysql_query($sql);
-			//printf ("Ver�nderte Datens�tze: %d\n", mysql_affected_rows());
+			$result = mysqli_query($this->db, $sql);
+			//printf ("Ver�nderte Datens�tze: %d\n", mysqli_affected_rows());
 			if(!$result){
-				$rueckGabe="Nicht erfolgreich beim schreiben der Datensaetze.";
+				throw new Exception("Nicht erfolgreich beim schreiben der Datens&auml;tze:".mysqli_error($this->db));
 			} 
 		} else {
-			$rueckGabe="<P>".
+			throw new Exception("<P>".
 				"Es Konnte nicht in die Bestell-Datenbank geschrieben werden, bitte versuchen Sie es sp�ter ".
 				"noch einmal und/oder berichten sie bitte den Fehler:<br> <a href=\"mailto:schreib@gunnardroege.de\">Mail an Webmaster</a><br>".
 				"Vielen Dank f�r Ihr Verst�ndnis.<br>".
@@ -580,7 +639,7 @@ global $db_pass;
 				($user->kundenNummer == "" ? NULL : $user->kundenNummer).
 				($user->gibBestellung(0) == "" ? $abbruch=true : $user->gibBestellung(0)).
 				($user->gibBestellung(1) == "" ? NULL : $user->gibBestellung(1)).
-				($user->gibBestellung(2) == "" ? NULL : $user->gibBestellung(2))."";
+				($user->gibBestellung(2) == "" ? NULL : $user->gibBestellung(2))."");
 			}
 		return $rueckGabe;
 	}
@@ -593,8 +652,8 @@ global $db_pass;
         . ' WHERE 1 AND `name` '
         . ' LIKE \'' . $_POST['adminName'] . '\' AND `passwort` '
         . ' LIKE \'' . $_POST['adminPasswort'] . '\' LIMIT 0, 30'; 
-		$result = mysql_query($sql);
-		if(mysql_num_rows($result)<1){
+		$result = mysqli_query($this->db, $sql);
+		if(mysqli_num_rows($result)<1){
 			print "".
 			"<br>Nachname: ".$_POST['adminName'].
             "<br>Sie konnten nicht erfolreich authetifiziert werden".
@@ -606,16 +665,16 @@ global $db_pass;
 	
 	function gibBestellungAus(){
 		$this->verbinde();
-		$sql = "SELECT DISTINCT * FROM bestellung,kunden WHERE LOCATE(bestellung.nachNameBesteller, kunden.nachname) != 0"; 
-		$result = mysql_query($sql);
-		print "Aufgetretene Fehler: ".mysql_error();
+		$sql = "SELECT DISTINCT * FROM bestellung,kunden WHERE LOCATE(bestellung.kundenID, kunden.id) != 0"; 
+		$result = mysqli_query($this->db, $sql);
+		print "Aufgetretene Fehler: ".mysqli_error($this->db);
 	return $result;
 	}
 
 	function gibKundenAus(){
 		$sql = "SELECT * FROM kunden"; 
-		$result = mysql_query($sql);
-		print "Aufgetretene Fehler: ".mysql_error();
+		$result = mysqli_query($this->db, $sql);
+		print "Aufgetretene Fehler: ".mysqli_error($this->db);
 	return $result;
 	}
 

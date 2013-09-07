@@ -30,8 +30,12 @@ function CreateThumb($filename, $size)
 	$outputDir = "MiniGal/images/thumbs/";
 	
 	$info = pathinfo($filename);
-	$base_file_name =  basename($filename,'.'.$info['extension']);
-	$returnPic = $outputDir.$base_file_name.'.'.$info['extension'];
+	$saveFileName = preg_replace("/[^a-zA-Z0-9]/", "", $filename);
+//	$base_file_name =  basename($filename,'.'.$info['extension']);
+	$returnPic = $outputDir.$saveFileName.'.'.$info['extension'];
+	
+	// print "filename:$filename<br />";
+	// print "returnPic:$returnPic<br />";
 	
 	// if exists just give back =)
 	if (is_file($returnPic))

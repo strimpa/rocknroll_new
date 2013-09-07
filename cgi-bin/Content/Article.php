@@ -7,11 +7,12 @@ class Article
 {
 	const DELEGATE_ARTICLE_PLOGGER = 1;
 	const DELEGATE_ARTICLE_LINKS = 2;
+	const DELEGATE_ARTICLE_ORDER = 3;
 		
 	private $title;
 	private $paragraphs;
 	
-	public function Article()
+	public function __construct()
 	{
 		$this->paragraphs = array();
 	}
@@ -23,6 +24,8 @@ class Article
 	
 	public function AddParagraph($para)
 	{
+		if(!is_array($this->paragraphs))
+			$this->paragraphs = array();
 		array_push($this->paragraphs, $para);
 	}
 	
@@ -34,6 +37,7 @@ print <<<EOD
 	<script src="/MiniGal/js/mootools.js" type="text/javascript"></script>
 	<script src="/MiniGal/js/mediaboxAdv-1.3.4b.js" type="text/javascript"></script>
 EOD;
+	print "<title>$this->title</title>";
 	}
 	
 	public function RenderParagraphs(&$contentDiv)
@@ -44,8 +48,8 @@ EOD;
 		{
 		    $para->Render($contentDiv, $currentOffset);
 		}	
-		if($currentOffset!=20)
-			$builder->AddStyle($contentDiv, ("height:".$currentOffset."px;"));
+		// if($currentOffset!=20)
+			// $builder->AddStyle($contentDiv, ("height:".$currentOffset."px;"));
 	}
 	
 	public function Render(&$parentNode)
@@ -54,20 +58,22 @@ EOD;
 
 		$parentNode->appendChild($builder->AddTag("div", "articleTitle", NULL, $this->title));
 		
-		$contentBGDiv = $builder->AddTag("div", "contentBG", "redbordered");
+		$contentBGBorderDiv = $builder->AddTag("div", "contentBGBorder");
+		$contentBGDiv = $builder->AddTag("div", "contentBG");
 		$menuPicDiv = $builder->AddTag("div", "contentLeftOverlap");
 	    $pic = $builder->GetDoc()->createElement( "img" );
 		$pic->setAttribute("src", "/images/layout/BG_04.jpg");
 		$menuPicDiv->appendChild($pic);
 		$contentBGDiv->appendChild($menuPicDiv);
-		$parentNode->appendChild($contentBGDiv);
+		$contentBGBorderDiv->appendChild($contentBGDiv);
+		$parentNode->appendChild($contentBGBorderDiv);
 		
 		$contentDiv = $builder->AddTag("div", "content");
 		$contentBGDiv->appendChild($contentDiv);
 		
 		$this->RenderParagraphs($contentDiv);
 		$footerDiv = $builder->AddTag("div", "footerDiv", NULL);
-		$contentBGDiv->appendChild($footerDiv);
+		$contentBGBorderDiv->appendChild($footerDiv);
 		$footerDiv->appendChild($builder->CreateImage("/images/layout/FooterDeko.jpg"));
 	}
 }
@@ -99,16 +105,15 @@ class DelegateArticle extends Article
 			case Article::DELEGATE_ARTICLE_LINKS:
 				include 'links.php';
 				break;
+			case Article::DELEGATE_ARTICLE_ORDER:
+				Aufenthalt::GetInstance()->GetAblauf()->aktuellerBestellSchritt();
+				break;
 		}
 	}
 	
 	public function RenderParagraphs(&$contentDiv)
 	{
 		$builder = ContentMgr::GetInstance()->GetBuilder();
-		//<iframe src="/plogger/" id="ploggerFrame" />
-		//$iframe = $builder->AddTag("iframe", "ploggerFrame", NULL);
-//		$iframe->setAttribute("src", $this->url);
-		
 		ob_start();
 		$this->RenderDelegate();
 		$str=ob_get_contents();
@@ -118,6 +123,7 @@ class DelegateArticle extends Article
 		$importdoc->loadHTML('<?xml encoding="UTF-8">'.$str);
 		$doc = $builder->GetDoc();
 		$text = $doc->importNode($importdoc->documentElement, true);
+		$contentDiv->appendChild(new DOMComment("Begin import"));
 		$contentDiv->appendChild($text);
 	}
 }
@@ -138,11 +144,11 @@ class FrameArticle extends Article
 		$importdoc->encoding = 'UTF-8';
 $htmlStr = <<<EOD
 <p style="margin-left:10px;">
-	<a href="http://www.rock-around.de/system-cgi/guestbook/guestbook.php?action=sign" target="innerFrame">Ins G�stebuch eintragen</a>
-	 | <a href="http://www.rock-around.de/system-cgi/guestbook/guestbook.php?action=view" target="innerFrame">G�stebuch anschauen</a>
+	<a href="http://www.rock-around.de/system-cgi/guestbook/guestbook.php?action=sign" target="innerFrame">Ins G&auml;stebuch eintragen</a>
+	 | <a href="http://www.rock-around.de/system-cgi/guestbook/guestbook.php?action=view" target="innerFrame">G&auml;stebuch anschauen</a>
 </p>
 EOD;
-		$importdoc->loadXML('<?xml version="1.0" encoding="UTF-8" ?>'.utf8_encode($htmlStr));
+		$importdoc->loadHTML('<?xml version="1.0" encoding="UTF-8" ?>'.utf8_encode($htmlStr));
 		$doc = $builder->GetDoc();
 		$text = $doc->importNode($importdoc->documentElement, true);
 		$contentDiv->appendChild($text);

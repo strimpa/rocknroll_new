@@ -8,6 +8,8 @@
 <link href="../../css/adminStyles.css" rel="stylesheet" type="text/css" />
 <link href="../../css/dot-luv/jquery-ui-1.8.12.custom.css" rel="stylesheet" type="text/css" />
 <link href="../../css/microgallery_style.css" rel="stylesheet" type="text/css" />
+<link href="../../css/jquery.timeentry.css" rel="stylesheet" type="text/css" />
+<link href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" rel="stylesheet" type="text/css" />
 
 <script type="text/javascript" src="../../script/jquery-1.5.1.min.js"></script>
 <script type="text/javascript" src="../../script/ui/jquery.ui.core.js"></script>
@@ -15,14 +17,14 @@
 <script type="text/javascript" src="../../script/ui/jquery.ui.button.js"></script>
 <script type="text/javascript" src="../../script/ui/jquery.ui.spinner.js"></script>
 <script type="text/javascript" src="../../script/ui/jquery.ui.datepicker.js"></script>
+<script type="text/javascript" src="../../script/ui/jquery.ui.progressbar.js"></script>
 
 <script type="text/javascript" src="../../script/tiny_mce/jquery.tinymce.js"></script>
-<!--<script type="text/javascript" src="../../script/jquery.microgallery.js"></script>-->
+<script type="text/javascript" src="../../script/jquery.timeentry.min.js"></script>
 
 <script type="text/javascript" src="../../script/jquery.jeditable.mini.js"></script>
 
-<script type="text/javascript" src="creationTemplates.json"></script>
-<script type="text/javascript" src="adminApp.js"></script>
+<script data-main="scripts/main" src="scripts/require.js"></script>
 </head>
 
 <body> <!--  onload="adminApp.Init();" -->
@@ -36,12 +38,19 @@
 		</select>
 		<input id="pageTitle" class="fullSizeControl" type="text" value="" readonly="true" />
 		<input id="menuPriority" class="shortControl" type="text" value="" readonly="true" />
+		<input id="refreshButton" class="createButton" type="button" value="Refresh" />
 	</fieldset>
 	<fieldset class="RightGroupBox">
 		<legend>Neu erstellen:</legend>
-		<input id="createPageButton" class="createButton" type="button" value="create" />
-		<input id="editPageButton" class="editButton" type="button" value="edit" />
-		<input id="deletePageButton" class="deleteButton" type="button" value="delete" />
+		<input id="createPageButton" class="createButton" type="button" value="Neu" />
+		<input id="editPageButton" class="editButton" type="button" value="Bearbeiten" style="width:75px;" />
+		<input id="deletePageButton" class="deleteButton" type="button" value="Loeschen" style="width:70px;" />
+	</fieldset>
+</div>
+<div class="editfield" id="settings">
+	<fieldset class="LeftGroupBox">
+		<legend>Ansicht</legend>
+		Anzahl Tabellenspalten:<input id="spinNumTableCols" value="5"/>
 	</fieldset>
 </div>
 <span id="TitleNavigation"><img src="images/Navigation.png" /></span>
@@ -49,12 +58,14 @@
 	<fieldset class="LeftGroupBox">
 		<legend>Submenu Eintraege:</legend>
 		<div id="submenuEntries" class="listBox" style="width:150px; height:110px"></div>
+		<input id="upMenuItemButton" class="moveMenuItemButton" type="button" value="Nach oben" />
+		<input id="downMenuItemButton" class="moveMenuItemButton" type="button" value="Nach unten" />
 	</fieldset>
 	<fieldset class="RightGroupBox">
 		<legend>Neu erstellen:</legend>
-		<input id="createMenuEntryButton" class="createButton" type="button" value="create" />
-		<input id="editMenuEntryButton" class="editButton" type="button" value="edit" />
-		<input id="deleteMenuEntryButton" class="deleteButton" type="button" value="delete" />
+		<input id="createMenuEntryButton" class="createButton" type="button" value="Neu" />
+		<input id="editMenuEntryButton" class="editButton" type="button" value="Bearbeiten" style="width:75px;" />
+		<input id="deleteMenuEntryButton" class="deleteButton" type="button" value="Loeschen" style="width:70px;" />
 	</fieldset>
 	<fieldset class="RightGroupBox" style="top:60px;">
 		<legend>Absatz-Anker Link:</legend>
@@ -71,12 +82,14 @@
 		Bestehenden Absatz einfuegen:<select id="insertParagraphSelect" class="fullSizeControl">
 				<option></option>
 		</select>
+		<fieldset>
+			<legend>Parsing Fehler:</legend>
+			<input type="button" id="errorOutputDelete" value="Loeschen" />
+			<div id="errorOutput"></div>
+		</fieldset>
 	</div>
 	<div id="admincontent">
 	</div>
-</div>
-
-<div class="editfield" id="outputDiv">
 </div>
 
 </body>

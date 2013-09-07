@@ -1,4 +1,4 @@
-/*
+﻿/*
 ** Fonts
 */
 @font-face {
@@ -19,6 +19,11 @@ body {
 	font-family:Arial, Helvetica, sans-serif;
 	font-size:12px;
 	color:#BBCCDB;
+}
+
+#loadingErrors
+{
+	visibility:hidden;
 }
 
 /*
@@ -60,14 +65,33 @@ body {
 	z-index:2;
 }
 
-#contentBG
+#contentBGBorder
 {
 	position:absolute;
-	background-color:#01274C;
+	background-color:#730B24;
 	top:202px;
 	left:112px;
+	width:696px;
+	overflow:hidden;
+	z-index:3; 
+}
+#contentBG
+{
+	background-color:#01274C;
 	width:690px;
+	overflow:hidden;
 	z-index:4; 
+}
+#popup
+{
+	position:absolute;
+	top:0px;
+	background-color:#01274C;
+	padding:10px;
+	width:80%;
+	height:600px;
+	overflow:hidden;
+	background: url(/images/randomPic.php?prefix=layout/contentBG) no-repeat fixed 50px center;
 }
 
 #content
@@ -110,16 +134,10 @@ body {
 .paragraph
 {
 	font-family:"Lucida Sans", "Lucida Sans Regular", "Lucida Grande", "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
-/*	position:absolute; 
-	left:68px;
-	width:620px;
-	top:0px;
-	
-	border:thin black solid; 
-	z-index:5;
-*/
-	float:right;
-	padding:0px;
+	padding-bottom:0px;
+	padding-left:0px;
+	padding-right:0px;
+	padding-top: 30px;
 }
 .paragraphContent
 {
@@ -128,15 +146,29 @@ body {
 .paragraphTitle
 {
 	text-align:left;
-	padding-top:2px;
-	height:50px;
-	padding-left:40px;
+	padding-top:0px;
+	height:55px;
 	color:#075AAC;
 	font-size:35px;
 	margin:0px;
-	width:585px;
+	width:630px;
 	right:0px;
 }
+
+.paragraphTitleUpLink
+{
+	float:right;
+	font-size:18px;
+	padding:3px;
+	vertical-align:top;
+}
+
+#closeBar
+{
+	top:0px;
+}
+
+.paragraphTitleUpLink:before { content:url("/images/layout/brush_arrow.png"); }
 
 .paragraphTitleText
 {
@@ -147,6 +179,11 @@ body {
 .paragraphDeko
 {
 	background:url(/images/randomPic.php?prefix=layout/paraDeko) no-repeat center top;
+}
+
+.paraContentImage
+{
+	max-width:200px;
 }
 
 .picFrame
@@ -189,15 +226,13 @@ a:hover{
 
 #contentLeftOverlap
 {
+	position:absolute;
+	top:0px;
+	left:0px;
 	background-color:#003366;
 	width:55px;
 	height:200px;
-	float:left;
-/*	position:absolute;
-	top:200px;
-	left:112px;
-	z-index:2;
-	*/
+	z-index:5;
 }
 #Deco01
 {
@@ -319,10 +354,45 @@ a:hover{
 	font-family:brush_font;
 	background:url('/images/layout/Elements_09.png') no-repeat;
 	overflow:visible;
-	width:55px;
+	width:65px;
 	vertical-align:top;
 	padding: 0px;
-	padding-left: 10px;
+	padding-left: 2px;
+}
+
+.eventUrl
+{
+	font-size:16px;
+	font-family:brush_font;
+	overflow:visible;
+	width:50px;
+	text-align:center;
+	border:1px solid #71A1D1;
+	padding: 0px;
+	margin: 3px;
+	float:right;
+}
+.eventMail
+{
+	font-size:16px;
+	font-family:brush_font;
+	overflow:visible;
+	width:44px;
+	text-align:center;
+	border:1px solid #71A1D1;
+	padding: 2px;
+	margin: 3px;
+	clear:both;
+	float:right;
+}
+.eventTel
+{
+	text-align:center;
+	border:1px solid #71A1D1;
+	padding: 2px;
+	margin: 3px;
+	clear:both;
+	float:right;
 }
 .eventType
 {
@@ -343,7 +413,7 @@ a:hover{
 }
 .eventVenue
 {
-	width: 173px;
+/*	width: 173px; */
 }
 .eventShowMore
 {
@@ -351,9 +421,12 @@ a:hover{
 	width: 60px;
 }
 
-.eventPic
+.eventPicTd
 {
 	border:1px solid #073869;
+}
+.eventPic
+{
 	width:80px;
 	float:left;
 }
@@ -386,6 +459,10 @@ a:hover{
 {
 	color:#FF0000;
 }
+.errorField
+{
+	border:1px solid #FF0000;
+}
 
 .hiddenFormButton
 {
@@ -393,3 +470,26 @@ a:hover{
 	background-color:#01274C;
 	color:#71A1D1;
 }
+
+/*
+ *  Mitarbeiter sites
+ */
+
+#teamPageContent
+{
+	background-color:#003366;
+	padding:10px;
+}
+
+#teamPageContent img
+{
+	float:right;
+}
+
+#teamPageTitle
+{
+	text-align:left;
+	font-family:brush_font;
+	font-size:35px;
+}
+

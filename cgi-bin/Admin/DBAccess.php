@@ -1,4 +1,8 @@
 <?php
+	global $build_errors;
+	global $currRow;
+	$build_errors = array();
+		
 
 	include("../Utils.php");
 	include("../Aufenthalt.php");
@@ -20,7 +24,7 @@
 			$returnString .= $tabs;
 			if($printName)
 				$returnString .= $currName.": ";
-			$returnString .= "\"".htmlentities(utf8_decode($currRoot))."\"";
+			$returnString .= "\"".SafeJSONString($currRoot)."\"";
 			$returnString = str_replace("\r\n", "<br />", $returnString);
 		}
 		else
@@ -61,7 +65,8 @@
 	
 //	PrintHtmlComment("fuckin DBAccess!");
 	
-	$pattern = '/(pages|submenus|paragraphs|events|links|pictures|navigation|folder|bestellung)/';
+	$pattern = '/(pages|submenus|paragraphs|events|links|pictures|navigation|folder|bestellung|kunden|archive)/';
+	$resultEntryID = null;
 	if(0!=preg_match($pattern, $query, $matches, PREG_OFFSET_CAPTURE))
 	{
 		if(isset($params["write"]) && $params["write"]==true)
@@ -70,8 +75,7 @@
 			{
 				Aufenthalt::GetInstance()->DBConn()->InsertTableContent(array('table'=>"submenus"));
 				// get submenu with highest id:
-				$result = Aufenthalt::GetInstance()->DBConn()->GetTableContent(array('table'=>"submenus", 'fields'=>"max(id)"));
-				$_POST['menuRef'] =  $result[0]["max(id)"];
+				$_POST['menuRef'] =  mysqli_insert_id(Aufenthalt::GetInstance()->DBConn()->verbinde());
 				$result = Aufenthalt::GetInstance()->DBConn()->InsertTableContent(
 					array(
 						'table'=>$query, 
@@ -88,11 +92,15 @@
 						'values'=>array_values($_POST)
 						));
 			}
-			$result = Aufenthalt::GetInstance()->DBConn()->GetTableContent(array('table'=>$query, 'fields'=>"max(id)"));
+			$resultEntryID = mysqli_insert_id(Aufenthalt::GetInstance()->DBConn()->verbinde());
 		}
-		else if(isset($params["del"]) && $params["delete"]==true)
+		else if(isset($params["del"]) && $params["del"]==true)
 		{
-			$result = Aufenthalt::GetInstance()->DBConn()->DropTableContent(array('table'=>$query, 'fields'=>$_POST));
+			$result = Aufenthalt::GetInstance()->DBConn()->DropTableContent(
+				array(
+					'table'=>$query, 
+					'requirements'=>$_POST)
+					);
 		}
 		else if(isset($params["edit"]) && $params["edit"]==true)
 		{
@@ -104,7 +112,7 @@
 //				PrintHtmlComment("edit:".$reqTuple[0].",".$reqTuple[1]);
 			}
 			// foreach ($_POST as $key => $value) {
-				// PrintHtmlComment('$_POST['.$key.']:'.$value);
+				// Print ('$_POST['.$key.']:'.$value);
 			// }
 			$result = Aufenthalt::GetInstance()->DBConn()->SetTableContent(
 				array(
@@ -113,12 +121,8 @@
 					'requirements'=>$requirements, 
 					'values'=>array_values($_POST)
 					));
-			$result = Aufenthalt::GetInstance()->DBConn()->GetTableContent(
-				array(
-					'table'=>$query, 
-					'fields'=>"id", 
-					'requirements'=>$requirements
-					));
+			assert(count($result)==1);
+			$resultEntryID = mysqli_insert_id(Aufenthalt::GetInstance()->DBConn()->verbinde());
 		}
 		else if(isset($params["def"]))
 		{
@@ -148,7 +152,7 @@
 		}
 		else if(isset($params["folder"]))
 		{
-			$result = GetFolderContent($_POST['assetFolder']);
+			$result = GetFolderContent($_POST['assetFolder'], isset($params["recursive"]));
 		}
 		else if(isset($params["xmlinput"]))
 		{
@@ -193,6 +197,10 @@
 		{
 			print gibTabelleAlsXml($result, $query);
 		}
+		else if(null!=$resultEntryID)
+		{
+			echo $resultEntryID;
+		}
 		else if(!is_bool($result))
 		{
 			if(isset($params["json"]))
@@ -207,75 +215,43 @@
 				$doc =  new DOMDocument(); //$imp->createDocument("", "", $dtd);
 				// Set other properties
 				$doc->encoding = 'UTF-8';
+				$doc->formatOutput = true;
 		//		$doc->standalone = false;
 				
 				$currRow = NULL;
 				$rootElem = $doc->createElement(MakeSafeTagName($query));
 				$doc->appendChild($rootElem);
 				$print = "";
-				foreach($result as $row)
-				{
-					$currRow = $doc->createElement("row");
-					if(is_bool($row))
-					{
-						$currRow->nodeValue = $row;
-					}
-					else 
-					{
-						for($colIndex=0;$colIndex<count($row);$colIndex++)
-						{
-							$keyArray = array_keys($row);
-							$fieldName = $keyArray[$colIndex];
-							$tagName = MakeSafeTagName($fieldName);
-							$col = $doc->createElement($tagName);
-	
-							if(IsXmlString($row[$fieldName]))
-							{
-								$importdoc = new DOMDocument();
-								$importdoc->encoding = 'UTF-8';
-//								ReplaceInvalidChars($row[$fieldName]);
-								$importdoc->loadHTML('<?xml version="1.0" encoding="UTF-8"?>\n'.$row[$fieldName]);
-	//							PrintHtmlComment("Xml string after import:".$importdoc->C14N());
-								
-								$node = $importdoc->getElementsByTagName("div")->item(0);
-								$text = FALSE;
-								if(null!=$node)
-									$text = $doc->importNode($node, true);
-								if(FALSE!=$text)
-									$col->appendChild($text);
-								else
-								{
-									$text = $doc->createTextNode("Fehler beim Text laden!");
-									$col->appendChild($text);
-								}
-							} 
-							else
-							{
-								$col->nodeValue = $row[$fieldName];
-							}
-							$currRow->appendChild($col);
-						}
-			//			print("<test>".$currRow->nodeValue."</test>");
-			//			$doc->normalizeDocument();
-					}			
-					$rootElem->appendChild($currRow);
+				
+				try{
+					RecurseXml($result, $rootElem, "row", $doc);
 				}
-			
+				catch(Exception $e)
+				{
+					array_push($build_errors, "Fehler beim lesen von html in Tabelle $query and id ".$currRow.": ".$e->getMessage());
+				}
+				foreach($build_errors as $anError)
+				{
+					$currError = $doc->createElement("error");
+					$currError->nodeValue = $anError;
+					$rootElem->appendChild($currError);
+				}
+
 				$output = $doc->saveXML();
 		//		$output = preg_replace("/[\n\r]/", "", $output);
 				print $output;
 		//			PrintHtmlComment($print);
 			}
 		}
-		else
+		else if($result!=TRUE)
 		{
-			print "ERROR: boolean result given back:".$result;
+			print "ERROR: FALSE result given back:";
 		}
 	
 	}
 	else
 	{
-		print "invalid request!";
+		print "invalid table request!";
 	}
 
 

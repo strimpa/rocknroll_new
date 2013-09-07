@@ -18,12 +18,12 @@ if (	array_search($_FILES["uploadedfile"]["type"], $filetypes) != -1 &&
 	}
 	else
 	{
-		$targetLocation = $serverRoot."images/";
+		$targetLocation = "images/";
 		if($_FILES["uploadedfile"]["type"] == "text/xml")
 		{
-			$targetLocation = $serverRoot."cgi-bin/Admin/temp/";
+			$targetLocation = "cgi-bin/Admin/temp/";
 		}
-		$completeFilepath = $targetLocation . $_FILES["uploadedfile"]["name"];
+		$completeFilepath = $serverRoot . $targetLocation . $_FILES["uploadedfile"]["name"];
 		
 		// if (file_exists($serverRoot."images/" . $_FILES["uploadedfile"]["name"]))
 		// {
@@ -32,7 +32,7 @@ if (	array_search($_FILES["uploadedfile"]["type"], $filetypes) != -1 &&
 		// else
 		// {
 			move_uploaded_file($_FILES["uploadedfile"]["tmp_name"], $completeFilepath);
-			echo $completeFilepath;
+			echo $httpRoot . $targetLocation . $_FILES["uploadedfile"]["name"];//$completeFilepath;
 		//}
 	}
 }

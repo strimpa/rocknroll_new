@@ -40,7 +40,7 @@ class HtmlBuilder
 	public function &AddMenuEntry($menuTuple, $index, $safePic=false)
 	{
 	    $link = $this->doc->createElement( 'a' );
-	    $anchorTarget = "#paragraph_".MakeSafeString($menuTuple->url);
+	    $anchorTarget = "#paragraph_".MakeSafeString(EncodeUmlaute($menuTuple->url));
 	    $link->setAttribute("href", $anchorTarget);
 	    $ele = $this->doc->createElement( 'div' );
 	    $index = sprintf("%02d", $index+1);
@@ -79,7 +79,7 @@ class HtmlBuilder
 	    return $div;
 	}
 	
-	public function AddImage($picID, $align=NULL)
+	public function AddImage($picID, $align=NULL, $paraImage=false)
 	{
 		$result = Aufenthalt::GetInstance()->Controller()->GetPicData($picID);
 
@@ -97,6 +97,8 @@ class HtmlBuilder
 		$picLink = $this->doc->createElement("a");
 	    $pic = $this->doc->createElement( "img" );
 	    $pic->setAttribute("src", $result["url"]);
+		if($paraImage)
+		    $pic->setAttribute("class", "paraContentImage");
 		$picLink->appendChild($pic);
 		$picLink->setAttribute("href", $result["url"]);
 		$picLink->setAttribute("target", "_blank");

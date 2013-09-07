@@ -14,6 +14,91 @@ function PrintHtmlComment($string)
 	//print ("<!-- ".$string."//-->\n");
 }
 
+function SendDebugMail($msg, $isProblem=FALSE)
+{
+	$to = 'mail@rocknroll-magazin.de';
+
+	$subject = 'Automatisch verschickte mail.';
+	if($isProblem)
+		$subject .= " Fuer Gunnar!";
+	$message = "Nachricht:<br />".$msg;
+	
+	// To send HTML mail, the Content-type header must be set
+	$headers  = 'MIME-Version: 1.0' . "\r\n";
+	$headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
+	
+	// Additional headers
+	$headers .= 'From: R&R website mail script <mail@rocknroll-magazin.de>' . "\r\n";
+	
+	mail($to, $subject, $message, $headers);
+}
+
+function ParseDateFromString($str)
+{
+	$datum = "";
+	$datumInfo = date_parse($str);
+	if(FALSE==$datumInfo)
+	{
+		return FALSE;
+	}
+	else
+	{
+			if(NULL==$datumInfo['month'] || NULL==$datumInfo['day'])
+			return false;
+		if(NULL!=$datumInfo['year'])
+			$datum .= $datumInfo['year']."-";
+		$datum .= $datumInfo['month']."-".$datumInfo['day'];
+	}
+	return $datum; 
+}
+
+function RecurseXml($content, $currRoot, $fieldName, $doc)
+{
+	$tagName = MakeSafeTagName($fieldName);
+	$col = $doc->createElement($tagName);
+//		print ("content: ".$content." |"); 
+	if(is_array($content))
+	{
+		for($colIndex=0;$colIndex<count($content);$colIndex++)
+		{
+			$currRow = $colIndex;
+			$keyArray = array_keys($content);
+			$fieldName = $keyArray[$colIndex];
+			RecurseXml($content[$fieldName], $col, $fieldName, $doc);
+			$currRoot->appendChild($col);
+		}
+	}
+	else
+	{
+		set_error_handler('handleError', E_WARNING|E_ERROR);
+		$potentialContent =  EncodeUmlaute($content); 
+		if(IsXmlString($potentialContent))
+		{
+			$importdoc = new DOMDocument();
+			$importdoc->encoding = 'UTF-8';
+			$importdoc->loadHTML('<?xml version="1.0" encoding="UTF-8"?>\n'.$potentialContent);
+			
+			$node = $importdoc->getElementsByTagName("div")->item(0);
+			$text = FALSE;
+			if(null!=$node)
+				$text = $doc->importNode($node, true);
+			if(FALSE!=$text)
+				$col->appendChild($text);
+			else
+			{
+				$text = $doc->createTextNode("Fehler beim Text laden!");
+				$col->appendChild($text);
+			}
+		} 
+		else
+		{
+			$col->nodeValue = htmlspecialchars($content);
+		}
+		$currRoot->appendChild($col);
+		restore_error_handler();
+	}
+}
+
 function FilenameFromUrl(&$params=NULL)
 {
 //	$start = strrpos($_SERVER['REQUEST_URI'], "rocknroll");
@@ -76,7 +161,7 @@ function MakeSafeTagName($string)
 {
 	$value = preg_replace("/[^a-zA-Z0-9]/", "_", $string);
 	if(preg_match("/^[0-9]/", $value))
-		$value = "_".$value;
+		$value = "A_".$value;
 	return $value;
 }
 
@@ -197,55 +282,91 @@ function IsXmlString($subject)
 	return $isXML;
 }
 
-function GetFolderContent($assetFolder)
+function GetFolderContentRec($relPath, $extensions, $resursive)
 {
 	global $serverRoot;
 	global $httpRoot;
-	$default_dir = $serverRoot;
-	$suffix = "";
-	$extensions = array("*");
-	switch($assetFolder)
-	{
-		case "images":
-		{
-			$suffix = "images/";
-			PrintHtmlComment("suffix: $suffix");
-			$extensions = array("jpg", "gif", "png");
-		}
-	}
-	$default_dir = $default_dir.$suffix;
-	if(!($dp = opendir($default_dir))) 
-		die("Cannot open $default_dir.");
+	
+	$default_dir = $serverRoot.$relPath;
 	$fileList = array();
+	if(!($dp = opendir($default_dir))) 
+	{
+		print("Cannot open $default_dir.");
+		return $fileList;
+	}
 	while($file = readdir($dp)) 
 	{
-		if(is_dir($file)) 
-		{
+		$urlSafeFile = urlencode($file);
+		if($file[0]==".")
 			continue;
+		$temppath = $default_dir.$file; 
+		$safeFileName = MakeSafeTagName($file);
+		if(is_dir($temppath))
+		{
+			if($resursive)
+				$fileList[$safeFileName] = GetFolderContentRec($relPath.$file."/", $extensions, true);
 		}
-		else if($file != '.' && $file != '..') 
+		else
 		{
 			$ext = substr($file, strrpos($file, '.') + 1);
 			if(FALSE !== array_search($ext, $extensions))
 			{
-				$safeFileName = MakeSafeTagName($file);
-				$fileList[$safeFileName] = $httpRoot.$suffix.$file;
-			}				
+				$fileList[$safeFileName] = $httpRoot.$relPath.$file;
+			}
 		}
 	}
+	return $fileList;
+}
+function GetFolderContent($assetFolder, $resursive)
+{
+	global $serverRoot;
+	global $httpRoot;
+	$default_dir = $serverRoot;
+	$suffix = $assetFolder."/";
+	$extensions = array("*");
+	switch($assetFolder)
+	{
+		case "images":
+		case "MiniGal/photos":
+		{
+//			$suffix = "images/";
+			PrintHtmlComment("default_dir: $default_dir, suffix: $suffix");
+			$extensions = array("jpg", "gif", "png");
+		}
+	}
+	$default_dir = $default_dir.$suffix;
+	
+	$fileList = GetFolderContentRec($suffix, $extensions, $resursive);
+	
 	$retArray = array();
 	array_push($retArray, $fileList);
 	return $retArray;
 }
+
+// function WriteExifCOmment($fileUrl, $comment)
+// {
+	// exif_ UserComment
+// }
 
 function IsAssoc($myarray)
 {
 	return array_keys($myarray) !== range(0, count($myarray) - 1);
 }
 
-function EncodeUmlaute($string)
+function DecodeUmlaute($res)
 {
-	  $res = htmlentities($string);
+	  $res = str_replace("ü","&uuml;",$res);
+	  $res = str_replace("ä","&auml;",$res);
+	  $res = str_replace('ö',"&ouml;",$res);
+	  $res = str_replace('Ü',"&Uuml;",$res);
+	  $res = str_replace('Ä',"&Auml;",$res);
+	  $res = str_replace('Ö',"&Ouml;",$res);
+	  $res = str_replace("ß", "&szlig;",$res);
+	  return $res;
+}
+
+function EncodeUmlaute($res)
+{
 	  $res = str_replace("&uuml;","ü",$res);
 	  $res = str_replace("&auml;","ä",$res);
 	  $res = str_replace("&ouml;",'ö',$res);
@@ -254,6 +375,30 @@ function EncodeUmlaute($string)
 	  $res = str_replace("&Ouml;",'Ö',$res);
 	  $res = str_replace("&szlig;",'ß',$res);
 	  return $res;
+}
+
+function SafeDBString($res)
+{
+	if(is_int($res))
+		return strval($res);
+	  //$res = htmlspecialchars_decode($res);
+	  $res = EncodeUmlaute($res);
+	  //$res = htmlspecialchars($res);
+	  $res = DecodeUmlaute($res);
+	  $res = mysqli_escape_string(Aufenthalt::GetInstance()->DBConn()->verbinde(), $res);
+	  $res = str_replace("& ", "&amp; ",$res);
+	  if(!mb_detect_encoding($res, 'UTF-8', true))
+	  	$res = utf8_encode($res);
+	  return $res;
+}
+
+function SafeJSONString($res)
+{
+//	$out = htmlentities($out);
+	$res = str_replace("\n","<br />",$res);
+//  	$res = DecodeUmlaute($res);
+	$res = mysqli_escape_string(Aufenthalt::GetInstance()->DBConn()->verbinde(), $res);
+  	return $res;
 }
 
 function gibTabelleAlsXml($result, $name){
@@ -270,7 +415,6 @@ function gibTabelleAlsXml($result, $name){
 		$doc->xmlStandalone = true;
 		// Wurzel erzeugen (<article> ... </article>
 		$name = MakeSafeTagName($name);
-		PrintHtmlComment("safemame: $name \n");
 		$root = $doc->createElement( $name );
 		$doc->appendChild($root);
 //			$trans = get_html_translation_table(HTML_ENTITIES);
@@ -279,17 +423,15 @@ function gibTabelleAlsXml($result, $name){
 		foreach ($result as $rowkey => $rowvalue) {
 		 	 // <artheader> ... </artheader>
 		 	 // $safeRowName  = MakeSafeTagName($rowkey);
-			 // PrintHtmlComment( "$rowkey safeRowName: $safeRowName \n");
 		  	$row = $doc->createElement( "Row" );
 		  	$root->appendChild($row);
 			foreach ($rowvalue as $cellkey => $cellvalue) {
 				$safeCellName = MakeSafeTagName($cellkey);
-				PrintHtmlComment( "$cellkey safeCellName: $safeCellName \n");
 				 $cell = $doc->createElement( $safeCellName );
 				 $row->appendChild($cell);
-				 $actualValue = EncodeUmlaute( utf8_decode($cellvalue) );
-//				 print "value: $actualValue\n";
-				 $cell->nodeValue =$actualValue; 
+				 $asciiCellValue = preg_replace('/[^(\x20-\x7F)]+/', '?', $cellvalue);
+				 $actualValue =  EncodeUmlaute( utf8_decode($asciiCellValue) );
+				 $cell->nodeValue =$actualValue;
 			}
 		}
 					
@@ -361,7 +503,7 @@ function EnterXMLintoTable($tablename, $filename)
 	print "localpath $localPath\n";
 
 	$doc = new DOMDocument();
-	$doc->encoding = 'ISO-8859-1';
+	$doc->encoding = 'utf-8'; //'ISO-8859-1';
 	$doc->load($localPath);
 	$root = $doc->firstChild;
 	print "tag:".$root->tagName."\n";
@@ -384,14 +526,27 @@ function EnterXMLintoTable($tablename, $filename)
 				print "cell not an element.\n";
 				continue;
 			}
-			print "there's a value:".$cell->tagName.":".$cell->textContent."\n";
 			if($cell->tagName=="id")
 				$idValue = $cell->textContent;
+			else if($cell->tagName=="approved")
+			{
+				/* Don't do anythoing as we set that manually below! */
+			}
 			else {
+				$val = $cell->textContent;
 				array_push($fieldArray,$cell->tagName);
-				array_push($valueArray,$cell->textContent);
+				if ($cell->tagName == 'date') 
+				{
+					$test = DateTime::createFromFormat("d.m.Y", $val);
+					if(FALSE != $test)
+						$val = date_format($test, 'Y-m-d'); // 2011-03-03 00:00:00;
+				}
+				array_push($valueArray,$val);
+				print "there's a value:".$cell->tagName.":".$val."\n";
 			}
 		}
+		array_push($fieldArray,"approved");
+		array_push($valueArray,1);
 		$params = array(
 				'table'=>$tablename, 
 				'fields'=>$fieldArray, 
@@ -404,13 +559,25 @@ function EnterXMLintoTable($tablename, $filename)
 		}
 		else
 		{
-			$result = Aufenthalt::GetInstance()->DBConn()->InsertTableContent($params);
+			$lastResult = Aufenthalt::GetInstance()->DBConn()->InsertTableContent($params);
 		}
 		if(is_bool($lastResult) && FALSE==$lastResult)
-			return FALSE;
+		{
+			//return FALSE;
+		}
 	}
 
 	return $lastResult;
+}
+
+function handleError($errno, $errstr, $errfile, $errline, array $errcontext)
+{
+    // error was suppressed with the @-operator
+    if (0 === error_reporting()) {
+        return false;
+    }
+
+    throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
 }
 
 ?>

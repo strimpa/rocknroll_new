@@ -1,7 +1,14 @@
-<FORM METHOD="POST" action="%%ServerVar(REQUEST_URI)%%">
-<input type="hidden" name="formFilled" value="s">
-<b>Mit dem Best&auml;tigen geben Sie Ihre Bestellung auf! Ihre Anfrage wird schnellstm&ouml;lglich beantwortet. Ihnre Anfrage wird schnellstm&ouml;glich bearbeitet. </b> 
-<p>
-	<INPUT style="width:200px; height:25; color:#000000" TYPE=SUBMIT VALUE="Best&auml;tigen und BESTELLEN">
-</p>
-</FORM>
+      <FORM METHOD="POST" action="/index/bestellen">
+        <input type="hidden" name="formFilled" value=<?php print BestellAblauf::STEP_CONFIRM ?> >
+        <p class="normalFont"> </p>
+        <b>Mit dem Best&auml;tigen geben Sie Ihre Bestellung auf! Ihre Anfrage wird schnellstm&ouml;lglichst beantwortet.</b> 
+        <p>
+          <INPUT style="width:200px; height:25; color:#336633" TYPE=SUBMIT VALUE="Best&auml;tigen und BESTELLEN">
+          <INPUT style="width:250px; height:25; color:#663333" TYPE=RESET VALUE="Eingabefelder zur&uuml;cksetzen">
+        </p>
+      </FORM>
+      </td>
+  </tr>
+</table>
+</div>
+<p>&nbsp;</p>

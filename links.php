@@ -1,20 +1,23 @@
 <?php
 
 Print '<p>
-                                Wir haben f&uuml;r Sie eine umfangreiche Liste an Internet-Links zum Thema Rock\'n\'Roll zusammengestellt. <br>
-                                W&auml;hlen Sie eine der nachfolgenden Kategorien, um zu unseren Surftipps zu gelangen: </p>
- 
-                              <form name="form1" method="post" action="'.$_SERVER['REQUEST_URI'].'">
-								<input name="linkMenu" type="hidden" value="-1">
-								<input type="submit" name="Submit" value="Themen&uuml;bersicht anzeigen"><br />
-                              </form>
-                              <form name="form1" method="post" action="'.$_SERVER['REQUEST_URI'].'">
-                                <input name="searchInput" type="text" value="Suchbegriff">
-								<input type="submit" name="Submit" value="Senden"><br />
-                              </form>
-							  ';
+		Wir haben f&uuml;r Sie eine umfangreiche Liste an Internet-Links zum Thema Rock\'n\'Roll zusammengestellt. <br>
+		W&auml;hlen Sie eine der nachfolgenden Kategorien, um zu unseren Surftipps zu gelangen: </p>
+		
+		<p /> NEU: <a href="../Popup.php?title=LinkVorschlag&amp;delegate=cgi-bin/ContentSuggestion.php&amp;vorschlag=link" rel="lightbox[vorschlag]" target="_blank">Senden Sie uns hier Ihren Link Vorschlag!</a>
+		<p />
+		 
+		<form name="form1" method="post" action="'.$_SERVER['REQUEST_URI'].'">
+			<input name="linkMenu" type="hidden" value="-1">
+			<input type="submit" name="Submit" value="Themen&uuml;bersicht anzeigen"><br />
+		</form>
+		<form name="form1" method="post" action="'.$_SERVER['REQUEST_URI'].'">
+			<input name="searchInput" type="text" value="Suchbegriff">
+			<input type="submit" name="Submit" value="Senden"><br />
+		</form>
+  ';
 
-// Abfrage nach Durchgang des Aufrufes und der Vollständigkeit der Angaben.
+// Abfrage nach Durchgang des Aufrufes und der Vollstï¿½ndigkeit der Angaben.
 
 if( (!isset($_POST['linkMenu'])) || ($_POST['linkMenu']==-1)) 
 {

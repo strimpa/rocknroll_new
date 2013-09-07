@@ -14,4 +14,4 @@ AuthType Basic
 AuthName "Service-Bereich"
 AuthUserFile E:\wwwroot\rocknroll_new\cgi-bin\Admin\.htusers
 #/kunden/85283_26135/new/cgi-bin/Admin/.htusers
-Require user  Gunnar Waltraut
+#Require user  Gunnar Waltraut

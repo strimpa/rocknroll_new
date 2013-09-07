@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<table name="archive">
+	<row>
+		<data class="eventDate tableCellFontFancy" type="string">issue</data>
+		<data class="archivePicTd tableCellFontNormal" type="pic">pic</data>
+		<data class="archiveContent tableCellFontNormal" type="string">content</data>
+	</row>
+</table>

@@ -64,9 +64,10 @@ class DBController
 				'table'=>"paragraphs", 
 				'requirements'=>array("id"=>$idval)
 				));
-		assert(count($result)==1);
-		$result= $result[0];
-		return $result;
+		if(count($result)!=1)
+			return NULL;
+		else
+			return $result[0];
 	}
 	
 	public function GetPicData($picID)

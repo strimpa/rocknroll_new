@@ -16,6 +16,7 @@ class ContentPage
 	
 	public function ContentPage($pageData, $articleType=NULL, $url=NULL)
 	{
+		global $loadingErrors;
 		$this->menu = new SubMenu();
 		if(NULL!=$articleType)
 			$this->article = new DelegateArticle($articleType);
@@ -38,9 +39,16 @@ class ContentPage
 			{
 				if($index == "")
 					continue;
-	//			PrintHtmlComment("one paragraph:".$index);
+				PrintHtmlComment("one paragraph:".$index);
 				$paragraph = Aufenthalt::GetInstance()->Controller()->GetParagraph($index);
-				$this->article->AddParagraph(ContentFactory::GetInstance()->CreateParagraph($paragraph));
+				if(NULL==$paragraph)
+					$loadingErrors .= "Paragraph $index not found in DB.";
+				else
+				{
+					foreach($paragraph as $paramInfo)
+						PrintHtmlComment("paragraph info:".$paramInfo);
+					$this->article->AddParagraph(ContentFactory::GetInstance()->CreateParagraph($paragraph));
+				}
 			}
 		}
 	}

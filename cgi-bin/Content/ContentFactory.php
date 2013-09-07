@@ -91,12 +91,8 @@ class ContentFactory
 				$p = new TablePara();
 				$p->Init($paraResult["title"], $paraResult["meta"], NULL);
 				break;
-			case iParagraph::eTYPE_ORDER:
-				$p = new OrderPara();
-				$p->Init($paraResult["title"], $paraResult["meta"], NULL);
-				break;
 			default:
-			break;
+				break;
 		}
 		return $p;
 	}
@@ -121,6 +117,8 @@ class ContentFactory
 //		PrintHtmlComment("content id:".$id);
 		$result = Aufenthalt::GetInstance()->Controller()->GetContent($id);
 //		PrintHtmlComment("Content count:".count($result));
+		if(count($result)<=0)
+			$result = Aufenthalt::GetInstance()->Controller()->GetContent("start");
 		foreach($result as $pageData)
 		{
 			// inital create
@@ -128,14 +126,17 @@ class ContentFactory
 			$url = NULL;
 			switch($pageData["identifier"])
 			{
-				case "plogger":
+				case "galerie":
 					$type = Article::DELEGATE_ARTICLE_PLOGGER;
 					break;
 				case "links":
 					$type = Article::DELEGATE_ARTICLE_LINKS;
 					break;
+				case "bestellen":
+					$type = Article::DELEGATE_ARTICLE_ORDER;
+					break;
 				case "guestbook":
-					$url = "http://www.rock-around.de/system-cgi/guestbook/guestbook.php?action=view";
+					$url = "	";
 					break;
 			} 
 			$newPage = new ContentPage($pageData, $type, $url);

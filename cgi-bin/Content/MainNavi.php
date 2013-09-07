@@ -30,6 +30,8 @@ class MainNavi
 		PrintHtmlComment("Main navi render:".count($this->titlesAndUrls));
 		for($menuIndex = 0;$menuIndex<count($this->titlesAndUrls); $menuIndex++)
 		{
+			if(strlen($titles[$menuIndex])<=0)
+				continue;
 			$linkNode = $builder->AddTag("a");
 			$link = $this->urlPrefix.$this->titlesAndUrls[$titles[$menuIndex]];
 			PrintHtmlComment($link);

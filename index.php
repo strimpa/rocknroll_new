@@ -3,6 +3,7 @@
 //require_once("cgi-bin/Aufenthalt.php");
 require_once("cgi-bin/Content/ContentMgr.php");
 session_start();
+Aufenthalt::GetInstance()->DBConn()->schliesse();
 ContentMgr::GetInstance()->Genesis();
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -28,7 +29,6 @@ ContentMgr::GetInstance()->Genesis();
   js.src = "//connect.facebook.net/de_DE/all.js#xfbml=1&appId=133353956731320";
   fjs.parentNode.insertBefore(js, fjs);
 }(document, 'script', 'facebook-jssdk'));</script>
-
 
 <!-- Navigation //-->
 <!-- Navigation 		
@@ -72,10 +72,6 @@ ContentMgr::GetInstance()->Genesis();
 	ContentMgr::GetInstance()->RenderContent();
 ?>
 
-<div id="advertRight">
-	Werbung:
-	<hr noshade />
-	<SCRIPT charset="utf-8" type="text/javascript" src="http://ws.amazon.de/widgets/q?rt=tf_sw&ServiceVersion=20070822&MarketPlace=DE&ID=V20070822/DE/rockmaga-21/8002/ba8f7bfe-18ec-49cb-a596-3bc5b18a626e"> </SCRIPT> <NOSCRIPT><A HREF="http://ws.amazon.de/widgets/q?rt=tf_sw&ServiceVersion=20070822&MarketPlace=DE&ID=V20070822%2FDE%2Frockmaga-21%2F8002%2Fba8f7bfe-18ec-49cb-a596-3bc5b18a626e&Operation=NoScript">Amazon.de Widgets</A></NOSCRIPT>
 </div>	
 </body>
 </html>

@@ -1,16 +1,7 @@
-35 // Abo Inland
-6 // Einzelheft Inland
-5 // Probeheft Inland
-35 // kl Probepaket Inland
-167 // grosses Probepaket Inland
-30 // probepaket abo
-15 // probepaket lexikon
-22 // Lexikon Inland
-40 // Abo Ausland
-7 // Einzelheft Ausland
-6 // Probeheft Ausland
-40 // kl Probepaket Ausland
-180 // grosses Probepaket Ausland
-35 // probepaket abo
-15 // probepaket lexikon
-24 // Lexikon Ausland
+35 	40.0 	// Abo Inland
+6	7 		// Einzelheft Inland
+6	7 		// aktuelles Heft Inland
+5	6 		// Probeheft Inland
+35	40 		// kl Probepaket Inland
+150	170 	// grosses Probepaket Inland
+7	10 		// Index Inland

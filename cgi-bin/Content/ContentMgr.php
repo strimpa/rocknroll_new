@@ -20,6 +20,8 @@ class ContentMgr
 	
 	private function Init()
 	{
+		/* Set internal character encoding to UTF-8 */
+		mb_internal_encoding("UTF-8");
 		$this->htmlBuilder = new HtmlBuilder();
 	}
 	
@@ -50,7 +52,7 @@ class ContentMgr
 		$currId = FilenameFromUrl();
 		PrintHtmlComment("currId:$currId");
 		if($currId=="")
-			$currId = "index";
+			$currId = "start";
 		$this->content = ContentFactory::GetInstance()->CreateContentPages($currId);
 	}
 	
@@ -61,11 +63,13 @@ class ContentMgr
 	
 	public function RenderHeader()
 	{
-		$this->content->RenderHeader();
+		if(NULL!=$this->content)
+			$this->content->RenderHeader();
 	}
 	
 	public function RenderContent()
 	{
+		global $loadingErrors;
 //		print ("current content:".FilenameFromUrl()."\n");
 //		print ("num content:".count($this->content)."\n");
 		if(NULL!=$this->navi)
@@ -83,6 +87,8 @@ class ContentMgr
 			$this->content->Render();
 		else
 			print "Error creating content!";
+		
+		print "<div id='loadingErrors'>$loadingErrors</div>";
 	}
 
 }
