@@ -2,6 +2,9 @@ images
 cgi-bin/Admin/temp
 script/rock-around.de   127.0.0.3   db85283_2   paragraphs   phpMyAdmin 2.11.11.3.htm
 docs
+MiniGal/photos
 management
 cgi-bin/Admin/scripts/tiny_mce
 cgi-bin/Admin/scripts/ui
+MiniGal/photos
+script/ui

@@ -11,19 +11,6 @@
 <link href="../../css/jquery.timeentry.css" rel="stylesheet" type="text/css" />
 <link href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" rel="stylesheet" type="text/css" />
 
-<script type="text/javascript" src="../../script/jquery-1.5.1.min.js"></script>
-<script type="text/javascript" src="../../script/ui/jquery.ui.core.js"></script>
-<script type="text/javascript" src="../../script/ui/jquery.ui.widget.js"></script>
-<script type="text/javascript" src="../../script/ui/jquery.ui.button.js"></script>
-<script type="text/javascript" src="../../script/ui/jquery.ui.spinner.js"></script>
-<script type="text/javascript" src="../../script/ui/jquery.ui.datepicker.js"></script>
-<script type="text/javascript" src="../../script/ui/jquery.ui.progressbar.js"></script>
-
-<script type="text/javascript" src="../../script/tiny_mce/jquery.tinymce.js"></script>
-<script type="text/javascript" src="../../script/jquery.timeentry.min.js"></script>
-
-<script type="text/javascript" src="../../script/jquery.jeditable.mini.js"></script>
-
 <script data-main="scripts/main" src="scripts/require.js"></script>
 </head>
 
