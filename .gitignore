@@ -9,3 +9,6 @@ script/ui
 cgi-bin/Admin/scripts/ui
 cgi-bin/Admin/scripts/ui
 script/ui
+cgi-bin/Admin/scripts/tiny_mce
+cgi-bin/Admin/scripts/ui
+script/ui

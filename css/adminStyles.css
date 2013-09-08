@@ -3,6 +3,9 @@ body {
 	padding:15px;
 	color:#BBCCDB;
 }
+fieldset{
+	border-radius: 5px;
+}
 
 .editfield
 {
@@ -16,6 +19,7 @@ body {
 	font-size:12px;
 	color:#A3BADB;
 	z-index:1;
+	border-radius: 5px;
 }
 
 .editDiv
@@ -56,8 +60,8 @@ body {
 #settings
 {
 	top:0px;
-	left:800px;
-	width:400px;
+	left:755px;
+	width:455px;
 	height:220px;
 }
 
