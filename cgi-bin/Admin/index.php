@@ -6,9 +6,6 @@
 <title>Adminbereich</title>
 <link href="../../css/mainstyles.css" rel="stylesheet" type="text/css" />
 <link href="../../css/adminStyles.css" rel="stylesheet" type="text/css" />
-<link href="../../css/dot-luv/jquery-ui-1.8.12.custom.css" rel="stylesheet" type="text/css" />
-<link href="../../css/microgallery_style.css" rel="stylesheet" type="text/css" />
-<link href="../../css/jquery.timeentry.css" rel="stylesheet" type="text/css" />
 <link href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" rel="stylesheet" type="text/css" />
 
 <script data-main="scripts/main" src="scripts/require.js"></script>
@@ -25,13 +22,13 @@
 		</select>
 		<input id="pageTitle" class="fullSizeControl" type="text" value="" readonly="true" />
 		<input id="menuPriority" class="shortControl" type="text" value="" readonly="true" />
-		<input id="refreshButton" class="createButton" type="button" value="Refresh" />
+		<input id="refreshButton" class="editButton" type="image" title="Refresh" src="images/061 Sync.png" />
 	</fieldset>
 	<fieldset class="RightGroupBox">
-		<legend>Neu erstellen:</legend>
-		<input id="createPageButton" class="createButton" type="button" value="Neu" />
-		<input id="editPageButton" class="editButton" type="button" value="Bearbeiten" style="width:75px;" />
-		<input id="deletePageButton" class="deleteButton" type="button" value="Loeschen" style="width:70px;" />
+		<legend>Bearbeiten:</legend>
+		<input id="createPageButton" class="editButton" type="image" title="Neu" src="images/022 Document Add.png" />
+		<input id="editPageButton" class="editButton" type="image" title="Bearbeiten" src="images/081 Pen.png" />
+		<input id="deletePageButton" class="deleteButton" type="image" title="Loeschen" src="images/023 Document Delete.png" />
 	</fieldset>
 </div>
 <div class="editfield" id="settings">
@@ -45,14 +42,14 @@
 	<fieldset class="LeftGroupBox">
 		<legend>Submenu Eintraege:</legend>
 		<div id="submenuEntries" class="listBox" style="width:150px; height:110px"></div>
-		<input id="upMenuItemButton" class="moveMenuItemButton" type="button" value="Nach oben" />
-		<input id="downMenuItemButton" class="moveMenuItemButton" type="button" value="Nach unten" />
+		<input id="upMenuItemButton" class="editButton" type="image" title="Eintrag nach oben bewegen" src="images/037 ArrowUp.png" /><br />
+		<input id="downMenuItemButton" class="editButton" type="image" title="Eintrag nach unten bewegen" src="images/038 ArrowDown.png" />
 	</fieldset>
 	<fieldset class="RightGroupBox">
-		<legend>Neu erstellen:</legend>
-		<input id="createMenuEntryButton" class="createButton" type="button" value="Neu" />
-		<input id="editMenuEntryButton" class="editButton" type="button" value="Bearbeiten" style="width:75px;" />
-		<input id="deleteMenuEntryButton" class="deleteButton" type="button" value="Loeschen" style="width:70px;" />
+		<legend>Bearbeiten:</legend>
+		<input id="createMenuEntryButton" class="editButton" type="image" title="Neu" src="images/022 Document Add.png" />
+		<input id="editMenuEntryButton" class="editButton" type="image" title="Bearbeiten" src="images/081 Pen.png" />
+		<input id="deleteMenuEntryButton" class="deleteButton" type="image" title="Loeschen" src="images/023 Document Delete.png" />
 	</fieldset>
 	<fieldset class="RightGroupBox" style="top:60px;">
 		<legend>Absatz-Anker Link:</legend>
@@ -65,11 +62,14 @@
 <span id="TitleInhalt"><img src="images/Inhalt.png" /></span>
 <div class="editfield" id="contentHolder">
 	<div id="contentCreate">
-		<input id="createParagraphButton" class="createButton" type="button" value="Neuen Absatz erstellen" />
-		Bestehenden Absatz einfuegen:<select id="insertParagraphSelect" class="fullSizeControl">
-				<option></option>
-		</select>
-		<fieldset>
+		<fieldset class="ThinGroupBox">
+			<legend>Bearbeiten:</legend>
+			<input id="createParagraphButton" class="editButton" type="image" title="Neuen Absatz erstellen" src="images/022 Document Add.png" />
+			Bestehenden Absatz einfuegen:<select id="insertParagraphSelect" class="fullSizeControl">
+					<option></option>
+			</select>
+		</fieldset>
+		<fieldset class="ThinGroupBox">
 			<legend>Parsing Fehler:</legend>
 			<input type="button" id="errorOutputDelete" value="Loeschen" />
 			<div id="errorOutput"></div>

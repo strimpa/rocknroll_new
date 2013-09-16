@@ -121,8 +121,14 @@ fieldset{
 	color:#FF0000;
 }
 
+.editButton
+{
+	margin:3px;
+}
+
 .deleteButton
 {
+	margin:3px;
 	border:1px solid red;
 }
 
@@ -141,6 +147,15 @@ fieldset{
 	left:410px;
 	top:5px; 
 	width:200px;
+}
+.ThinGroupBox
+{
+	border: 1px solid #444;
+}
+.ParaEditGroupBox
+{
+	border: 1px solid #444;
+	float:right;
 }
 
 .shortControl
@@ -181,11 +196,12 @@ fieldset{
 /**************************************************/
 #creationBg 
 {
+	position:fixed !important;
 	position:absolute;
-	top:0px;
-	left:0px;
-	width:2000px;
-	height:2000px;
+	top:0;
+	right:0;
+	bottom:0;
+	left:0;
 	background-color:black;
 	z-index:19;
 	opacity:0.7;
@@ -268,8 +284,6 @@ fieldset{
 .adminTableDiv
 {
 	overflow:hidden;
-	border:1px solid gray;
-	padding: 5px;
 }
 .adminTable
 {
@@ -290,7 +304,15 @@ fieldset{
 	left:10px;
 	border:1px solid #444;
 	width:1080px;
+	overflow:hidden;
+	margin:5px;
+	padding:5px;
+}
+
+.adminParaTableHolder
+{
 	overflow:auto;
+	width:100%;
 }
 
 #content_edit

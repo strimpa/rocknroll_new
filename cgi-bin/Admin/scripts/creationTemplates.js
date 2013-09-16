@@ -5,6 +5,8 @@
 //	dataType:null
 //}
 
+require(['tiny_mce/jquery.tinymce']);
+
 	function showImageBrowser(position, rootFolder, targetPicElem)
 	{
 		var holder = $('<div id="folderBrowser">');
@@ -20,18 +22,18 @@
 			$(result).find("row").children().children().each(function(){
 				var picFrame = $('<div class="folderBrowserPicFrame">'); 
 				var pic = $('<img />');
-				pic.attr("class","folderBrowsePic"); 
-				pic.attr("src",$(this).text()); 
+				pic.prop("class","folderBrowsePic"); 
+				pic.prop("src",$(this).text()); 
 				picFrame.append(pic);
 				picFrame.append($("<i>"+$(this).text()+"</i>"));
 				picHolder.append(picFrame);
 				pic.click(function(){
 					console.log("targetPicElem:"+targetPicElem);
-					$(targetPicElem).attr("src", $(this).attr("src"));
+					$(targetPicElem).prop("src", $(this).prop("src"));
 					holder.remove();
 				});
 			});
-//			$("#menuPriority").attr("value", $(result).find( 'priority' ).first().text());
+//			$("#menuPriority").val( $(result).find( 'priority' ).first().text());
 		}, {"assetFolder":rootFolder}, "xml");
 		$(closeBar).click(function(){
 			$("#folderBrowser").remove();
@@ -58,10 +60,10 @@ var DataEntity = function(n, h, d)
 DataEntity.prototype.createControl = function(doc, presetValues)
 {
 	return this.control;
-}
+};
 DataEntity.prototype.init = function(presetValues)
 {
-}
+};
 DataEntity.prototype.create = function(doc, presetValues, presetOptions)
 {
 	var controlDiv = doc.createElement("div");
@@ -82,7 +84,7 @@ DataEntity.prototype.create = function(doc, presetValues, presetOptions)
 	controlDiv.appendChild(helpIcon);
 	
 	return controlDiv;
-}
+};
 DataEntity.prototype.destroy = function()
 {
 };
@@ -92,7 +94,7 @@ var TextField = function(n, h, d)
 {
 	// contructor
 	DataEntity.call(this, n, h, d);
-}
+};
 TextField.prototype = new DataEntity;
 TextField.prototype.createControl = function(doc, presetValues)
 {
@@ -105,18 +107,18 @@ TextField.prototype.createControl = function(doc, presetValues)
 		this.control.value = presetValues[this.name];
 	}
 	return this.control;
-}
+};
 
 TextField.prototype.getData = function(data)
 {
 	data[this.name] = this.control.value;
-}
+};
 ////////////////////////////////////////////////////////////////////////////////////////
 var TextArea = function(n, h, d)
 {
 	// contructor
 	DataEntity.call(this, n, h, d);
-}
+};
 TextArea.prototype = new DataEntity;
 TextArea.prototype.createControl = function(doc, presetValues)
 {
@@ -128,19 +130,19 @@ TextArea.prototype.createControl = function(doc, presetValues)
 		this.control.value = presetValues[this.name];
 	}
 	return this.control;
-}
+};
 
 TextArea.prototype.getData = function(data)
 {
 	data[this.name] = this.control.value;
-}
+};
 ////////////////////////////////////////////////////////////////////////////////////////
 var ComboBox = function(n, h, d, returnIndex)
 {
 	this.returnIndex = returnIndex;
 	// contructor
 	DataEntity.call(this, n, h, d);
-}
+};
 ComboBox.prototype = new DataEntity;
 ComboBox.prototype.createControl = function(doc, presetValues, presetOptions)
 {
@@ -164,7 +166,7 @@ ComboBox.prototype.createControl = function(doc, presetValues, presetOptions)
 		this.control.selectedIndex = presetValues[this.name];
 	}
 	return this.control;
-}
+};
 
 ComboBox.prototype.getData = function(data)
 {
@@ -172,14 +174,14 @@ ComboBox.prototype.getData = function(data)
 		data[this.name] = this.control.selectedIndex;
 	else
 		data[this.name] = this.control.value;
-}
+};
 
 ////////////////////////////////////////////////////////////////////////////////////////
 var Spinner = function(n, h, d)
 {
 	// contructor
 	DataEntity.call(this, n, h, d);
-}
+};
 Spinner.prototype = new DataEntity;
 Spinner.prototype.createControl = function(doc, presetValues)
 {
@@ -194,13 +196,14 @@ Spinner.prototype.createControl = function(doc, presetValues)
 		this.control.setAttribute("value", presetValues[this.name]);
 	}
 	return this.control;
-}
+};
 Spinner.prototype.init = function(presetValues)
 {
-	$(this.control).spinner();
+	$(this.control).spinner({ min: 0, max: 500, step:1 });
 	if(null!=presetValues && null!=presetValues[this.name])
 	{
-		$(this.control).spinner("value", presetValues[this.name]);
+		var trimmedVal = parseInt(presetValues[this.name], 10);
+		$(this.control).spinner("value", trimmedVal);
 	}
 	else if(null!=this.staticPresetData)
 	{
@@ -208,18 +211,18 @@ Spinner.prototype.init = function(presetValues)
 	}
 	else if(this.control.getAttribute("value")=="")
 		$(this.control).spinner("value", 300);
-}
+};
 
 Spinner.prototype.getData = function(data)
 {
 	data[this.name] = this.control.value;
-}
+};
 ////////////////////////////////////////////////////////////////////////////////////////
 var DateField = function(n, h, d)
 {
 	// contructor
 	DataEntity.call(this, n, h, d);
-}
+};
 DateField.prototype = new DataEntity;
 DateField.prototype.createControl = function(doc, presetValues)
 {
@@ -234,25 +237,25 @@ DateField.prototype.createControl = function(doc, presetValues)
 		this.control.setAttribute("value", presetValues[this.name]);
 	}
 	return this.control;
-}
+};
 DateField.prototype.init = function()
 {
 	$(this.control).datepicker({dateFormat:'yy-mm-dd'});
 	$(this.control).datepicker( "setDate", "0" );
 //	if(this.control.getAttribute("value")=="")
 //		$(this.control).datepicker("value", 300);
-}
+};
 
 DateField.prototype.getData = function(data)
 {
 	data[this.name] = this.control.value;
-}
+};
 ////////////////////////////////////////////////////////////////////////////////////////
 var TimeField = function(n, h, d)
 {
 	// contructor
 	DataEntity.call(this, n, h, d);
-}
+};
 TimeField.prototype = new DataEntity;
 TimeField.prototype.createControl = function(doc, presetValues)
 {
@@ -270,23 +273,23 @@ TimeField.prototype.createControl = function(doc, presetValues)
 		this.control.setAttribute("value", "19:00:00");
 
 	return this.control;
-}
+};
 TimeField.prototype.init = function()
 {
-	$(this.control).timeEntry({show24Hours: true, showSeconds: true});
-}
+	$(this.control).timepicker();
+};
 
 TimeField.prototype.getData = function(data)
 {
 	data[this.name] = this.control.value;
-}
+};
 
 ////////////////////////////////////////////////////////////////////////////////////////
 var WYSIWYGField = function(n, h, d)
 {
 	// contructor
 	DataEntity.call(this, n, h, d);
-}
+};
 WYSIWYGField.prototype = new DataEntity;
 WYSIWYGField.prototype.createControl = function(doc, presetValues)
 {
@@ -299,12 +302,12 @@ WYSIWYGField.prototype.createControl = function(doc, presetValues)
 	var myId = this.name+"_edit";
 	this.control.setAttribute("id", myId);
 	return this.control;
-}
+};
 function createMce(on)
 {
 	on.tinymce({
 		// Location of TinyMCE script
-		script_url : '../../script/tiny_mce/tiny_mce.js',
+		script_url : 'scripts/tiny_mce/tiny_mce.js',
 
 		// General options
 		theme : "advanced",
@@ -360,7 +363,7 @@ WYSIWYGField.prototype.init = function(presetValues)
 	//this.control.setAttribute("value", thevalue);
 	//$(selector).tinymce().setContent(thevalue);
 	$(this.control).html(thevalue);
-}
+};
 
 WYSIWYGField.prototype.getData = function(data)
 {
@@ -369,20 +372,20 @@ WYSIWYGField.prototype.getData = function(data)
 	wrapper.children().first().append($(this.control).tinymce().getContent());
 	data[this.name] = wrapper.html();
 //	alert(data[this.name]);
-}
+};
 WYSIWYGField.prototype.destroy = function(presetValues)
 {
 //	$(this.control).tinymce().removeControl();
 //	$("#"+this.name+"_edit_parent").remove();
 //	alert("destroy editor");
-}
+};
 
 ////////////////////////////////////////////////////////////////////////////////////////
 var PicBrowse = function(n, h, d)
 {
 	// contructor
 	DataEntity.call(this, n, h, d);
-}
+};
 PicBrowse.prototype = new DataEntity;
 PicBrowse.prototype.createControl = function(doc, presetValues)
 {
@@ -426,7 +429,7 @@ PicBrowse.prototype.createControl = function(doc, presetValues)
 	this.control.setAttribute("id", myId);
 	this.control.setAttribute("class", "creationControl");
 	this.control.setAttribute("src","images/noImageDummy.png");
-	if(null!=presetValues && null!=presetValues[this.name])
+	if(null!=presetValues && null!=presetValues[this.name] && ""!=presetValues[this.name])
 	{
 		this.control.setAttribute("src", presetValues[this.name]);
 	}
@@ -445,14 +448,14 @@ PicBrowse.prototype.createControl = function(doc, presetValues)
 	holder.appendChild(this.browseLink);
 
 	return holder;
-}
+};
 PicBrowse.prototype.init = function(presetValues, changeHandler)
 {
 	var controlScopePass = this.control; 
 	$(this.control).load(changeHandler);
 	
 	$(this.picDelete).click(function(){
-		$(controlScopePass).attr("src", "images/noImageDummy.png");
+		$(controlScopePass).prop("src", "images/noImageDummy.png");
 	});
 
 	var picElement = this.control;
@@ -483,7 +486,7 @@ PicBrowse.prototype.init = function(presetValues, changeHandler)
 				if(resultString.search(/Invalid file/) == -1)
 				{
 					console.log("New src:"+resultString);
-					$(controlScopePass1).attr("src", resultString);
+					$(controlScopePass1).prop("src", resultString);
 				}
 				else
 				{
@@ -493,18 +496,18 @@ PicBrowse.prototype.init = function(presetValues, changeHandler)
 		}
 		manipIframe();
 	});
-}
+};
 
 PicBrowse.prototype.getData = function(data)
 {
-	if($(this.control).attr("src").indexOf("noImageDummy")!=-1)
+	if($(this.control).prop("src").indexOf("noImageDummy")!=-1)
 	{
 		data[this.name] = ""; 
 		return;
 	}
 	
-	data[this.name] = $(this.control).attr("src");
-}
+	data[this.name] = $(this.control).prop("src");
+};
 
 ////////////////////////////////////////////////////////////////////////////////////////
 /********************************************************************************************
@@ -610,6 +613,8 @@ EditDialog.prototype.createDialog = function(doc, callback, presetValues, preset
 	
 	//Group.prototype.init.call(this, presetValues);
 	this.init(presetValues);
+	
+	$('html, body').animate({ scrollTop: 0 }, 'fast');
 };
 function removeDialog()
 {
@@ -646,7 +651,8 @@ var TableGroup = new Group("tableGroup", "Absatz spezifische Inhalte");
 TableGroup.controls = new Array(
 		new ComboBox("table", "Die verwendete Tabelle.", "events|links|archive"),
 		new ComboBox("category",  "Kategorie oder Monat."),
-		new TextField("newCategory", "Neue Kategorie.")
+		new TextField("newCategory", "Neue Kategorie."),
+		new ComboBox("sortBy",  "Sortiere den Inhalt der Tabelle bezuegllich dieser Spalte.")
 );
 var ParaTypeStrings = ["Text mit Bild rechts","Text mit Bild links","Tabelle"];
 ParagraphCreationDialog.controls = new Array(
@@ -656,10 +662,16 @@ ParagraphCreationDialog.controls = new Array(
 		PicTextGroup,
 		TableGroup
 );
+
+/////////////////////////////////////////////////////////////////////////////////
+// helper fucntions
+/////////////////////////////////////////////////////////////////////////////////
+
+
 function toggleGroup(event, index)
 {
 	if(null==index)
-		index = $("#type_edit").attr("selectedIndex"); 
+		index = $("#type_edit").prop("selectedIndex"); 
 	console.log("para type index:"+index);
 	if(index==2)
 	{
@@ -672,6 +684,7 @@ function toggleGroup(event, index)
 		$("#tableGroup_edit").css("visibility", "hidden");
 	}
 }
+
 function getCategoryCallback(result)
 {
 	$(TableGroup.controls[1].control).empty();
@@ -686,6 +699,58 @@ function getCategoryCallback(result)
 		$(TableGroup.controls[1].control).append(optn);
 	});
 }
+
+function getSortingHeaderCallback(result)
+{
+	$(TableGroup.controls[3].control).empty();
+
+	optn = document.createElement("OPTION");
+	optn.textContent = "";
+	$(TableGroup.controls[3].control).append(optn);
+	
+	$(result).find("A_0").children().each(function(){
+		optn = document.createElement("OPTION");
+		optn.textContent = this.nodeName.toLowerCase();
+		$(TableGroup.controls[3].control).append(optn);
+	});
+}
+
+function getEventCategoryCallback(result)
+{
+	$(EventTableEntryDialog.controls[0].control).empty();
+
+	optn = document.createElement("OPTION");
+	optn.textContent = "";
+	$(EventTableEntryDialog.controls[0].control).append(optn);
+	
+	$(result).find("category").each(function(){
+		optn = document.createElement("OPTION");
+		optn.textContent = $(this).text();
+		$(EventTableEntryDialog.controls[0].control).append(optn);
+	});
+	$(EventTableEntryDialog.controls[0].control).val( $(EventTableEntryDialog.controls[0].control).data("initVal"));
+}
+
+function getArchivCategoryCallback(result)
+{
+	$(ArchivTableEntryDialog.controls[0].control).empty();
+
+	optn = document.createElement("OPTION");
+	optn.textContent = "";
+	$(ArchivTableEntryDialog.controls[0].control).append(optn);
+	
+	$(result).find("category").each(function(){
+		optn = document.createElement("OPTION");
+		optn.textContent = $(this).text();
+		$(ArchivTableEntryDialog.controls[0].control).append(optn);
+	});
+	$(ArchivTableEntryDialog.controls[0].control).val( $(ArchivTableEntryDialog.controls[0].control).data("initVal"));
+}
+
+/////////////////////////////////////////////////////////////////////////////////
+// inits
+/////////////////////////////////////////////////////////////////////////////////
+
 ParagraphCreationDialog.init = function(presetValues)
 {
 	$(this.controls[1].control).change(toggleGroup);
@@ -697,8 +762,10 @@ TableGroup.init = function(presetValues)
 {
 	this.control.setAttribute("style", "visibility:hidden;");
 	$(this.controls[0].control).change(function(){
-		var table = $(this).attr("value");
+		var table = $(this).val();
 		$.fn.loadContent(table, getCategoryCallback, null, "data", {selector:"category",distinct:true});
+		// attaching change listener for table to set sorting alternatives.
+		$.fn.loadContent(table, getSortingHeaderCallback, null, "data", {def:true});
 	});
 	Group.prototype.init.call(this, presetValues);
 	var defaultVal = "events";
@@ -706,8 +773,10 @@ TableGroup.init = function(presetValues)
 		 defaultVal = presetValues['table'];
 	var gGroupContext = this.controls[1].control;
 	var gNewCatContext = this.controls[2].control;
-	$.fn.loadContent(defaultVal, function(result){
+	var gSortBy = this.controls[3].control;
+	$.fn.loadContent(defaultVal, function(result){	
 		getCategoryCallback(result);
+
 		// If entries contain a categrory like this or not
 		if(null!=presetValues['category'])
 		{
@@ -715,16 +784,30 @@ TableGroup.init = function(presetValues)
 			console.log("category:"+cat);
 			if(null!=$(gGroupContext).text().match(cat))
 			{
-				$(gGroupContext).attr("value", cat);
+				$(gGroupContext).val( cat);
 			}
 			else
 			{
-				$(gNewCatContext).attr("value", cat);
+				$(gNewCatContext).val( cat);
 			}
 		}
-		
+
 	}, null, "data", {selector:"category",distinct:true});
-}
+	
+	$.fn.loadContent(defaultVal, function(result){
+		getSortingHeaderCallback(result);
+		
+		if(null!=presetValues['sortBy'])
+		{
+			var sortBy = presetValues['sortBy']; 
+			console.log("sortBy:"+sortBy);
+			if(null!=$(gSortBy).text().match(sortBy))
+			{
+				$(gSortBy).val(sortBy);
+			}
+		}
+	}, null, "data", {def:true});
+};
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 var EventTableEntryDialog = new EditDialog("EventTableEntryDialog", "In Tabelle einfuegen.");
 EventTableEntryDialog.controls = new Array(
@@ -741,27 +824,15 @@ EventTableEntryDialog.controls = new Array(
 		new TextField("url", "Website mit info bezueglich des Events."),
 		new TextField("mail", "E-mail fuer mehr informationen.")
 );
-function getEventCategoryCallback(result)
-{
-	$(EventTableEntryDialog.controls[0].control).empty();
 
-	optn = document.createElement("OPTION");
-	optn.textContent = "";
-	$(EventTableEntryDialog.controls[0].control).append(optn);
-	
-	$(result).find("category").each(function(){
-		optn = document.createElement("OPTION");
-		optn.textContent = $(this).text();
-		$(EventTableEntryDialog.controls[0].control).append(optn);
-	});
-	$(EventTableEntryDialog.controls[0].control).attr("value", $(EventTableEntryDialog.controls[0].control).attr("initVal"));
-}
+
+
 EventTableEntryDialog.init = function(initData)
 {
-	$(EventTableEntryDialog.controls[0].control).attr("initVal", initData['category']);
+	$(EventTableEntryDialog.controls[0].control).data("initVal", initData['category']);
 	$.fn.loadContent(initData['table'], getEventCategoryCallback, null, "data", {selector:"category",distinct:true});
 	Group.prototype.init.call(this, initData);
-}
+};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 var ArchivTableEntryDialog = new EditDialog("EventTableEntryDialog", "In Tabelle einfuegen.");
@@ -772,24 +843,9 @@ ArchivTableEntryDialog.controls = new Array(
 		new PicBrowse("pic", "Cover"),
 		new TextField("content", "Inhalt des Heftes.")
 );
-function getArchivCategoryCallback(result)
-{
-	$(ArchivTableEntryDialog.controls[0].control).empty();
-
-	optn = document.createElement("OPTION");
-	optn.textContent = "";
-	$(ArchivTableEntryDialog.controls[0].control).append(optn);
-	
-	$(result).find("category").each(function(){
-		optn = document.createElement("OPTION");
-		optn.textContent = $(this).text();
-		$(ArchivTableEntryDialog.controls[0].control).append(optn);
-	});
-	$(ArchivTableEntryDialog.controls[0].control).attr("value", $(ArchivTableEntryDialog.controls[0].control).attr("initVal"));
-}
 ArchivTableEntryDialog.init = function(initData)
 {
-	$(ArchivTableEntryDialog.controls[0].control).attr("initVal", initData['category']);
+	$(ArchivTableEntryDialog.controls[0].control).data("initVal", initData['category']);
 	$.fn.loadContent(initData['table'], getArchivCategoryCallback, null, "data", {selector:"category",distinct:true});
 	Group.prototype.init.call(this, initData);
-}
+};

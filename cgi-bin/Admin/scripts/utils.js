@@ -114,12 +114,12 @@ define(['config'], function(config)
 					var picHolder = new PicBrowse("picUrl", "Verwendetes Bild.");
 					var dataDiv = picHolder.createControl(document, {"picUrl":col});
 					dataTd.appendChild(dataDiv);
-					$(picHolder.control).attr("value", col);
-					$(picHolder.control).attr("rowId", row["id"]);
-					$(picHolder.control).attr("field", colHash);
+					$(picHolder.control).val( col);
+					$(picHolder.control).data("rowId", row["id"]);
+					$(picHolder.control).data("field", colHash);
 					picHolder.init(null, function(){
-						var theId = this.getAttribute("rowId");
-						var field = this.getAttribute("field");
+						var theId = $(this).data("rowId");
+						var field = $(this).data("field");
 						var value = this.src;
 						console.log("result of dummy search:"+value.search(/noImageDummy/));
 						if(-1!=value.search(/noImageDummy/))
@@ -155,17 +155,17 @@ define(['config'], function(config)
 						{
 							var dataDiv = document.createElement("input");
 							dataTd.appendChild(dataDiv);
-							$(dataDiv).attr("value", col);
-							$(dataDiv).attr("rowId", row["id"]);
-							$(dataDiv).attr("field", colHash);
+							$(dataDiv).val( col);
+							$(dataDiv).data("rowId", row["id"]);
+							$(dataDiv).data("field", colHash);
 							
 							
 							$(dataDiv).datepicker({
 								dateFormat:"yy-mm-dd",
 								onClose: function(value, inst) 
 								{
-									var theId = this.getAttribute("rowId");
-									var field = this.getAttribute("field");
+									var theId = $(this).data("rowId");
+									var field = $(this).data("field");
 									var dateParts = value.split(".");
 									var sqlDate = value;
 									if(dateParts.length>1)
@@ -185,15 +185,16 @@ define(['config'], function(config)
 						{
 							var dataDiv = document.createElement("input");
 							dataTd.appendChild(dataDiv);
-							$(dataDiv).attr("value", col);
-							$(dataDiv).attr("rowId", row["id"]);
-							$(dataDiv).attr("field", colHash);
+							$(dataDiv).val( col);
+							$(dataDiv).data("rowId", row["id"]);
+							$(dataDiv).data("field", colHash);
 							
 							$(dataDiv).spinner({
+								min: 0, max: 500, step:1,
 								change: function(ev, ui) 
 								{
-									var theId = this.getAttribute("rowId");
-									var field = this.getAttribute("field");
+									var theId = $(this).data("rowId");
+									var field = $(this).data("field");
 									var val = $(this).spinner("value");
 								    var dbData = eval("({"+field+": \""+val+"\"})"); 
 								    $.fn.loadContent(tableName, null, dbData, "data", {edit:true,req:("id="+theId)});
@@ -207,15 +208,15 @@ define(['config'], function(config)
 							dataDiv.setAttribute("type", "checkbox");
 							dataTd.appendChild(dataDiv);
 							if(col=="1")
-								$(dataDiv).attr("checked", true);
-							$(dataDiv).attr("rowId", row["id"]);
-							$(dataDiv).attr("id", colHash + row["id"]);
-							$(dataDiv).attr("field", colHash);
+								$(dataDiv).prop("checked", true);
+							$(dataDiv).data("rowId", row["id"]);
+							$(dataDiv).data("id", colHash + row["id"]);
+							$(dataDiv).data("field", colHash);
 							
 							$(dataDiv).change(function(ev, ui) 
 								{
-									var theId = this.getAttribute("rowId");
-									var field = this.getAttribute("field");
+									var theId = $(this).data("rowId");
+									var field = $(this).data("field");
 									var val = this.checked ? "1" : "0";
 									console.log("checkbox "+field+" is checked:"+val);
 								    var dbData = eval("({"+field+": \""+val+"\"})"); 
@@ -227,21 +228,17 @@ define(['config'], function(config)
 						{
 							var dataDiv = document.createElement("input");
 							dataTd.appendChild(dataDiv);
-							$(dataDiv).attr("value", col);
-							$(dataDiv).attr("rowId", row["id"]);
-							$(dataDiv).attr("field", colHash);
+							$(dataDiv).val( col);
+							$(dataDiv).data("rowId", row["id"]);
+							$(dataDiv).data("field", colHash);
 							
-							$(dataDiv).timeEntry({
-								show24Hours: true, 
-								showSeconds: false,
-								spinnerImage: '../../images/jquery_ui/spinnerDefault.png'
-							});
+							$(dataDiv).timepicker();
 								
 							$(dataDiv).change(function(e) 
 							{
-								var theId = this.getAttribute("rowId");
-								var field = this.getAttribute("field");
-								var value = $(this).attr("value");
+								var theId = $(this).data("rowId");
+								var field = $(this).data("field");
+								var value = $(this).val();
 							    var dbData = eval("({"+field+": \""+value+"\"})"); 
 							    $.fn.loadContent(tableName, null, dbData, "data", {edit:true,req:("id="+theId)});
 							});
@@ -263,7 +260,7 @@ define(['config'], function(config)
 		while(colCOunt<endColCount)
 		{
 			var dataTd = document.createElement("td");
-			dataTd.setAttribute("class", "adminTableTd")
+			dataTd.setAttribute("class", "adminTableTd");
 			rowDiv.appendChild(dataTd);
 			colCOunt++;
 		}
@@ -290,7 +287,7 @@ define(['config'], function(config)
 				$(this).parents("table").find("#"+name).each(function(){
 					var tdText = $(this).text();
 					if(tdText != "Click to edit")
-						textArea.append(tdText+"\n")
+						textArea.append(tdText+"\n");
 				});
 				$("body").append(textWin);
 				textWin.css("top", $(this).offset().top);
@@ -344,7 +341,10 @@ define(['config'], function(config)
 		uploadForm.appendChild(uploadLink);
 		tableHolder.appendChild(uploadForm);
 
-		tableHolder.appendChild(table);
+		var adminParaTableHolder = document.createElement("div");
+		$(adminParaTableHolder).prop("class", "adminParaTableHolder");
+		adminParaTableHolder.appendChild(table);
+		tableHolder.appendChild(adminParaTableHolder);
 		
 		$(downloadButton).click(function(result){
 			console.log("download!");
@@ -417,14 +417,14 @@ define(['config'], function(config)
 					
 					$(this).parents(".adminTable").find(".markRowCheck").each(function()
 					{
-						if($(this).attr("checked"))
+						if($(this).prop("checked"))
 						{
 							for(var ti=0; ti<tabellenliste.length; ti++)
 							{
 								var table = tabellenliste[ti];
 								var theID = idliste[ti];
 								var delData = {};
-								delData[theID] = $(this).attr("id");
+								delData[theID] = $(this).prop("id");
 								$.fn.loadContent(table, null, delData, "data", {del:true});
 							}
 						}
@@ -471,27 +471,36 @@ define(['config'], function(config)
 		//paraDiv.style.height = metaData['height'] + "px";
 //			heightobj.offset += parseInt(metaData['height']);
 		// title
-		var editDiv = document.createElement("div");
-		editDiv.setAttribute("class", "editDiv");
+		var editDiv = document.createElement("fieldset");
+		editDiv.setAttribute("class", "ParaEditGroupBox");
 		editDiv.style.textAlign = "right";
+		var editLabel = document.createElement("legend");
+		editLabel.innerText = "Bearbeiten";
+		editDiv.appendChild(editLabel);
 		var editParaButton = document.createElement("input");
-		editParaButton.setAttribute("type", "button");
-		editParaButton.setAttribute("value", "edit");
+		editParaButton.setAttribute("type", "image");
+		editParaButton.setAttribute("title", "Bearbeiten");
+		editParaButton.setAttribute("src", "images/081 Pen.png");
 		editParaButton.setAttribute("class", "editButton");
 		editParaButton.setAttribute("disabled", "true");
 		editDiv.appendChild(editParaButton);
 		var deleteParaButton = document.createElement("input");
-		deleteParaButton.setAttribute("type", "button");
-		deleteParaButton.setAttribute("value", "delete "+paraID);
+		deleteParaButton.setAttribute("type", "image");
+		deleteParaButton.setAttribute("src", "images/023 Document Delete.png");
+		deleteParaButton.setAttribute("title", "Loeschen "+paraID);
 		deleteParaButton.setAttribute("class", "deleteButton");
 		editDiv.appendChild(deleteParaButton);
 		var upParaButton = document.createElement("input");
-		upParaButton.setAttribute("type", "button");
-		upParaButton.setAttribute("value", "nach oben");
+		upParaButton.setAttribute("type", "image");
+		upParaButton.setAttribute("src", "images/037 ArrowUp.png");
+		upParaButton.setAttribute("title", "Absatz nach oben bewegen");
+		upParaButton.setAttribute("class", "editButton");
 		editDiv.appendChild(upParaButton);
 		var downParaButton = document.createElement("input");
-		downParaButton.setAttribute("type", "button");
-		downParaButton.setAttribute("value", "nach unten");
+		downParaButton.setAttribute("type", "image");
+		downParaButton.setAttribute("src", "images/038 ArrowDown.png");
+		downParaButton.setAttribute("title", "Absatz nach unten bewegen");
+		downParaButton.setAttribute("class", "editButton");
 		editDiv.appendChild(downParaButton);
 		paraDiv.appendChild(editDiv);
 		// title
@@ -506,27 +515,7 @@ define(['config'], function(config)
 		var paraContent = "";
 		var picID = -1;
 		// image
-		if(null!=metaData['image'])
-		{
-			var imgDiv = document.createElement("div");
-//				var classString = "";
-			imgDiv.setAttribute("class", "picFrame picFrameLeft");
-			$.fn.loadContent("pictures", function(result)
-			{
-				picID = $(result).find("id").text();
-				var img = document.createElement("img");
-				imageUrl = $(result).find("url").text();
-				img.setAttribute("src", imageUrl);
-				imgDiv.appendChild(img);
-				editParaButton.removeAttribute("disabled");
-				var txt = document.createElement("div");
-				imageTitle = $(result).find("title").text();
-				txt.textContent = imageTitle;
-				imgDiv.appendChild(txt);
-			}, {"id":metaData['image']}, "xml");
-			paraDiv.appendChild(imgDiv);
-		}
-		else
+		if(null==metaData['image'])
 		{
 			editParaButton.removeAttribute("disabled");
 		}
@@ -535,38 +524,107 @@ define(['config'], function(config)
 		case "0":
 		case "1":
 			// title
+			var contentHolder = document.createElement("div");
+			$(contentHolder).css("height", "0px");
+			$(contentHolder).css("overflow", "hidden");
+
+			// image
+			if(null!=metaData['image'])
+			{
+				var imgDiv = document.createElement("div");
+				imgDiv.setAttribute("class", "picFrame picFrameLeft");
+				$.fn.loadContent("pictures", function(result)
+				{
+					picID = $(result).find("id").text();
+					var img = document.createElement("img");
+					imageUrl = $(result).find("url").text();
+					img.setAttribute("src", imageUrl);
+					imgDiv.appendChild(img);
+					editParaButton.removeAttribute("disabled");
+					var txt = document.createElement("div");
+					imageTitle = $(result).find("title").text();
+					txt.textContent = imageTitle;
+					imgDiv.appendChild(txt);
+				}, {"id":metaData['image']}, "xml");
+				contentHolder.appendChild(imgDiv);
+			}
+
 			var textDiv = document.createElement("div");
 			textDiv.setAttribute("class", "paragraphContent");
-			var contentHtml = $(paragraphData.find("content").children().first());
-			$(textDiv).append(contentHtml);
-			paraContent = $(textDiv).html();
-			paraDiv.appendChild(textDiv);
+			var contentHtml = $(paragraphData.find("content").first());	
+			xmlString = $('<div>').append(contentHtml).html();
+			$(textDiv).html(xmlString);
+			paraContent = xmlString;
+			contentHolder.appendChild(textDiv);
+
+			var tableCollapseButton = document.createElement("input");
+			tableCollapseButton.setAttribute("type", "button");
+			tableCollapseButton.setAttribute("value", "Daten anzeigen");
+			$(tableCollapseButton).click(function(evnt)
+			{
+				if($(this).val()=="Daten anzeigen")
+				{
+					$(contentHolder).css("height","");
+					$(contentHolder).css("overflow","visible");
+					$(this).val("Daten verbergen");
+				}
+				else
+				{
+					$(contentHolder).css("height", "0px");
+					$(contentHolder).css("overflow","hidden");
+					$(this).val("Daten anzeigen");
+				}
+			});
+
+			paraDiv.appendChild(tableCollapseButton);
+			paraDiv.appendChild(contentHolder);
+
 			break;
 		case "2":
 			if(metaData['table'])
 			{
 				var theTable = metaData['table'];
 				var theCategory = metaData['category'];
+				var toSortBy = metaData['sortBy'] || "";
 				if(theCategory=="" || null==theCategory)
 					$("#errorOutput").append("Absatz "+paraID+" hat keine Kategorie definiert!");
 				var tableDiv = document.createElement("div");
 				$(tableDiv).css("height", "0px");
+				
 				var tableCollapseButton = document.createElement("input");
 				tableCollapseButton.setAttribute("type", "button");
 				tableCollapseButton.setAttribute("value", "Daten anzeigen");
 				$(tableCollapseButton).click(function(evnt)
 				{
-					if($(this).attr("value")=="Daten anzeigen")
+					if($(this).val()=="Daten anzeigen")
 					{
 						$(tableDiv).css("height","");
 						$(tableDiv).css("overflow","visible");
-						$(this).attr("value","Daten verbergen");
+						$(this).val("Daten verbergen");
+
+						if($(tableDiv).children("[name='content']").length == 0)
+						{
+							$.fn.loadContent(theTable, function(result)
+							{
+								var typeJson = eval(result);
+								var reqs = null;
+								var params = null;
+								if(theCategory!="")
+									reqs = {category:theCategory};
+								if(toSortBy!=undefined)
+									params = {orderBy:toSortBy};
+								
+								var table = utils.RenderTable(theTable,typeJson[0],reqs, null, params);
+								table.setAttribute("name", "content");
+								tableDiv.appendChild(table);
+							}, null, "data", {def:true,json:"types"});
+						}
 					}
 					else
 					{
 						$(tableDiv).css("height", "0px");
 						$(tableDiv).css("overflow","hidden");
-						$(this).attr("value","Daten anzeigen");
+						$(this).val("Daten anzeigen");
 					}
 				});
 				tableDiv.setAttribute("class", "adminTableDiv");
@@ -596,15 +654,6 @@ define(['config'], function(config)
 				});
 				var abreak = document.createElement("br");
 				paraDiv.appendChild(abreak);
-				$.fn.loadContent(theTable, function(result)
-				{
-					var typeJson = eval(result);
-					var reqs = null;
-					if(theCategory!="")
-						reqs = {category:theCategory}
-					var table = utils.RenderTable(theTable,typeJson[0],reqs);
-					tableDiv.appendChild(table);
-				}, null, "data", {def:true,json:"types"});
 
 				paraDiv.appendChild(tableCollapseButton);
 				paraDiv.appendChild(tableDiv);
@@ -617,6 +666,7 @@ define(['config'], function(config)
 		var myHeight = metaData['height'];
 		var whichTable = metaData['table'];
 		var myCategory = metaData['category'];
+		var toSortBy = metaData['sortBy'];
 		
 		// clck handlers
 		$(editParaButton).click(function()
@@ -630,6 +680,7 @@ define(['config'], function(config)
 				content:paraContent,
 				table:whichTable,
 				category:myCategory,
+				sortBy:toSortBy
 			};
 			createParagraphHandler(defaultData, paraID, picID);
 		});
@@ -637,7 +688,7 @@ define(['config'], function(config)
 		{
 			if(!confirm("Sind sie sicher dass Sie den Absatz loeschen moechten?"))
 				return;
-			var selectedIndex = $("#pagesDropDown").attr("selectedIndex")-1;
+			var selectedIndex = $("#pagesDropDown").prop("selectedIndex")-1;
 		    var paragraphString = $(contentCache.find( 'paragraphs' )[selectedIndex]).text();
 		    var pageIndex = $(contentCache.find( 'id' )[selectedIndex]).text();
 		    var paraArray = paragraphString.split(",");
@@ -667,7 +718,7 @@ define(['config'], function(config)
 				alert("Dies ist bereits der erste Paragraph.");
 				return;
 			}
-			var selectedIndex = $("#pagesDropDown").attr("selectedIndex")-1;
+			var selectedIndex = $("#pagesDropDown").prop("selectedIndex")-1;
 		    var paragraphString = $(contentCache.find( 'paragraphs' )[selectedIndex]).text();
 		    var pageIndex = $(contentCache.find( 'id' )[selectedIndex]).text();
 		    var paraArray = paragraphString.split(",");
@@ -687,7 +738,7 @@ define(['config'], function(config)
 		});
 		$(downParaButton).click(function()
 		{
-			var selectedIndex = $("#pagesDropDown").attr("selectedIndex")-1;
+			var selectedIndex = $("#pagesDropDown").prop("selectedIndex")-1;
 		    var paragraphString = $(contentCache.find( 'paragraphs' )[selectedIndex]).text();
 		    var pageIndex = $(contentCache.find( 'id' )[selectedIndex]).text();
 		    var paraArray = paragraphString.split(",");
