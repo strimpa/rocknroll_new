@@ -10,14 +10,14 @@ require.config({
 });
 
 jQuery = require([
-		'lib/jquery-1.9.1',
-		'lib/jquery-ui-1.10.3.custom.min'
+		'lib/jquery-1.9.1'
 	],
 	function(jQuery)
 	{
 		require([
 		'utils',
 		'creationTemplates',
+		'lib/jquery-ui-1.10.3.custom.min',
 		'lib/jquery.ui.timepicker',
 		'lib/jquery.jeditable.mini',
 		'tiny_mce/jquery.tinymce'
