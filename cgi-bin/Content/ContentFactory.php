@@ -14,7 +14,7 @@ class ContentFactory
 	private function ContentFactory()
 	{}
 	
-	public static function &GetInstance()
+	public static function &GetInst()
 	{
 		if(!isset(self::$instance))
 		{
@@ -99,13 +99,13 @@ class ContentFactory
 	
 	public function &CreateMainNavi()
 	{
-		$result = Aufenthalt::GetInstance()->Controller()->GetNavi();
+		$result = DBCntrl::GetInst()->GetNavi();
 		$theMenu = new MainNavi();
 		$titlesAndLinks = array();
 		foreach($result as $entry)
 		{
 			// Menu entries
-			$pageIdentifier = Aufenthalt::GetInstance()->Controller()->GetPageIdentifier($entry["pageRef"]);
+			$pageIdentifier = DBCntrl::GetInst()->GetPageIdentifier($entry["pageRef"]);
 			$titlesAndLinks[$entry['title']] = $pageIdentifier['identifier'];
 		}
 		$theMenu->SetTitles($titlesAndLinks);
@@ -114,32 +114,13 @@ class ContentFactory
 	
 	public function CreateContentPages($id)
 	{
-//		PrintHtmlComment("content id:".$id);
-		$result = Aufenthalt::GetInstance()->Controller()->GetContent($id);
-//		PrintHtmlComment("Content count:".count($result));
+		$result = DBCntrl::GetInst()->GetContent($id);
 		if(count($result)<=0)
-			$result = Aufenthalt::GetInstance()->Controller()->GetContent("start");
+			$result = DBCntrl::GetInst()->GetContent("start");
+		
 		foreach($result as $pageData)
 		{
-			// inital create
-			$type = NULL;
-			$url = NULL;
-			switch($pageData["identifier"])
-			{
-				case "galerie":
-					$type = Article::DELEGATE_ARTICLE_PLOGGER;
-					break;
-				case "links":
-					$type = Article::DELEGATE_ARTICLE_LINKS;
-					break;
-				case "bestellen":
-					$type = Article::DELEGATE_ARTICLE_ORDER;
-					break;
-				case "guestbook":
-					$url = "	";
-					break;
-			} 
-			$newPage = new ContentPage($pageData, $type, $url);
+			$newPage = new ContentPage($pageData);
 			
 			// add
 			return $newPage;

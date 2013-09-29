@@ -1,30 +1,40 @@
 <?php
+
+require_once('DBHelper_links.php');
+
 /**
 * Diese KLasse behandelt die Linkausgabe
 **/
 class Linkausgabe
 {
-var $myName;
 var $hintergrundbild;
 var $tabellenUeberschriften;
 var $urls;
 var $zeigeDatum;
+	private static $instance;
 
-	function Linkausgabe($gewuenschteInhalte){
-		$this->myName = $gewuenschteInhalte;
+	private function Linkausgabe(){
 		//$this->hintergrundbild = "/_pics/BG_".$this->myName;
 		$this->urls = array("artists", "texte", "labels", "hitparaden", "instruments", "sellers", "oldtimer", "clothes", "queens", "misc", "swing", "radio", "tv", "magazines");
 		$this->zeigeDatum=false;
 	}
 	
+	public static function &GetInst()
+	{
+		if(!isset(self::$instance))
+			self::$instance = new Linkausgabe(); 
+		
+		return self::$instance;
+	}
+	
 	public function PrintSections()
 	{
-		$result = Aufenthalt::GetInstance()->DBConn()->getLinkSections();
-		$builder = ContentMgr::GetInstance()->GetBuilder();
+		$results = getLinkSections();
+		$builder = ContentMgr::GetInst()->GetBuilder();
 		print "<ul>";
-		while($row = mysqli_fetch_row($result))
+		foreach($results as $row)
 		{
-			$formString =$builder->BuildFormForLink($row[0]); 
+			$formString =$builder->BuildFormForLink($row['category']); 
 			print "<li>$formString</li>";
 		}
 		print "</ul>";
@@ -45,10 +55,11 @@ var $zeigeDatum;
 			";
 		$bgToggle=false;
 		$linkindex=0;
-		while($row = mysqli_fetch_row($result)){
+		foreach($result as $row)
+		{
 			print "<tr>\n";
-			$descr = htmlentities(utf8_decode($row[1]));
-			$link = $row[2];
+			$descr = htmlentities(utf8_decode($row['description']));
+			$link = $row['url'];
 			print "<td width=\"500\">$descr</td>";
 			$bg = "";
 			if($bgToggle=!$bgToggle) 
@@ -72,13 +83,13 @@ var $zeigeDatum;
 	
 	public function rubrikAusgabe($inhalt)
 	{
-		$result = Aufenthalt::GetInstance()->DBConn()->gibLinksAusFuerRubrik($inhalt);
+		$result = gibLinksAusFuerRubrik($inhalt);
 		$this->TableOutput($result);
 	}
 	
 	function suchAusgabe($suchEingabe)
 	{
-		$result = Aufenthalt::GetInstance()->DBConn()->gibLinksAusFuerSuche($suchEingabe);
+		$result = gibLinksAusFuerSuche($suchEingabe);
 		
 		// Linktabelle malen
 		$this->TableOutput($result);

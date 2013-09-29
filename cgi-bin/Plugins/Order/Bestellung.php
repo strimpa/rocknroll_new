@@ -53,12 +53,12 @@ class Bestellung{
 	{
 		$rueckGabe = "";
 		$this->gesamtPreis = 0;
-		$this->preise = Aufenthalt::GetInstance()->GetAblauf()->inland_preise;
-		$this->portos = Aufenthalt::GetInstance()->GetAblauf()->inland_portos;
+		$this->preise = BestellAblauf::GetInst()->inland_preise;
+		$this->portos = BestellAblauf::GetInst()->inland_portos;
 		if($this->destination != 'germany')
 		{
-			$this->preise=Aufenthalt::GetInstance()->GetAblauf()->ausland_preise;
-			$this->portos=Aufenthalt::GetInstance()->GetAblauf()->ausland_portos;
+			$this->preise=BestellAblauf::GetInst()->ausland_preise;
+			$this->portos=BestellAblauf::GetInst()->ausland_portos;
 		}
 		
 		$mitBerechnung = true;
@@ -93,7 +93,7 @@ class Bestellung{
 	
 	function zeigeBestellungen()
 	{
-		$ablauf = Aufenthalt::GetInstance()->GetAblauf();
+		$ablauf = BestellAblauf::GetInst();
 		
 		// bestellTebelle	
 		$mitBerechnung = (($this->destination!='noneuausland') ? true : false);
@@ -181,7 +181,7 @@ class Bestellung{
 		Bank zeuch		
 		********************************/
 		if($this->destination=='germany'){
-			if(Aufenthalt::GetInstance()->GetUser()->bezahlung=="lastschrift"){
+			if(Aufenthalt::GetInst()->GetUser()->bezahlung=="lastschrift"){
 				$rueckGabe .= "Sie haben gew&auml;hlt per Lastschrift zu zahlen.
 								Vielen Dank. Wir werden den oben stehenden Betrag von ihrem Konto einziehen und ihre Bestellung schnellstm&ouml;glich abschicken.";
 			} else {
@@ -201,7 +201,7 @@ class Bestellung{
 							";
 			}
 		}else{
-			if(Aufenthalt::GetInstance()->GetUser()->bezahlung=="lastschrift")
+			if(Aufenthalt::GetInst()->GetUser()->bezahlung=="lastschrift")
 				$rueckGabe .= "<p name=\"noDirectDebit\" />
 				<strong>You chose to pay by direct debit. 
 				We are sorry to say that we don't offer this posibility for customers from abroad. 

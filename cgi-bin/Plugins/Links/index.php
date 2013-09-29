@@ -1,5 +1,7 @@
 <?php
 
+require_once("Linkausgabe.php");
+
 Print '<p>
 		Wir haben f&uuml;r Sie eine umfangreiche Liste an Internet-Links zum Thema Rock\'n\'Roll zusammengestellt. <br>
 		W&auml;hlen Sie eine der nachfolgenden Kategorien, um zu unseren Surftipps zu gelangen: </p>
@@ -23,16 +25,16 @@ if( (!isset($_POST['linkMenu'])) || ($_POST['linkMenu']==-1))
 {
 	if( (isset($_POST['searchInput'])) && ($_POST['searchInput']!="Suchbegriff") )
 	{
-		$sucheErfolgreich = Aufenthalt::GetInstance()->Links()->suchAusgabe($_POST['searchInput']);
+		$sucheErfolgreich = Linkausgabe::GetInst()->suchAusgabe($_POST['searchInput']);
 	} 
 	else 
 	{
-		Aufenthalt::GetInstance()->Links()->PrintSections();
+		Linkausgabe::GetInst()->PrintSections();
 	}
 } 
 else 
 {
-	Aufenthalt::GetInstance()->Links()->rubrikAusgabe($_POST['linkMenu']);
+	Linkausgabe::GetInst()->rubrikAusgabe($_POST['linkMenu']);
 }
 													
 Print '

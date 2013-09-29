@@ -54,7 +54,6 @@ fieldset{
 #choice
 {
 	top:0px;
-	height:60px;
 }
 
 #settings
@@ -68,7 +67,7 @@ fieldset{
 #TitleNavigation
 {
 	position:absolute;
-	top:80px;
+	top:165px;
 	left:90px;
 	z-index: 30;
 }
@@ -80,7 +79,7 @@ fieldset{
 }
 #meta
 {
-	top:80px;
+	top:165px;
 	height:140px;
 }
 
@@ -92,12 +91,12 @@ fieldset{
 #TitleInhalt
 {
 	position:absolute;
-	top:240px;
+	top:320px;
 	left:90px;
 }
 #contentHolder
 {
-	top:240px;
+	top:320px;
 	width:1100px;
 }
 
@@ -135,9 +134,6 @@ fieldset{
 .LeftGroupBox
 {
 	border: 1px solid #444;
-	position:absolute; 
-	left:0px;
-	top:5px; 
 	width:380px;
 }
 .RightGroupBox

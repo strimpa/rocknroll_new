@@ -12,7 +12,7 @@
           </TR>
         <TR >
           <TD height="21" ALIGN="right" class="normalFont"><div align="left">
-            <input name="kundenNr" type="text" size="25" value="<?php print Aufenthalt::GetInstance()->GetAblauf()->holeBenutzerDaten('kundenNr') ?>"/>
+            <input name="kundenNr" type="text" size="25" value="<?php print BestellAblauf::GetInst()->holeBenutzerDaten('kundenNr') ?>"/>
           </div></TD>
           </TR>
             <tr>
@@ -23,58 +23,58 @@
                       <TD width="235" class="normalFont">
 					  <select name="anrede">
 					    <option>Bitte w&auml;hlen sie</option>
-					    <option value="Herr" <?php print Aufenthalt::GetInstance()->GetAblauf()->holeBenutzerDaten('anrede', 'Herr') ?>>Herr</option>
-					    <option value="Frau" <?php print Aufenthalt::GetInstance()->GetAblauf()->holeBenutzerDaten('anrede', 'Frau') ?>>Frau</option>
+					    <option value="Herr" <?php print BestellAblauf::GetInst()->holeBenutzerDaten('anrede', 'Herr') ?>>Herr</option>
+					    <option value="Frau" <?php print BestellAblauf::GetInst()->holeBenutzerDaten('anrede', 'Frau') ?>>Frau</option>
                       </select></TD>
                     </TR>
                     <TR> 
                       <TD ALIGN="right" class="normalFont"> Nachname  </TD>
                       <TD class="normalFont">   
-                        <INPUT NAME="Nachname" SIZE=25 value="<?php print Aufenthalt::GetInstance()->GetAblauf()->holeBenutzerDaten('Nachname') ?>"  />
+                        <INPUT NAME="Nachname" SIZE=25 value="<?php print BestellAblauf::GetInst()->holeBenutzerDaten('Nachname') ?>"  />
                       </TD>
                     </TR>
                     <TR> 
                       <TD ALIGN="right" class="normalFont">  Vorname</TD>
                       <TD class="normalFont">   
-                        <INPUT NAME="Vorname" SIZE=25 value="<?php print Aufenthalt::GetInstance()->GetAblauf()->holeBenutzerDaten('Vorname') ?>"  />
+                        <INPUT NAME="Vorname" SIZE=25 value="<?php print BestellAblauf::GetInst()->holeBenutzerDaten('Vorname') ?>"  />
                       </TD>
                     </TR>
                     <tr> 
                       <TD ALIGN="right" class="normalFont"> Adresse  </TD>
                       <TD class="normalFont">   
-                        <INPUT NAME="Postadresse" SIZE=25 value="<?php print Aufenthalt::GetInstance()->GetAblauf()->holeBenutzerDaten('Postadresse') ?>"  />
+                        <INPUT NAME="Postadresse" SIZE=25 value="<?php print BestellAblauf::GetInst()->holeBenutzerDaten('Postadresse') ?>"  />
                       </TD>
                     </tr>
                     <tr> 
                       <TD ALIGN="right" class="normalFont">  Adresse 
                         (Fortsetzung.)</TD>
                       <TD class="normalFont">   
-                        <INPUT NAME="Postadresse2" SIZE=25 value="<?php print Aufenthalt::GetInstance()->GetAblauf()->holeBenutzerDaten('Postadresse2') ?>"  />
+                        <INPUT NAME="Postadresse2" SIZE=25 value="<?php print BestellAblauf::GetInst()->holeBenutzerDaten('Postadresse2') ?>"  />
                       </TD>
                     </tr>
                     <tr> 
                       <TD ALIGN="right" class="normalFont"> Postleitzahl </TD>
                       <TD class="normalFont">   
-                        <INPUT NAME="Postleitzahl" SIZE=12 MAXLENGTH=12 value="<?php print Aufenthalt::GetInstance()->GetAblauf()->holeBenutzerDaten('Postleitzahl') ?>"  />
+                        <INPUT NAME="Postleitzahl" SIZE=12 MAXLENGTH=12 value="<?php print BestellAblauf::GetInst()->holeBenutzerDaten('Postleitzahl') ?>"  />
                       </TD>
                     </tr>
                     <tr> 
                       <TD ALIGN="right" class="normalFont"> Stadt  </TD>
                       <TD class="normalFont">   
-                        <INPUT NAME="Ort" SIZE=25 value="<?php print Aufenthalt::GetInstance()->GetAblauf()->holeBenutzerDaten('Ort') ?>"  />
+                        <INPUT NAME="Ort" SIZE=25 value="<?php print BestellAblauf::GetInst()->holeBenutzerDaten('Ort') ?>"  />
                       </TD>
                     </tr>
                     <tr> 
                       <TD ALIGN="right" class="normalFont"> Land </TD>
                       <TD class="normalFont"><p />
                         <label onclick=" javascript:setPayment('germany')">
-                          <input name="Land" type="radio" value="germany" <?php if(Aufenthalt::GetInstance()->GetAblauf()->holeBenutzerDaten('Land')=="germany") print "checked=\"checked\"" ?> />
+                          <input name="Land" type="radio" value="germany" <?php if(BestellAblauf::GetInst()->holeBenutzerDaten('Land')=="germany") print "checked=\"checked\"" ?> />
                           Germany</label>
                         <br />
                         <label onclick="javascript:setPayment('else')">
-                          <input type="radio" name="Land" value="euausland" <?php if(Aufenthalt::GetInstance()->GetAblauf()->holeBenutzerDaten('Land')!="germany") print "checked=\"checked\"" ?> />
+                          <input type="radio" name="Land" value="euausland" <?php if(BestellAblauf::GetInst()->holeBenutzerDaten('Land')!="germany") print "checked=\"checked\"" ?> />
                           EU</label>
-                        <input name="sonstigesLandEU" type="text" id="sonstigesLandEU" value="<?php $land = Aufenthalt::GetInstance()->GetAblauf()->holeBenutzerDaten('Land'); if($land!="germany") print $land; ?>" />
+                        <input name="sonstigesLandEU" type="text" id="sonstigesLandEU" value="<?php $land = BestellAblauf::GetInst()->holeBenutzerDaten('Land'); if($land!="germany") print $land; ?>" />
                         <br />
                         <label onclick="javascript:setPayment('else')">
                           <input type="radio" name="Land" value="noneuausland" />
@@ -85,12 +85,12 @@
                     <TR> 
                       <TD ALIGN="right" class="normalFont">  Telefon</TD>
                       <TD class="normalFont">   
-                        <INPUT NAME="Telefon" id="Telefon" SIZE=25 MAXLENGTH=25 value="<?php print Aufenthalt::GetInstance()->GetAblauf()->holeBenutzerDaten('Telefon') ?>"  />
+                        <INPUT NAME="Telefon" id="Telefon" SIZE=25 MAXLENGTH=25 value="<?php print BestellAblauf::GetInst()->holeBenutzerDaten('Telefon') ?>"  />
                       </TD>
                     </TR>
                     <TR>
                       <TD ALIGN="right" class="normalFont"> E-mail</TD>
-                      <TD class="normalFont"><INPUT NAME="EMail" SIZE=25 value="<?php print Aufenthalt::GetInstance()->GetAblauf()->holeBenutzerDaten('EMail') ?>"  />
+                      <TD class="normalFont"><INPUT NAME="EMail" SIZE=25 value="<?php print BestellAblauf::GetInst()->holeBenutzerDaten('EMail') ?>"  />
                       </TD>
                     </TR>
                   </TABLE>
@@ -115,21 +115,21 @@
                       <TD ALIGN="right" class="normalFont"> Name 
                         der Bank:</TD>
                       <TD class="normalFont">   
-                        <INPUT NAME="Bankinstitut" SIZE=25 value="<?php print Aufenthalt::GetInstance()->GetAblauf()->holeBenutzerDaten('Bankinstitut') ?>"  />
+                        <INPUT NAME="Bankinstitut" SIZE=25 value="<?php print BestellAblauf::GetInst()->holeBenutzerDaten('Bankinstitut') ?>"  />
                       </TD>
 				</TR>
 				<TR> 
 					<td>&nbsp;</td>
                       <TD ALIGN="right" class="normalFont">Kontonummer:</TD>
                       <TD class="normalFont">   
-                        <INPUT NAME="Kontonummer" SIZE=12 value="<?php print Aufenthalt::GetInstance()->GetAblauf()->holeBenutzerDaten('Kontonummer') ?>"  />
+                        <INPUT NAME="Kontonummer" SIZE=12 value="<?php print BestellAblauf::GetInst()->holeBenutzerDaten('Kontonummer') ?>"  />
                       </TD>
 				</TR>
 				<tr> 
 					<td>&nbsp;</td>
                       <TD ALIGN="right" class="normalFont">  Bankleitzahl:</TD>
                       <TD class="normalFont">   
-                        <INPUT NAME="Bankleitzahl" SIZE=12 value="<?php print Aufenthalt::GetInstance()->GetAblauf()->holeBenutzerDaten('Bankleitzahl') ?>"  />
+                        <INPUT NAME="Bankleitzahl" SIZE=12 value="<?php print BestellAblauf::GetInst()->holeBenutzerDaten('Bankleitzahl') ?>"  />
                       </TD>
 				</tr>
 					</table>

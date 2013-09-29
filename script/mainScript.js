@@ -17,16 +17,16 @@
 				if(extendableDiv.attr("extended")=="true")
 				{
 					extendableDiv.css("height", "0px");
-					extendableDiv.attr("extended", "false")
+					extendableDiv.attr("extended", "false");
 				}
 				else
 				{
 					extendableDiv.removeAttr("style");
-					extendableDiv.attr("extended", "true")
+					extendableDiv.attr("extended", "true");
 				}
 			});
 			extendableDiv.css("height", "0px");
-			extendableDiv.attr("extended", "false")
+			extendableDiv.attr("extended", "false");
 		});
 	}
 	
@@ -98,7 +98,7 @@
 	$.Init = function() 
 	{
 		createEvents();
-	}
+	};
 })(jQuery);
 
 // entry point

@@ -25,7 +25,7 @@ class ContentMgr
 		$this->htmlBuilder = new HtmlBuilder();
 	}
 	
-	public static function &GetInstance()
+	public static function &GetInst()
 	{
 		if(!isset(self::$instance))
 		{
@@ -48,12 +48,11 @@ class ContentMgr
 	
 	public function Genesis()
 	{
-		$this->navi = ContentFactory::GetInstance()->CreateMainNavi();
+		$this->navi = ContentFactory::GetInst()->CreateMainNavi();
 		$currId = FilenameFromUrl();
-		PrintHtmlComment("currId:$currId");
 		if($currId=="")
 			$currId = "start";
-		$this->content = ContentFactory::GetInstance()->CreateContentPages($currId);
+		$this->content = ContentFactory::GetInst()->CreateContentPages($currId);
 	}
 	
 	public function &GetBuilder()
@@ -74,13 +73,11 @@ class ContentMgr
 //		print ("num content:".count($this->content)."\n");
 		if(NULL!=$this->navi)
 		{
-			PrintHtmlComment("Navigation should render here!");
 			$this->navi->Render();
 		}
 		else
 		{
 			PrintHtmlComment("Error creating navigation!");
-			print "Error creating navigation!";
 		}
 
 		if(NULL!=$this->content)

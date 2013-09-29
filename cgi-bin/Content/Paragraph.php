@@ -69,7 +69,7 @@ class PicPara implements iParagraph
 
 	public function Render(&$parentNode, &$currentOffset)
 	{	
-		$builder = ContentMgr::GetInstance()->GetBuilder();
+		$builder = ContentMgr::GetInst()->GetBuilder();
 
 		$div = $builder->AddTag("div", "paragraph_".MakeSafeString($this->header), "paragraph");
 //		$builder->AddStyle($div, $this->CreateStyleString($currentOffset));
@@ -168,7 +168,7 @@ class TablePara implements iParagraph
 		$this->height = $dataAssoc["height"];
 		$this->tableType = $dataAssoc["table"];
 		$this->category = $dataAssoc["category"];
-		$this->sortBy = $dataAssoc["sortBy"];
+		$this->sortBy = isset($dataAssoc["sortBy"]) ? $dataAssoc["sortBy"] : null;
 	}
 	
 	private function CreateStyleString($offset)
@@ -348,7 +348,7 @@ class TablePara implements iParagraph
 		if(""!=$this->category)
 			$reqArray["requirements"] = array("category"=>$this->category);
 
-		$tableDef = Aufenthalt::GetInstance()->DBConn()->GetTableDef($reqArray);
+		$tableDef = DBCntrl::GetInst()->Conn()->GetTableDef($reqArray);
 		if(array_key_exists("date", $tableDef[0]))
 		{
 			$reqArray["orderBy"] = "date";
@@ -358,12 +358,12 @@ class TablePara implements iParagraph
 			$reqArray["orderBy"] = "issue";
 		}
 
-		return Aufenthalt::GetInstance()->DBConn()->GetTableContent($reqArray);
+		return DBCntrl::GetInst()->Conn()->GetTableContent($reqArray);
 	}
 	
 	public function Render(&$parentNode, &$currentOffset)
 	{
-		$builder = ContentMgr::GetInstance()->GetBuilder();
+		$builder = ContentMgr::GetInst()->GetBuilder();
 
 		$div = $builder->AddTag("div", "paragraph_".MakeSafeString($this->header), "paragraph");
 //		$builder->AddStyle($div, $this->CreateStyleString($currentOffset));
@@ -390,7 +390,7 @@ class TablePara implements iParagraph
 		if(""!=$this->category)
 			$reqArray["requirements"]["category"] = $this->category;
 
-		$tableDef = Aufenthalt::GetInstance()->DBConn()->GetTableDef($reqArray);
+		$tableDef = DBCntrl::GetInst()->Conn()->GetTableDef($reqArray);
 		if(array_key_exists("date", $tableDef[0]))
 		{
 			$reqArray["orderBy"] = "date";
@@ -400,7 +400,7 @@ class TablePara implements iParagraph
 			$reqArray["orderBy"] = "issue";
 		}
 
-		$dbResult = Aufenthalt::GetInstance()->DBConn()->GetTableContent($reqArray);
+		$dbResult = DBCntrl::GetInst()->Conn()->GetTableContent($reqArray);
 		//$dbResult = $this->GetTableResults();
 		$doc = $builder->GetDoc();
 		

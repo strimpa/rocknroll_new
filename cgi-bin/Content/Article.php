@@ -31,19 +31,19 @@ class Article
 	
 	public function RenderHeader()
 	{
-print <<<EOD
-	<link rel="stylesheet" href="/MiniGal/css/mediaboxAdvWhite.css" type="text/css" media="screen" />
-	<link rel="stylesheet" href="/MiniGal/css/Gallery.css" type="text/css" media="screen" />
-	<script src="/MiniGal/js/mootools.js" type="text/javascript"></script>
-	<script src="/MiniGal/js/mediaboxAdv-1.3.4b.js" type="text/javascript"></script>
-EOD;
-	print "<title>$this->title</title>";
+		print "<title>$this->title</title>";
 	}
 	
 	public function RenderParagraphs(&$contentDiv)
 	{
-		$builder = ContentMgr::GetInstance()->GetBuilder();
+		$builder = ContentMgr::GetInst()->GetBuilder();
 		$currentOffset = 20;
+		if(count($this->paragraphs)<=0)
+		{
+			$builder = ContentMgr::GetInst()->GetBuilder();
+	
+			$contentDiv->appendChild($builder->AddTag("div", "noContantWarning", NULL, "The Page contains no paragraphs and has no plugin defined either."));
+		}
 		foreach($this->paragraphs as $para)
 		{
 		    $para->Render($contentDiv, $currentOffset);
@@ -54,7 +54,7 @@ EOD;
 	
 	public function Render(&$parentNode)
 	{
-		$builder = ContentMgr::GetInstance()->GetBuilder();
+		$builder = ContentMgr::GetInst()->GetBuilder();
 
 		$parentNode->appendChild($builder->AddTag("div", "articleTitle", NULL, $this->title));
 		
@@ -80,51 +80,42 @@ EOD;
 
 class DelegateArticle extends Article
 {
-	private $type = Article::DELEGATE_ARTICLE_PLOGGER;
+	private $delegate = null;
 	
-	public function DelegateArticle($url)
+	public function DelegateArticle($type)
 	{
-		$this->type = $url; 
-	}
-
-	public function RenderDelegate()
-	{
-		global $queryDir;
-		switch($this->type)
+		$plugins = Aufenthalt::GetInst()->GetPlugins();
+		if(array_key_exists($type, $plugins))
 		{
-			case Article::DELEGATE_ARTICLE_PLOGGER:
-//				$queryStart = strrpos($_SERVER['REQUEST_URI'], "&");
-//				$wholeQueryString = substr($_SERVER['REQUEST_URI'], $queryStart);
-//				$reqString ='http://'.$_SERVER['SERVER_NAME'].'/MiniGal/index.php?'.$wholeQueryString;
-				$getVars = GetGETVars();
-				$queryDir = "";
-				if(array_key_exists("dir", $getVars))
-					$queryDir = $getVars["dir"];
-				include 'MiniGal/index.php';
-				break;
-			case Article::DELEGATE_ARTICLE_LINKS:
-				include 'links.php';
-				break;
-			case Article::DELEGATE_ARTICLE_ORDER:
-				Aufenthalt::GetInstance()->GetAblauf()->aktuellerBestellSchritt();
-				break;
+			$this->delegate = $plugins[$type];
+		}
+		else {
+			PrintHtmlComment("Couldn't find plugin ".$type);			
 		}
 	}
 	
+	public function RenderHeader()
+	{
+		Article::RenderHeader();
+		PrintHtmlComment("start render plugin header");
+		if(null!=$this->delegate)
+		{
+			PrintHtmlComment("Delegate:".get_class($this->delegate));
+			$this->delegate->RenderHeader();
+		}
+		PrintHtmlComment("end render plugin header");
+	}
+
 	public function RenderParagraphs(&$contentDiv)
 	{
-		$builder = ContentMgr::GetInstance()->GetBuilder();
-		ob_start();
-		$this->RenderDelegate();
-		$str=ob_get_contents();
-		ob_end_clean();	
-		$importdoc = new DOMDocument();
-		$importdoc->encoding = 'UTF-8';
-		$importdoc->loadHTML('<?xml encoding="UTF-8">'.$str);
-		$doc = $builder->GetDoc();
-		$text = $doc->importNode($importdoc->documentElement, true);
-		$contentDiv->appendChild(new DOMComment("Begin import"));
-		$contentDiv->appendChild($text);
+		global $queryDir;
+		$getVars = GetGETVars();
+		$queryDir = "";
+		if(array_key_exists("dir", $getVars))
+			$queryDir = $getVars["dir"];
+
+		if(null!=$this->delegate)
+			$this->delegate->RenderContent($contentDiv);
 	}
 }
 
@@ -139,7 +130,7 @@ class FrameArticle extends Article
 
 	public function RenderParagraphs(&$contentDiv)
 	{
-		$builder = ContentMgr::GetInstance()->GetBuilder();
+		$builder = ContentMgr::GetInst()->GetBuilder();
 		$importdoc = new DOMDocument();
 		$importdoc->encoding = 'UTF-8';
 $htmlStr = <<<EOD
@@ -154,7 +145,7 @@ EOD;
 		$contentDiv->appendChild($text);
 		
 		
-		$builder = ContentMgr::GetInstance()->GetBuilder();
+		$builder = ContentMgr::GetInst()->GetBuilder();
 //		<iframe src="/plogger/" id="ploggerFrame" />
 		$iframe = $builder->AddTag("iframe", "articleframe", NULL);
 		$iframe->setAttribute("name", "innerFrame");

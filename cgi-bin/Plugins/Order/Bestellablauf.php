@@ -1,4 +1,9 @@
 <?php
+	global $serverRoot;
+
+	require_once($serverRoot."/cgi-bin/Utils.php");
+	require_once("Bestellung.php");
+	require_once("DBHelper_order.php");
 /**
 * Klasse zum Managen der Bestellungen.
 **/
@@ -10,14 +15,16 @@
 class BestellAblauf{
 	
 	const STEP_BESTELLEN = 0, STEP_BESTELLUNG = 1, STEP_BENUTZERREG = 2, STEP_CONFIRM = 3;
-	var $state;
-	var $stateName = array("Aufgeben der Bestellung", "Benutzeregistrierung", "Best&auml;tigen der Bestellung", "Best&auml;tigung");
-	var $inland_preise = array();
-	var $ausland_preise = array();
-	var $inland_portos = array();
-	var $ausland_portos = array();
-	var $aktuelleBestellung;
-	var $bestellungAufgegeben;
+	private $state;
+	private $stateName = array("Aufgeben der Bestellung", "Benutzeregistrierung", "Best&auml;tigen der Bestellung", "Best&auml;tigung");
+	private $bestellungAufgegeben;
+	private static $aktuellerBestellAblauf;
+
+	public $aktuelleBestellung;
+	public $inland_preise = array();
+	public $ausland_preise = array();
+	public $inland_portos = array();
+	public $ausland_portos = array();
 
 	function BestellAblauf()
 	{
@@ -27,10 +34,22 @@ class BestellAblauf{
 		if(!$back)
 			print "CAn't open price defintion file!";
 	}
+
+	static function GetInst()
+	{
+		if(!isset($_SESSION['BestellAblauf']))
+		{
+			PrintHtmlComment("New BestellAblauf");
+			$_SESSION['BestellAblauf'] = new BestellAblauf();
+		}
+		$returnObj = $_SESSION['BestellAblauf'];
+		return $returnObj;
+	}
+	
 	
 	function holepreise(){
 		// print "************************".$_SERVER['DOCUMENT_ROOT']."/cgi-bin/preis-definition.txt";
-		if(($fp = fopen($_SERVER['DOCUMENT_ROOT']."/cgi-bin/preis-definition.txt", 'r'))!=null)
+		if(($fp = fopen(realpath(dirname(__FILE__))."/preis-definition.txt", 'r'))!=null)
 		{
 			$this->inland_preise = array();
 			$this->ausland_preise = array();
@@ -58,7 +77,7 @@ class BestellAblauf{
 			return FALSE;
 	}
 	
-	function InsertBackButton($step)
+	private function InsertBackButton($step)
 	{
 		print "
 			<FORM METHOD='POST' action='/index/bestellen'>
@@ -101,39 +120,39 @@ class BestellAblauf{
 		if(isset($_POST['formFilled']) && $_POST['formFilled'] == BestellAblauf::STEP_CONFIRM)
 		{
 			$this->bestellungAufgegeben=true;
-			require_once("endKopf.htm");
-			$summary = Aufenthalt::GetInstance()->GetUser()->printUserShort();
+			require_once("html/endKopf.htm");
+			$summary = Aufenthalt::GetInst()->GetUser()->printUserShort();
 			$summary .= $this->aktuelleBestellung->zeigeBestellungen($this);
 			print $summary;
 			SendDebugMail("Eine Bestellung wurde aufgegeben: <br />".$summary);
-			require_once("emailForm.php");
+			require_once("html/emailForm.php");
 	/*******************************************************************/
 	// nach zweiter Best�tigung ist die Flagvariable vorhanden und auf y
 	/*******************************************************************/
 		} else if (isset($_POST['formFilled']) && $_POST['formFilled'] == BestellAblauf::STEP_BENUTZERREG){
 			if($errorsOccured)
 			{
-				require_once("confirmFormError.php");
+				require_once("html/confirmFormError.php");
 				print "<font color=\"#FF0000\">".$ausgabePuffer."</font>";
-				require_once("emailForm.php");
+				require_once("html/emailForm.php");
 			}
 			else
-				require_once("confirmForm.php");
+				require_once("html/confirmForm.php");
 			if(!BackButtonPressed() && !$errorsOccured)
 			{
-				Aufenthalt::GetInstance()->GetUser()->registriereMich();
+				Aufenthalt::GetInst()->GetUser()->registriereMich();
 			}
-			print Aufenthalt::GetInstance()->GetUser()->printUserShort();
+			print Aufenthalt::GetInst()->GetUser()->printUserShort();
 			print $this->aktuelleBestellung->zeigeBestellungen($this);
 			$this->InsertBackButton(BestellAblauf::STEP_BESTELLUNG);
-			require_once("confirmFormFuss.htm");
+			require_once("html/confirmFormFuss.htm");
 	/*******************************************************************/
 	// nach erster Best�tigung ist die Flagvariable vorhanden und auf j
 	/*******************************************************************/
 		} 
 		else if(isset($_POST['formFilled']) && $_POST['formFilled'] == BestellAblauf::STEP_BESTELLUNG)
 		{
-			require_once("registrierFormKopf.htm");
+			require_once("html/registrierFormKopf.htm");
 			print "<font color=\"#FF0000\">".$ausgabePuffer."</font>";
 			if(!BackButtonPressed() && !$errorsOccured)
 			{
@@ -141,7 +160,7 @@ class BestellAblauf{
 			}
 			print $this->aktuelleBestellung->zeigeBestellungen($this);
 			$this->InsertBackButton(BestellAblauf::STEP_BESTELLEN);
-			require_once("registrierForm.php");
+			require_once("html/registrierForm.php");
 	/*******************************************************************/
 	// erster Aufruf
 	/*******************************************************************/
@@ -149,9 +168,9 @@ class BestellAblauf{
 			$this->bestellungAufgegeben = false;
 			$back = $this->holepreise();
 
-			require_once("bestellFormKopf.htm");
+			require_once("html/bestellFormKopf.htm");
 			print "<font color=\"#FF0000\">".$ausgabePuffer."</font>";
-			require_once("bestellForm.php");
+			require_once("html/bestellForm.php");
 		}
 	}
 	
@@ -176,48 +195,48 @@ class BestellAblauf{
 	function holeBenutzerDaten($key, $equals=NULL)
 	{
 		$retVal = "";
-		if(NULL!=Aufenthalt::GetInstance()->GetUser())
+		if(NULL!=Aufenthalt::GetInst()->GetUser())
 		{
 			switch ($key) {
 				case 'kundenNr':
-					$retVal = Aufenthalt::GetInstance()->GetUser()->kundenNummer;
+					$retVal = Aufenthalt::GetInst()->GetUser()->kundenNummer;
 					break;
 				case 'anrede':
-					if(Aufenthalt::GetInstance()->GetUser()->anrede==$equals)
+					if(Aufenthalt::GetInst()->GetUser()->anrede==$equals)
 						$retVal = "selected";
 					break;
 				case 'Nachname':
-					$retVal = Aufenthalt::GetInstance()->GetUser()->nachName;
+					$retVal = Aufenthalt::GetInst()->GetUser()->nachName;
 					break;
 				case 'Vorname':
-					$retVal = Aufenthalt::GetInstance()->GetUser()->vorName;
+					$retVal = Aufenthalt::GetInst()->GetUser()->vorName;
 					break;
 				case 'Postadresse':
-					$retVal = Aufenthalt::GetInstance()->GetUser()->adresse;
+					$retVal = Aufenthalt::GetInst()->GetUser()->adresse;
 					break;
 				case 'Postleitzahl':
-					$retVal = Aufenthalt::GetInstance()->GetUser()->postleitzahl;
+					$retVal = Aufenthalt::GetInst()->GetUser()->postleitzahl;
 					break;
 				case 'Ort':
-					$retVal = Aufenthalt::GetInstance()->GetUser()->ort;
+					$retVal = Aufenthalt::GetInst()->GetUser()->ort;
 					break;
 				case 'Land':
-					$retVal = Aufenthalt::GetInstance()->GetUser()->land;
+					$retVal = Aufenthalt::GetInst()->GetUser()->land;
 					break;
 				case 'Telefon':
-					$retVal = Aufenthalt::GetInstance()->GetUser()->telHome;
+					$retVal = Aufenthalt::GetInst()->GetUser()->telHome;
 					break;
 				case 'EMail':
-					$retVal = Aufenthalt::GetInstance()->GetUser()->eMail;
+					$retVal = Aufenthalt::GetInst()->GetUser()->eMail;
 					break;
 				case 'Bankinstitut':
-					$retVal = Aufenthalt::GetInstance()->GetUser()->bankInstitut;
+					$retVal = Aufenthalt::GetInst()->GetUser()->bankInstitut;
 					break;
 				case 'Kontonummer':
-					$retVal = Aufenthalt::GetInstance()->GetUser()->ktnr;
+					$retVal = Aufenthalt::GetInst()->GetUser()->ktnr;
 					break;
 				case 'Bankleitzahl':
-					$retVal = Aufenthalt::GetInstance()->GetUser()->blz;
+					$retVal = Aufenthalt::GetInst()->GetUser()->blz;
 					break;
 			}
 		}
@@ -286,8 +305,8 @@ class BestellAblauf{
 	function gibDatenInDb(&$ausgabePuffer)
 	{
 		try{
-			$kundenId = Aufenthalt::GetInstance()->DBConn()->gibUserInDB(Aufenthalt::GetInstance()->GetUser());
-			Aufenthalt::GetInstance()->DBConn()->gibBestellungInDB(Aufenthalt::GetInstance()->GetUser(), $this->aktuelleBestellung, $kundenId);
+			$kundenId = DBCntrl::GetInst()->Conn()->gibUserInDB(Aufenthalt::GetInst()->GetUser());
+			gibBestellungInDB(Aufenthalt::GetInst()->GetUser(), $this->aktuelleBestellung, $kundenId);
 		}
 		catch(Exception $e)
 		{

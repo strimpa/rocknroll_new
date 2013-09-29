@@ -37,8 +37,10 @@ $version = "0.3.5";
 ini_set("memory_limit","256M");
 
 require("config_default.php");
-include("config.php");
+require("config.php");
 require("createthumb.php");
+
+define("GALLERY_ROOT", realpath(dirname(__FILE__))."/");
 
 //-----------------------
 // DEFINE VARIABLES
@@ -116,18 +118,17 @@ if (ini_get('allow_url_fopen') == "1") {
 	fclose($file);
 }
 
-if (!defined("GALLERY_ROOT")) define("GALLERY_ROOT", "MiniGal/");
 $thumbdir = 'photos/' . $queryDir;//rtrim('photos' . "/" .$_REQUEST["dir"],"/");
 $thumbdir = str_replace("/..", "", $thumbdir); // Prevent looking at any up-level folders
-$currentdir = GALLERY_ROOT . $thumbdir;
-$currentHTTPDir = "http://".$_SERVER['SERVER_NAME']."/".$currentdir;
-//Print("queryDir:".$currentHTTPDir);
+$currentdir = $thumbdir;
+$currentHTTPDir = PLUGIN_SUBDIR."/Gallery/".$currentdir;
 
 //-----------------------
 // READ FILES AND FOLDERS
 //-----------------------
 $files = array();
 $dirs = array();
+
  if ($handle = opendir($currentdir))
  {
 	while (false !== ($file = readdir($handle)))
@@ -166,26 +167,26 @@ $dirs = array();
 						}
 					}
 				}
-			}	
+			}
 
-// 2. LOAD CAPTIONS
-if (file_exists($currentdir ."/captions.txt"))
-{
-	$file_handle = fopen($currentdir ."/captions.txt", "rb");
-	while (!feof($file_handle) ) 
-	{	
-		$line_of_text = fgets($file_handle);
-		$parts = explode('/n', $line_of_text);
-		foreach($parts as $img_capts)
-		{
-			list($img_filename, $img_caption) = explode('|', $img_capts);	
-			$img_captions[$img_filename] = $img_caption;
-		}
-	}
-	fclose($file_handle);
-}
-
-// 3. LOAD FILES
+			// 2. LOAD CAPTIONS
+			if (file_exists($currentdir ."/captions.txt"))
+			{
+				$file_handle = fopen($currentdir ."/captions.txt", "rb");
+				while (!feof($file_handle) ) 
+				{	
+					$line_of_text = fgets($file_handle);
+					$parts = explode('/n', $line_of_text);
+					foreach($parts as $img_capts)
+					{
+						list($img_filename, $img_caption) = explode('|', $img_capts);	
+						$img_captions[$img_filename] = $img_caption;
+					}
+				}
+				fclose($file_handle);
+			}
+			
+			// 3. LOAD FILES
 	        	if ($file != "." && $file != ".." && $file != "folder.jpg")
 		  		{
 		  			// JPG, GIF and PNG
@@ -193,7 +194,8 @@ if (file_exists($currentdir ."/captions.txt"))
 		  			{
 						//Read EXIF
 						//$img_captions[$file] = "display_exif:".$display_exif;
-						if ($display_exif == 1) $img_captions[$file] .= readEXIF($currentdir . "/" . $file);
+						if ($display_exif == 1) 
+							$img_captions[$file] .= readEXIF($currentdir . "/" . $file);
 
 						checkpermissions($currentdir . "/" . $file);
 			  			$files[] = array (

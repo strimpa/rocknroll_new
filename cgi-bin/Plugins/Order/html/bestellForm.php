@@ -42,8 +42,8 @@ Ggf. entstehende Bankgeb&uuml;hren bei &Uuml;berweisungen aus dem Ausland m&uuml
 	  <td bgcolor="#336699"><strong>Probeheft</strong></td>
 	  <td bgcolor="#336699">&nbsp;</td>
 	  <td align="right" bgcolor="#336699">nach unserer Wahl</td>
-	  <td align="right" bgcolor="#336699"><?php printf(" %4.2f &euro; ", Aufenthalt::GetInstance()->GetAblauf()->inland_preise["ProHeft"]); ?></td>
-	  <td align="right" bgcolor="#336699"><?php printf(" %4.2f &euro; ", Aufenthalt::GetInstance()->GetAblauf()->ausland_preise["ProHeft"]); ?></td>
+	  <td align="right" bgcolor="#336699"><?php printf(" %4.2f &euro; ", BestellAblauf::GetInst()->inland_preise["ProHeft"]); ?></td>
+	  <td align="right" bgcolor="#336699"><?php printf(" %4.2f &euro; ", BestellAblauf::GetInst()->ausland_preise["ProHeft"]); ?></td>
   </tr>
 	<tr>
 	  <td bgcolor="#336699">
@@ -52,8 +52,8 @@ Ggf. entstehende Bankgeb&uuml;hren bei &Uuml;berweisungen aus dem Ausland m&uuml
 	  <td bgcolor="#336699"><strong>Aktuelle Ausgabe </strong></td>
 	  <td bgcolor="#336699">&nbsp;</td>
 	  <td align="right" bgcolor="#336699">&nbsp;</td>
-	  <td align="right" bgcolor="#336699"><?php printf(" %4.2f &euro; ", Aufenthalt::GetInstance()->GetAblauf()->inland_preise["AktHeft"]); ?></td>
-	  <td align="right" bgcolor="#336699"><?php printf(" %4.2f &euro; ", Aufenthalt::GetInstance()->GetAblauf()->ausland_preise["AktHeft"]); ?></td>
+	  <td align="right" bgcolor="#336699"><?php printf(" %4.2f &euro; ", BestellAblauf::GetInst()->inland_preise["AktHeft"]); ?></td>
+	  <td align="right" bgcolor="#336699"><?php printf(" %4.2f &euro; ", BestellAblauf::GetInst()->ausland_preise["AktHeft"]); ?></td>
   </tr>
 	<tr>
       <td bgcolor="#336699"><p style="line-height: 100%" align="left">
@@ -65,8 +65,8 @@ Ggf. entstehende Bankgeb&uuml;hren bei &Uuml;berweisungen aus dem Ausland m&uuml
           <input name="EinzelheftAusgabeNr" size=10 maxlength=200 value="<?php if(isset($_POST['EinzelheftAusgabeNr'])) print $_POST['EinzelheftAusgabeNr'] ?>"> *
       </td>
       <td align="right" bgcolor="#336699"><p style="line-height: 100%" align=right>
-												 <?php printf(" %4.2f &euro; ", Aufenthalt::GetInstance()->GetAblauf()->inland_preise["Heft"]); ?><strong><br></strong> </td>
-      <td align="right" nowrap bgcolor="#336699"><?php printf(" %4.2f &euro; ", Aufenthalt::GetInstance()->GetAblauf()->ausland_preise["Heft"]); ?></td>
+												 <?php printf(" %4.2f &euro; ", BestellAblauf::GetInst()->inland_preise["Heft"]); ?><strong><br></strong> </td>
+      <td align="right" nowrap bgcolor="#336699"><?php printf(" %4.2f &euro; ", BestellAblauf::GetInst()->ausland_preise["Heft"]); ?></td>
   </tr>
 	<tr>
       <td colspan="2">&nbsp;</td>
@@ -96,8 +96,8 @@ Ggf. entstehende Bankgeb&uuml;hren bei &Uuml;berweisungen aus dem Ausland m&uuml
       <td align="right"> * 
             <input name="AboAbAusgabe" size="5" maxlength="3" value="<?php if(isset($_POST['AboAbAusgabe'])) print $_POST['AboAbAusgabe'] ?>">
       </td>
-      <td align="right"><p style="line-height: 100%" align=right><?php printf(" %4.2f &euro; ", Aufenthalt::GetInstance()->GetAblauf()->inland_preise["Abo"]); ?> </td>
-      <td align="right"><?php printf(" %4.2f &euro; ", Aufenthalt::GetInstance()->GetAblauf()->ausland_preise["Abo"]); ?></td>
+      <td align="right"><p style="line-height: 100%" align=right><?php printf(" %4.2f &euro; ", BestellAblauf::GetInst()->inland_preise["Abo"]); ?> </td>
+      <td align="right"><?php printf(" %4.2f &euro; ", BestellAblauf::GetInst()->ausland_preise["Abo"]); ?></td>
   </tr>
 	<tr>
 	  <td colspan="2">&nbsp;</td>
@@ -114,8 +114,8 @@ Ggf. entstehende Bankgeb&uuml;hren bei &Uuml;berweisungen aus dem Ausland m&uuml
 	  <td bgcolor="#336699"><span style="line-height: 100%"><strong>kleines Probepaket </strong></span></td>
 	  <td bgcolor="#336699">10 verschiedene &auml;ltere Ausgaben nach unserer Wahl.  Sie k&ouml;nnen bevorzugte Nummern in das Textfeld am Ende des Bestellformulars eintragen. Wir versuchen es m&ouml;glich zu machen.</td>
 	  <td align="right" bgcolor="#336699">nach unserer Wahl</td>
-	  <td align="right" bgcolor="#336699"><p style="line-height: 100%" align="right"><?php printf(" %4.2f &euro; ", Aufenthalt::GetInstance()->GetAblauf()->inland_preise["KlPaket"]); ?></td>
-	  <td align="right" bgcolor="#336699"><?php printf(" %4.2f &euro; ", Aufenthalt::GetInstance()->GetAblauf()->ausland_preise["KlPaket"]); ?></td>
+	  <td align="right" bgcolor="#336699"><p style="line-height: 100%" align="right"><?php printf(" %4.2f &euro; ", BestellAblauf::GetInst()->inland_preise["KlPaket"]); ?></td>
+	  <td align="right" bgcolor="#336699"><?php printf(" %4.2f &euro; ", BestellAblauf::GetInst()->ausland_preise["KlPaket"]); ?></td>
 	</tr>
     
 	<tr>
@@ -124,8 +124,8 @@ Ggf. entstehende Bankgeb&uuml;hren bei &Uuml;berweisungen aus dem Ausland m&uuml
 	  </td>
 	  <td bgcolor="#336699"><span style="line-height: 100%; margin-bottom: 0"><strong>gro&szlig;es Probepaket </strong></span></td>
 	  <td colspan="2" bgcolor="#336699">50 verschiedene &auml;ltere Ausgaben nach unserer Wahl.  Sie k&ouml;nnen bevorzugte Nummern in das Textfeld am Ende des Bestellformulars eintragen. Wir versuchen es m&ouml;glich zu machen.&nbsp;</td>
-	  <td align="right" bgcolor="#336699"><p style="line-height: 100%" align="right"><?php printf(" %4.2f &euro; ", Aufenthalt::GetInstance()->GetAblauf()->inland_preise["GrPaket"]); ?></td>
-	  <td align="right" bgcolor="#336699"><?php printf(" %4.2f &euro; ", Aufenthalt::GetInstance()->GetAblauf()->ausland_preise["GrPaket"]); ?></td>
+	  <td align="right" bgcolor="#336699"><p style="line-height: 100%" align="right"><?php printf(" %4.2f &euro; ", BestellAblauf::GetInst()->inland_preise["GrPaket"]); ?></td>
+	  <td align="right" bgcolor="#336699"><?php printf(" %4.2f &euro; ", BestellAblauf::GetInst()->ausland_preise["GrPaket"]); ?></td>
     </tr>
     
 	<tr>
@@ -142,8 +142,8 @@ Ggf. entstehende Bankgeb&uuml;hren bei &Uuml;berweisungen aus dem Ausland m&uuml
 	  </td>
       <td width="108"><span style="line-height: 100%"><strong>Der Index</strong></span></td>
       <td colspan="2">Inhaltsverzeichnis aller Magazine von Ausgabe 1 bis 200.</td>
-      <td align="right"><p style="line-height: 100%" align=right><?php printf(" %4.2f &euro; ", Aufenthalt::GetInstance()->GetAblauf()->inland_preise["Index"]); ?> </td>
-      <td align="right"><?php printf(" %4.2f &euro; ", Aufenthalt::GetInstance()->GetAblauf()->ausland_preise["Index"]); ?></td>
+      <td align="right"><p style="line-height: 100%" align=right><?php printf(" %4.2f &euro; ", BestellAblauf::GetInst()->inland_preise["Index"]); ?> </td>
+      <td align="right"><?php printf(" %4.2f &euro; ", BestellAblauf::GetInst()->ausland_preise["Index"]); ?></td>
   </tr>
 	<tr>
 	  <td colspan="2">&nbsp;</td>

@@ -26,8 +26,8 @@ Example: <img src="createthumb.php?filename=photo.jpg&amp;width=100&amp;height=1
 
 function CreateThumb($filename, $size)
 {
-	$imageDir = "MiniGal/images/";
-	$outputDir = "MiniGal/images/thumbs/";
+	$imageDir = "images/";
+	$outputDir = "images/thumbs/";
 	
 	$info = pathinfo($filename);
 	$saveFileName = preg_replace("/[^a-zA-Z0-9]/", "", $filename);
@@ -40,7 +40,7 @@ function CreateThumb($filename, $size)
 	// if exists just give back =)
 	if (is_file($returnPic))
 	{
-		return "/".$returnPic;
+		return PLUGIN_SUBDIR."/Gallery/".$returnPic;
 	}
 //	print("\n<br />returnPic:$returnPic");
 
@@ -113,7 +113,7 @@ function CreateThumb($filename, $size)
     if (preg_match("/.png$/i", $filename)) ImageJPEG($target,$returnPic,90); // Using ImageJPEG on purpose
     imagedestroy($target);
          
-    return "/".$returnPic; 
+    return PLUGIN_SUBDIR."/Gallery/".$returnPic; 
 }
 
 ?>

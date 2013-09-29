@@ -81,7 +81,7 @@ class HtmlBuilder
 	
 	public function AddImage($picID, $align=NULL, $paraImage=false)
 	{
-		$result = Aufenthalt::GetInstance()->Controller()->GetPicData($picID);
+		$result = DBCntrl::GetInst()->GetPicData($picID);
 
 		$picDiv = $this->doc->createElement("div");
 	    switch($align)

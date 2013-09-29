@@ -4,9 +4,9 @@
 			<?php 
 					foreach($_POST as $key=>$value)
 					{
-						if(NULL!=(Aufenthalt::GetInstance()->GetUser())) 
-							print Aufenthalt::GetInstance()->GetUser()->printUserShort();
-						print Aufenthalt::GetInstance()->GetAblauf()->aktuelleBestellung->zeigeBestellungen($this);
+						if(NULL!=(Aufenthalt::GetInst()->GetUser())) 
+							print Aufenthalt::GetInst()->GetUser()->printUserShort();
+						print BestellAblauf::GetInst()->aktuelleBestellung->zeigeBestellungen($this);
 					}
 					?>">
 		</textarea>
@@ -17,15 +17,15 @@
             <tr>
               <td width="15%" class="normalFont">Ihr Name  </td>
               <td width="85%"><input name="realname" type="text" size="30" <?php 
-              		if(NULL!=(Aufenthalt::GetInstance()->GetUser())) 
-              			print "value=\"".html_entity_decode(Aufenthalt::GetInstance()->GetUser()->GetWholeName())."\"";
+              		if(NULL!=(Aufenthalt::GetInst()->GetUser())) 
+              			print "value=\"".html_entity_decode(Aufenthalt::GetInst()->GetUser()->GetWholeName())."\"";
               	?> /></td>
             </tr>
             <tr>
               <td class="normalFont">Ihre E-mail Adresse </td>
               <td><input name="email" type="text" size="30" <?php 
-              		if(NULL!=(Aufenthalt::GetInstance()->GetUser())) 
-              			print "value=\"".Aufenthalt::GetInstance()->GetUser()->eMail."\""; 
+              		if(NULL!=(Aufenthalt::GetInst()->GetUser())) 
+              			print "value=\"".Aufenthalt::GetInst()->GetUser()->eMail."\""; 
               	?> /></td>
             </tr>
             <tr>

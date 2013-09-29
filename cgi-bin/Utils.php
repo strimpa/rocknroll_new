@@ -11,7 +11,7 @@ function MyHtmlSpecialVars_decode($string)
 
 function PrintHtmlComment($string)
 {
-	//print ("<!-- ".$string."//-->\n");
+	print ("<!-- ".$string."//-->\n");
 }
 
 function SendDebugMail($msg, $isProblem=FALSE)
@@ -43,7 +43,7 @@ function ParseDateFromString($str)
 	}
 	else
 	{
-			if(NULL==$datumInfo['month'] || NULL==$datumInfo['day'])
+		if(NULL==$datumInfo['month'] || NULL==$datumInfo['day'])
 			return false;
 		if(NULL!=$datumInfo['year'])
 			$datum .= $datumInfo['year']."-";
@@ -52,7 +52,7 @@ function ParseDateFromString($str)
 	return $datum; 
 }
 
-function RecurseXml($content, $currRoot, $fieldName, $doc)
+function RecurseXml($content, $currRoot, $fieldName, $doc, $attrs)
 {
 	$tagName = MakeSafeTagName($fieldName);
 	$col = $doc->createElement($tagName);
@@ -64,7 +64,7 @@ function RecurseXml($content, $currRoot, $fieldName, $doc)
 			$currRow = $colIndex;
 			$keyArray = array_keys($content);
 			$fieldName = $keyArray[$colIndex];
-			RecurseXml($content[$fieldName], $col, $fieldName, $doc);
+			RecurseXml($content[$fieldName], $col, $fieldName, $doc, $attrs);
 			$currRoot->appendChild($col);
 		}
 	}
@@ -96,6 +96,13 @@ function RecurseXml($content, $currRoot, $fieldName, $doc)
 		}
 		$currRoot->appendChild($col);
 		restore_error_handler();
+	}
+
+	if(array_key_exists($fieldName, $attrs))
+	{
+		foreach ($attrs[$fieldName] as $key => $value) {
+			$col->setAttribute($key, $value);
+		}
 	}
 }
 
@@ -172,7 +179,7 @@ function DitchQuotes($string)
 
 function GetPrice($matches)
 {
-	$price = Aufenthalt::GetInstance()->GetAblauf()->preise[$matches[1]];
+	$price = BestellAblauf::GetInst()->preise[$matches[1]];
 	$formattedPrice = sprintf(" %4.2f &euro; ", $price);
 	return $formattedPrice;
 }
@@ -245,7 +252,7 @@ function GetPostVarValue($matches)
 		$newString = ReplaceTagValues($tagname, $type, $wholetag, $postVar);
 	}
 	
-	$order = Aufenthalt::GetInstance()->GetAblauf()->aktuelleBestellung;
+	$order = BestellAblauf::GetInst()->aktuelleBestellung;
 	if(NULL!=$order)
 	{
 		$orderIndex = array_search($id, Bestellung::$ids);
@@ -261,7 +268,7 @@ function GetPostVarValue($matches)
 		}
 	}
 	
-	$user = Aufenthalt::GetInstance()->GetUser();
+	$user = Aufenthalt::GetInst()->GetUser();
 	if(NULL!=$user)
 	{
 		$postVar = $user->GetMember($id);
@@ -289,6 +296,7 @@ function GetFolderContentRec($relPath, $extensions, $resursive)
 	
 	$default_dir = $serverRoot.$relPath;
 	$fileList = array();
+	PrintHtmlComment($default_dir);
 	if(!($dp = opendir($default_dir))) 
 	{
 		print("Cannot open $default_dir.");
@@ -309,9 +317,10 @@ function GetFolderContentRec($relPath, $extensions, $resursive)
 		else
 		{
 			$ext = substr($file, strrpos($file, '.') + 1);
-			if(FALSE !== array_search($ext, $extensions))
+			if("*"==$extensions[0] || FALSE !== array_search($ext, $extensions))
 			{
 				$fileList[$safeFileName] = $httpRoot.$relPath.$file;
+				PrintHtmlComment("adding:".$fileList[$safeFileName]);
 			}
 		}
 	}
@@ -327,14 +336,12 @@ function GetFolderContent($assetFolder, $resursive)
 	switch($assetFolder)
 	{
 		case "images":
-		case "MiniGal/photos":
 		{
-//			$suffix = "images/";
-			PrintHtmlComment("default_dir: $default_dir, suffix: $suffix");
 			$extensions = array("jpg", "gif", "png");
+			$default_dir = $default_dir.$suffix;
 		}
 	}
-	$default_dir = $default_dir.$suffix;
+	$default_dir = $suffix;
 	
 	$fileList = GetFolderContentRec($suffix, $extensions, $resursive);
 	
@@ -385,7 +392,7 @@ function SafeDBString($res)
 	  $res = EncodeUmlaute($res);
 	  //$res = htmlspecialchars($res);
 	  $res = DecodeUmlaute($res);
-	  $res = mysqli_escape_string(Aufenthalt::GetInstance()->DBConn()->verbinde(), $res);
+	  $res = mysqli_escape_string(DBCntrl::GetInst()->Conn()->Connect(), $res);
 	  $res = str_replace("& ", "&amp; ",$res);
 	  if(!mb_detect_encoding($res, 'UTF-8', true))
 	  	$res = utf8_encode($res);
@@ -397,14 +404,14 @@ function SafeJSONString($res)
 //	$out = htmlentities($out);
 	$res = str_replace("\n","<br />",$res);
 //  	$res = DecodeUmlaute($res);
-	$res = mysqli_escape_string(Aufenthalt::GetInstance()->DBConn()->verbinde(), $res);
+	$res = mysqli_escape_string(DBCntrl::GetInst()->Conn()->Connect(), $res);
   	return $res;
 }
 
-function gibTabelleAlsXml($result, $name){
+function gibTabelleAlsXml($result, $name, $attrs){
 	global $serverRoot;
 	global $httpRoot;
-// Verbinden
+// Connectn
 
 	if($result)
 	{
@@ -425,13 +432,21 @@ function gibTabelleAlsXml($result, $name){
 		 	 // $safeRowName  = MakeSafeTagName($rowkey);
 		  	$row = $doc->createElement( "Row" );
 		  	$root->appendChild($row);
-			foreach ($rowvalue as $cellkey => $cellvalue) {
+			foreach ($rowvalue as $cellkey => $cellvalue) 
+			{
 				$safeCellName = MakeSafeTagName($cellkey);
 				 $cell = $doc->createElement( $safeCellName );
 				 $row->appendChild($cell);
 				 $asciiCellValue = preg_replace('/[^(\x20-\x7F)]+/', '?', $cellvalue);
 				 $actualValue =  EncodeUmlaute( utf8_decode($asciiCellValue) );
 				 $cell->nodeValue =$actualValue;
+
+				if(array_key_exists($cellkey, $attrs))
+				{
+					foreach ($variable as $key => $value) {
+						$cell->setAttribute($key, $value);
+					}
+				}
 			}
 		}
 					
@@ -555,11 +570,11 @@ function EnterXMLintoTable($tablename, $filename)
 		if($idValue != null)
 		{
 			$params['requirements'] = array("id"=>$idValue);
-			$lastResult = Aufenthalt::GetInstance()->DBConn()->SetTableContent($params);
+			$lastResult = DBCntrl::GetInst()->Conn()->SetTableContent($params);
 		}
 		else
 		{
-			$lastResult = Aufenthalt::GetInstance()->DBConn()->InsertTableContent($params);
+			$lastResult = DBCntrl::GetInst()->Conn()->InsertTableContent($params);
 		}
 		if(is_bool($lastResult) && FALSE==$lastResult)
 		{
@@ -569,6 +584,60 @@ function EnterXMLintoTable($tablename, $filename)
 
 	return $lastResult;
 }
+
+function RecurseJson($currRoot, $currName, &$returnString, $depth, $printName)
+{
+	$tabs = "";
+	for ($i=0; $i < $depth; $i++) { 
+		$tabs .= "\t";
+	}
+	
+	$currCount = count($currRoot);
+	
+	if(!is_array($currRoot))
+	{
+		$returnString .= $tabs;
+		if($printName)
+			$returnString .= $currName.": ";
+		$returnString .= "\"".SafeJSONString($currRoot)."\"";
+		$returnString = str_replace("\r\n", "<br />", $returnString);
+	}
+	else
+	{
+		$returnString .= $tabs;
+		if($printName)
+			$returnString .= $currName.": ";
+		
+		$isAssoc = IsAssoc($currRoot);
+		if($isAssoc)
+			$returnString .= "{\n";
+		else
+			$returnString .= "[\n";
+		$keys = array_keys($currRoot);
+		$values = array_values($currRoot);
+		for($k=0;$k<$currCount;$k++)
+		{
+			$row = $values[$k];
+			$name = $keys[$k];
+			RecurseJson($row, $name, $returnString, $depth+1, $isAssoc);
+			if($k<($currCount-1))
+				$returnString .= ",";
+			$returnString .= "\n";
+		}
+		if($isAssoc)
+			$returnString .= $tabs."}";
+		else
+			$returnString .= $tabs."]";
+	}
+}		
+
+function ReplaceInvalidChars(&$string)	
+{
+	$count = 0;		
+	$string = preg_replace('/&.+;/', '<img src="invalidCharPic.gif">', $string, $count);
+//		PrintHtmlComment("Count of replaced invalid chars: $count");	
+}
+
 
 function handleError($errno, $errstr, $errfile, $errline, array $errcontext)
 {

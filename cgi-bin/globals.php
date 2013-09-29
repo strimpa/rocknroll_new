@@ -1,10 +1,11 @@
 <?php
 	global $build_errors;
+	global $serverRoot;
 
 	$path_parts = pathinfo(__FILE__);
 //	$img = ($path_parts['dirname']."/".$prefix."_".rand(1,8).".png");
-	$serverRoot = $_SERVER['DOCUMENT_ROOT']."/rocknroll_new/"; // "/"
-	$httpRoot = "http://".$_SERVER['SERVER_NAME']."/rocknroll_new/"; // "/"
+	$serverRoot = $_SERVER['DOCUMENT_ROOT']."/"; 
+	$httpRoot = "http://".$_SERVER['SERVER_NAME']."/";
 
 	setlocale(LC_ALL, 'de_DE');
 

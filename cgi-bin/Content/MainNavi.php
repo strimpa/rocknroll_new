@@ -23,7 +23,7 @@ class MainNavi
 	
 	public function Render()
 	{
-		$builder = ContentMgr::GetInstance()->GetBuilder();
+		$builder = ContentMgr::GetInst()->GetBuilder();
 		
 		$menuDiv = $builder->AddTag("div", "menuLeft", NULL);
 		$titles = array_keys($this->titlesAndUrls);

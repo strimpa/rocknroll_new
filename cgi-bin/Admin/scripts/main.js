@@ -1,13 +1,26 @@
 ﻿// class to deal with content creation
 
 // globals
-var currContent = null;
 var contentCache = null;
 var currSubMenuUrls = null;
+var plugins = [];
 
 require.config({
-	waitSeconds:15
+/*    baseUrl : '/cgi-bin/Admin/scripts', */
+    paths : {
+		pluginsPath : '../../Plugins'
+    },
+	waitSeconds:5,
+	catchError:true
 });
+requirejs.onError = function (err) {
+    alert(err.requireType);
+    if (err.requireType === 'timeout') {
+        alert('modules: ' + err.requireModules);
+    }
+
+    throw err;
+};
 
 jQuery = require([
 		'lib/jquery-1.9.1'
@@ -70,6 +83,9 @@ jQuery = require([
 						optn.textContent = $(this).text();
 					    $("#pagesDropDown").append(optn);
 				    });
+
+					// PLugins
+					$("#pluginDropDown").empty();
 		//		    $("#pagesDropDown").effect("bounce", { times:10 }, 300);
 				}
 				
@@ -142,17 +158,47 @@ jQuery = require([
 				    var menuRef = $(contentCache.find( 'menuRef' )[selectedIndex]).text();
 					output("Sub menu reference: "+menuRef);
 				    $.fn.loadContent("submenus", populateSubMenuItems, {"id":menuRef}, "xml");
-				    
+
+					// PLugins
+					$("#pluginDropDown").empty();
+					var optn = document.createElement("OPTION");
+				    $("#pluginDropDown").append(optn);
+				    for(pluginName in plugins)
+				    {
+						optn = document.createElement("OPTION");
+						optn.textContent = pluginName;
+					    $("#pluginDropDown").append(optn);
+				    }
+				    var plugin = new String($(contentCache.find( 'plugin' )[selectedIndex]).text());
+					output("Page's plugin: "+plugin);
+					$("#pluginDropDown").val(plugin.toUpperCase());
+									    
 					// trigger paragraph creation
 				    triggerParagraphCreation();
 				};
 				
 				function refreshPages(callback)
 				{
-					$.fn.loadContent("pages", function(result)
+					console.log("loading plugins...");
+					$.fn.loadContent("plugins", function(pluginXML)
 					{
-						contentCache = $(result);
-						callback();
+						$(pluginXML).find("row").children().each(function(){
+							var currentPluginName =this.tagName;
+							var pluginPath = "pluginsPath/" + this.innerText; 
+							var localPath = this.getAttribute("localPath");
+							require([pluginPath], function(adminPage)
+							{
+								plugins[currentPluginName] = adminPage;
+								plugins[currentPluginName].path = localPath;
+								console.log("currentPluginName local path: "+plugins[currentPluginName].path);
+							});
+						});
+						console.log("loading pages...");
+						$.fn.loadContent("pages", function(result)
+						{
+							contentCache = $(result);
+							callback();
+						}, null, "xml");
 					}, null, "xml");
 				}
 				function contentEditHandler(result)
@@ -253,6 +299,18 @@ jQuery = require([
 					{
 						$.fn.loadContent("navigation", contentEditHandler, navidata, "data", {del:true});
 					}, data, "data", {del:true});
+				};
+				
+				changePluginHandler = function()
+				{
+					var selectedIndex = $("#pagesDropDown").prop("selectedIndex")-1;
+					var pageId = $(contentCache.find( 'id' )[selectedIndex]).text();
+					var chosenPlugin = $("#pluginDropDown").val();
+					var reqString = "id="+pageId;
+					$.fn.loadContent("pages", function(result)
+					{
+						triggerParagraphCreation();
+					}, {plugin:chosenPlugin}, "data", {edit:true, req:reqString});
 				};
 		
 				////////////////////////////////////////////////////////////////////////////////////////
@@ -556,220 +614,66 @@ jQuery = require([
 		//			heightobj.offset = 0;
 					var selectedIndex = $("#pagesDropDown").prop("selectedIndex")-1;
 					var selectedvalue = $("#pagesDropDown").val();
+					var selectedPlugin = $("#pluginDropDown").val();
 					
-					switch(selectedvalue)
+					if(selectedPlugin in plugins)
 					{
-					case "links":
-						{
-							$.fn.loadContent("links", function(result)
-							{
-								var typeJson = eval(result);
-								$.fn.loadContent("links", function(result)
-								{
-									var sections = eval(result);
-				
-									var addEntryButton = document.createElement("input");
-									addEntryButton.setAttribute("type", "button");
-									addEntryButton.setAttribute("value", "Neuer Eintrag");
-									contentDiv.appendChild(addEntryButton);
-				
-									var abreak = document.createElement("br");
-									contentDiv.appendChild(abreak);
-									var label = document.createTextNode("Zeige Kategorie:");
-									contentDiv.appendChild(label);
-									
-									var categorySelect = document.createElement("select");
-									categorySelect.setAttribute("id", "categorySelect");
-									contentDiv.appendChild(categorySelect);
-									for(sectionIndex in sections)
-									{
-										section = sections[sectionIndex];
-										var sectionOption = document.createElement("option");
-										sectionOption.textContent = section.category;
-										categorySelect.appendChild(sectionOption);
-									}
-		
-									$(addEntryButton).click(function()
-									{
-										var data = {category:$("#categorySelect").val()};
-										$.fn.loadContent("links", triggerParagraphCreation, data, "data", {write:true});
-									});
-		
-									var tableDiv = document.createElement("div");
-									tableDiv.setAttribute("class", "adminTableDiv");
-									contentDiv.appendChild(tableDiv);
-									
-									var categoryFill = function(section)
-									{
-										$(tableDiv).empty();
-										var paraDiv = document.createElement("div");
-										paraDiv.setAttribute("id", "paragraph_"+section);
-										paraDiv.setAttribute("class", "adminParagraph");
-										paraDiv.appendChild(utils.RenderTable("links", typeJson[0], {category:section}, null));
-										tableDiv.appendChild(paraDiv);
-									};
-									$(categorySelect).change(function(){
-										categoryFill(this.value);
-									});
-									categoryFill(sections[0].category);
-									
-								}, null, "data", {selector:"category",distinct:true,json:"sections"});
-							}, null, "data", {def:true,json:"types"});
-						}
-						break;
-					case "approve":
-						{
-							$.fn.loadContent("links", function(result)
-							{
-								var typeJson = eval(result);
-								var paraDiv = document.createElement("div");
-								paraDiv.setAttribute("id", "paragraph_order");
-								paraDiv.setAttribute("class", "adminParagraph");
-								paraDiv.appendChild(utils.RenderTable("links", typeJson[0], {approved:0}));
-								contentDiv.appendChild(paraDiv);
-							}, null, "data", {def:true,json:"types"});
-							$.fn.loadContent("events", function(result)
-							{
-								var typeJson = eval(result);
-								var paraDiv = document.createElement("div");
-								paraDiv.setAttribute("id", "paragraph_order");
-								paraDiv.setAttribute("class", "adminParagraph");
-								paraDiv.appendChild(utils.RenderTable("events", typeJson[0], {approved:0}));
-								contentDiv.appendChild(paraDiv);
-							}, null, "data", {def:true,json:"types"});
-						}
-						break;
-					case "bestellen":
-						{
-							$.fn.loadContent("bestellung,kunden", function(result)
-							{
-								var typeJson = eval(result);
-								var paraDiv = document.createElement("div");
-								paraDiv.setAttribute("id", "paragraph_order");
-								paraDiv.setAttribute("class", "adminParagraph");
-								paraDiv.appendChild(utils.RenderTable("bestellung,kunden", typeJson[0], null, null, {joinFields:"kundenID=id"}, "kundenID,id", false));
-								contentDiv.appendChild(paraDiv);
-							}, null, "data", {def:true,json:"types",joinFields:"kundenID=id"});
-						}
-						break;
-					case "galerie":
-						{
-							var paraDiv = document.createElement("div");
-							paraDiv.setAttribute("id", "paragraph_order");
-							paraDiv.setAttribute("class", "adminParagraph");
-							var folderSelect = document.createElement("select");
-							$(folderSelect).append("<option>Suche Ordner aus Liste aus...</option>");
-							var photoDiv = document.createElement("div");
-							var photoArray = new Array();
-							$.fn.loadContent("folder", function(result)
-							{
-								$(result).find("row").children().children().each(function(){
-									var folderName = this.nodeName;
-									console.log("folderName:"+folderName);
-									var pics = [];
-									$(this).children().each(function(){
-										var picture = $(this).text();
-										console.log("\tpic:"+picture);
-										pics.push(picture);
-									});
-									photoArray[folderName] = pics;
-									$(folderSelect).append($("<option>"+folderName+"</option>"));
-								});
-							}, {"assetFolder":"MiniGal/photos"}, "xml", {recursive:true});
-							$(folderSelect).change(function(){
-								$(photoDiv).empty();
-								var folder = this.value;
-								console.log("selectied folder:"+folder);
-								for(d in photoArray[folder])
-								{
-									var picFrame = $('<div class="folderBrowserPicFrame">'); 
-									var pic = $('<img />');
-									var picUrl = photoArray[folder][d];
-									pic.prop("class","folderBrowsePic"); 
-									pic.prop("src",picUrl);
-									pic.css("float", "left");
-									picFrame.append(pic);
-									picFrame.prop("title", picUrl);
-		
-									var picText = $('<textarea />');
-									picText.css("height", "100px");
-									picText.css("width", "300px");
-									$(picFrame).append(picText);
-		
-									var picButton = $('<input />');
-									picButton.prop("type", "button");
-									picButton.css("width", "300px");
-									picButton.val( "Update");
-									$(picFrame).append(picButton);
-		
-									$(picFrame).css("clear", "both");
-									$(photoDiv).append(picFrame);
-									
-									picButton.click(function(){
-										console.log($(this).prev().val());
-									});
-								}
-							});
-							paraDiv.appendChild(folderSelect);
-							paraDiv.appendChild(photoDiv);
-							contentDiv.appendChild(paraDiv);
-						}
-						break;
-					default:
-						{
-							console.log("selectedIndex:"+selectedIndex);
-						    var paragraphs = $(contentCache.find( 'paragraphs' )[selectedIndex]).text();
-						    var paraArray = paragraphs.split(",");
-				
-						    for(paraIndex in paraArray)
-						    {
-						    	if(paraArray[paraIndex]=="" || paraArray[paraIndex]==null)
-						    		continue;
-								var paraDiv = document.createElement("div");
-								paraDiv.setAttribute("id", "paragraph_"+paraArray[paraIndex]);
-								// var titleIDDiv = document.createElement("div");
-								// titleIDDiv.setAttribute("class", "adminParaTitle");
-								// titleIDDiv.textContent = "Absatz ID:"+paraArray[paraIndex];
-								// contentDiv.appendChild(titleIDDiv);
-						    	$.fn.loadContent("paragraphs", function(result)
-						    	{
-						    		//try{
-							    		result = getXmlDocFromResponse(result);
-										$(result).find("row").each(function()
-									    {
-										    // paragraph itself
-										    var myParagraphId = $(this).find("id").first().text();
-										    var myParagraph = element("paragraph_"+myParagraphId);
-										    if(null==myParagraph)
-										    {
-										    	throw("Can't resolve holding paragraph HTML node.");
-										    	return;
-										    }
-			
-					//						alert("localParaIndex:"+$(this).find('id').text());
-											var localParaIndex = paraArray.indexOf($(this).find('id').text());
-					//				    	output("id:"+$(this).find('id').text());
-									    	$(this).find('title').each(function(index, value)
-										    {
-												optn = document.createElement("OPTION");
-												optn.textContent = $(this).text();
-											    $("#paragraphDropDown").append(optn);
-										    });
-										    utils.renderPargraphHTML(myParagraph, $(this), localParaIndex);
-										});
-									// }catch(err)
-									// {
-										// $(paraDiv).append("Der Ansatz konnte nicht gerendert werden. Ueberpruefen sie bitte das eingegebene html. Error:"+err+"<br />");
-									// }
-						    	}, {id:paraArray[paraIndex]}, "data");
-								
-								// append
-								contentDiv.appendChild(paraDiv);
-						    }
-		
-						    $.fn.loadContent("paragraphs", populateAllParagraphSelect, null, "xml");
-						}
+						plugins[selectedPlugin].Render(contentDiv);
 					}
+					else
+					{
+					    var paragraphs = $(contentCache.find( 'paragraphs' )[selectedIndex]).text();
+					    var paraArray = paragraphs.split(",");
+			
+					    for(paraIndex in paraArray)
+					    {
+					    	if(paraArray[paraIndex]=="" || paraArray[paraIndex]==null)
+					    		continue;
+							var paraDiv = document.createElement("div");
+							paraDiv.setAttribute("id", "paragraph_"+paraArray[paraIndex]);
+							// var titleIDDiv = document.createElement("div");
+							// titleIDDiv.setAttribute("class", "adminParaTitle");
+							// titleIDDiv.textContent = "Absatz ID:"+paraArray[paraIndex];
+							// contentDiv.appendChild(titleIDDiv);
+					    	$.fn.loadContent("paragraphs", function(result)
+					    	{
+					    		//try{
+						    		result = getXmlDocFromResponse(result);
+									$(result).find("row").each(function()
+								    {
+									    // paragraph itself
+									    var myParagraphId = $(this).find("id").first().text();
+									    var myParagraph = element("paragraph_"+myParagraphId);
+									    if(null==myParagraph)
+									    {
+									    	throw("Can't resolve holding paragraph HTML node.");
+									    	return;
+									    }
+		
+				//						alert("localParaIndex:"+$(this).find('id').text());
+										var localParaIndex = paraArray.indexOf($(this).find('id').text());
+				//				    	output("id:"+$(this).find('id').text());
+								    	$(this).find('title').each(function(index, value)
+									    {
+											optn = document.createElement("OPTION");
+											optn.textContent = $(this).text();
+										    $("#paragraphDropDown").append(optn);
+									    });
+									    utils.renderPargraphHTML(myParagraph, $(this), localParaIndex);
+									});
+								// }catch(err)
+								// {
+									// $(paraDiv).append("Der Ansatz konnte nicht gerendert werden. Ueberpruefen sie bitte das eingegebene html. Error:"+err+"<br />");
+								// }
+					    	}, {id:paraArray[paraIndex]}, "data");
+							
+							// append
+							contentDiv.appendChild(paraDiv);
+					    }
+	
+					    $.fn.loadContent("paragraphs", populateAllParagraphSelect, null, "xml");
+					}
+					
 				}
 		//		function importParagraphHTML(identifier)
 		//		{
@@ -956,6 +860,7 @@ jQuery = require([
 				$("#pagesDropDown").change(selectContentHandler);
 				$("#createPageButton").click(createContentHandler);
 				$("#editPageButton").click(editContentHandler);
+				$("#pluginDropDown").change(changePluginHandler);
 				$("#deletePageButton").click(deleteContentHandler);
 				$("#createMenuEntryButton").click(createMenuEntryHandler);
 				$("#editMenuEntryButton").click(editMenuEntryHandler);

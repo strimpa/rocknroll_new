@@ -1,82 +1,32 @@
 <?php
+	include("../Utils.php");
+	include("../Aufenthalt.php");
+
+	session_start();
+
+	global $serverRoot;
 	global $build_errors;
 	global $currRow;
 	$build_errors = array();
 		
-
-	include("../Utils.php");
-	include("../Aufenthalt.php");
-
 	$params = array();
 	$query = FilenameFromUrl($params);
 
-	function RecurseJson($currRoot, $currName, &$returnString, $depth, $printName)
-	{
-		$tabs = "";
-		for ($i=0; $i < $depth; $i++) { 
-			$tabs .= "\t";
-		}
-		
-		$currCount = count($currRoot);
-		
-		if(!is_array($currRoot))
-		{
-			$returnString .= $tabs;
-			if($printName)
-				$returnString .= $currName.": ";
-			$returnString .= "\"".SafeJSONString($currRoot)."\"";
-			$returnString = str_replace("\r\n", "<br />", $returnString);
-		}
-		else
-		{
-			$returnString .= $tabs;
-			if($printName)
-				$returnString .= $currName.": ";
-			
-			$isAssoc = IsAssoc($currRoot);
-			if($isAssoc)
-				$returnString .= "{\n";
-			else
-				$returnString .= "[\n";
-			$keys = array_keys($currRoot);
-			$values = array_values($currRoot);
-			for($k=0;$k<$currCount;$k++)
-			{
-				$row = $values[$k];
-				$name = $keys[$k];
-				RecurseJson($row, $name, $returnString, $depth+1, $isAssoc);
-				if($k<($currCount-1))
-					$returnString .= ",";
-				$returnString .= "\n";
-			}
-			if($isAssoc)
-				$returnString .= $tabs."}";
-			else
-				$returnString .= $tabs."]";
-		}
-	}		
-	
-	function ReplaceInvalidChars(&$string)	
-	{
-		$count = 0;		
-		$string = preg_replace('/&.+;/', '<img src="invalidCharPic.gif">', $string, $count);
-//		PrintHtmlComment("Count of replaced invalid chars: $count");	
-	}
-	
 //	PrintHtmlComment("fuckin DBAccess!");
 	
-	$pattern = '/(pages|submenus|paragraphs|events|links|pictures|navigation|folder|bestellung|kunden|archive)/';
+	$pattern = '/(pages|submenus|paragraphs|events|links|pictures|navigation|folder|bestellung|kunden|archive|plugins)/';
 	$resultEntryID = null;
+	$attributes = array();
 	if(0!=preg_match($pattern, $query, $matches, PREG_OFFSET_CAPTURE))
 	{
 		if(isset($params["write"]) && $params["write"]==true)
 		{
 			if($query=="pages")
 			{
-				Aufenthalt::GetInstance()->DBConn()->InsertTableContent(array('table'=>"submenus"));
+				DBCntrl::GetInst()->Conn()->InsertTableContent(array('table'=>"submenus"));
 				// get submenu with highest id:
-				$_POST['menuRef'] =  mysqli_insert_id(Aufenthalt::GetInstance()->DBConn()->verbinde());
-				$result = Aufenthalt::GetInstance()->DBConn()->InsertTableContent(
+				$_POST['menuRef'] =  mysqli_insert_id(DBCntrl::GetInst()->Conn()->Connect());
+				$result = DBCntrl::GetInst()->Conn()->InsertTableContent(
 					array(
 						'table'=>$query, 
 						'fields'=>array_keys($_POST),
@@ -85,18 +35,18 @@
 			}
 			else
 			{
-				$result = Aufenthalt::GetInstance()->DBConn()->InsertTableContent(
+				$result = DBCntrl::GetInst()->Conn()->InsertTableContent(
 					array(
 						'table'=>$query, 
 						'fields'=>array_keys($_POST),
 						'values'=>array_values($_POST)
 						));
 			}
-			$resultEntryID = mysqli_insert_id(Aufenthalt::GetInstance()->DBConn()->verbinde());
+			$resultEntryID = mysqli_insert_id(DBCntrl::GetInst()->Conn()->Connect());
 		}
 		else if(isset($params["del"]) && $params["del"]==true)
 		{
-			$result = Aufenthalt::GetInstance()->DBConn()->DropTableContent(
+			$result = DBCntrl::GetInst()->Conn()->DropTableContent(
 				array(
 					'table'=>$query, 
 					'requirements'=>$_POST)
@@ -114,7 +64,7 @@
 			// foreach ($_POST as $key => $value) {
 				// Print ('$_POST['.$key.']:'.$value);
 			// }
-			$result = Aufenthalt::GetInstance()->DBConn()->SetTableContent(
+			$result = DBCntrl::GetInst()->Conn()->SetTableContent(
 				array(
 					'table'=>$query, 
 					'fields'=>array_keys($_POST), 
@@ -122,7 +72,7 @@
 					'values'=>array_values($_POST)
 					));
 			assert(count($result)==1);
-			$resultEntryID = mysqli_insert_id(Aufenthalt::GetInstance()->DBConn()->verbinde());
+			$resultEntryID = mysqli_insert_id(DBCntrl::GetInst()->Conn()->Connect());
 		}
 		else if(isset($params["def"]))
 		{
@@ -142,7 +92,7 @@
 					$joinFields[$exploded[0]] = $exploded[1];
 				}
 			}
-			$result = Aufenthalt::GetInstance()->DBConn()->GetTableDef(
+			$result = DBCntrl::GetInst()->Conn()->GetTableDef(
 				array(
 					'table'=>$query, 
 					'fields'=>array_keys($_POST), 
@@ -153,6 +103,21 @@
 		else if(isset($params["folder"]))
 		{
 			$result = GetFolderContent($_POST['assetFolder'], isset($params["recursive"]));
+		}
+		else if(isset($params["plugins"]))
+		{
+			$plugins = Aufenthalt::GetInst()->GetPlugins();
+			$result = array();
+			foreach ($plugins as $key => $value) {
+				$result[$key] = $value->GetAdminScript();
+				$locaPath = $value->GetPath();
+				if(!is_dir($locaPath))
+					$locaPath = dirname($locaPath);
+				$locaPath = str_ireplace("\\", "/", $locaPath);
+				$safeServerRoot = str_ireplace("\\", "/", $serverRoot);
+				$locaPath = str_replace($safeServerRoot, "", $locaPath);
+				$attributes[$key] = array("localPath"=>$locaPath);
+			}
 		}
 		else if(isset($params["xmlinput"]))
 		{
@@ -181,7 +146,7 @@
 			// foreach ($_POST as $key => $value) {
 				// PrintHtmlComment('$_POST['.$key.']:'.$value);
 			// }
-			$result = Aufenthalt::GetInstance()->DBConn()->GetTableContent(
+			$result = DBCntrl::GetInst()->Conn()->GetTableContent(
 				array(
 					'table'=>$query, 
 					'fields'=>$selector, 
@@ -195,7 +160,7 @@
 		
 		if(isset($params["xmloutput"]) && $params["xmloutput"])
 		{
-			print gibTabelleAlsXml($result, $query);
+			print gibTabelleAlsXml($result, $query, $attributes);
 		}
 		else if(null!=$resultEntryID)
 		{
@@ -224,7 +189,7 @@
 				$print = "";
 				
 				try{
-					RecurseXml($result, $rootElem, "row", $doc);
+					RecurseXml($result, $rootElem, "row", $doc, $attributes);
 				}
 				catch(Exception $e)
 				{

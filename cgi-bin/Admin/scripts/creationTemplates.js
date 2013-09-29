@@ -5,47 +5,45 @@
 //	dataType:null
 //}
 
-require(['tiny_mce/jquery.tinymce']);
-
-	function showImageBrowser(position, rootFolder, targetPicElem)
+function showImageBrowser(position, rootFolder, targetPicElem)
+{
+	var holder = $('<div id="folderBrowser">');
+	holder.css("left", position.left);
+	holder.css("top", position.top);
+	var closeBar = $('<a><div id="closeBar">schliessen<img src="../../images/layout/closeButton.png" align="right" /></div></a>');
+	holder.append(closeBar);
+	$("body").append(holder);
+	var picHolder = $('<div id="folderBrowserPicHolder">'); 
+	holder.append(picHolder);
+	$.fn.loadContent("folder", function(result)
 	{
-		var holder = $('<div id="folderBrowser">');
-		holder.css("left", position.left);
-		holder.css("top", position.top);
-		var closeBar = $('<a><div id="closeBar">schliessen<img src="../../images/layout/closeButton.png" align="right" /></div></a>');
-		holder.append(closeBar);
-		$("body").append(holder);
-		var picHolder = $('<div id="folderBrowserPicHolder">'); 
-		holder.append(picHolder);
-		$.fn.loadContent("folder", function(result)
-		{
-			$(result).find("row").children().children().each(function(){
-				var picFrame = $('<div class="folderBrowserPicFrame">'); 
-				var pic = $('<img />');
-				pic.prop("class","folderBrowsePic"); 
-				pic.prop("src",$(this).text()); 
-				picFrame.append(pic);
-				picFrame.append($("<i>"+$(this).text()+"</i>"));
-				picHolder.append(picFrame);
-				pic.click(function(){
-					console.log("targetPicElem:"+targetPicElem);
-					$(targetPicElem).prop("src", $(this).prop("src"));
-					holder.remove();
-				});
+		$(result).find("row").children().children().each(function(){
+			var picFrame = $('<div class="folderBrowserPicFrame">'); 
+			var pic = $('<img />');
+			pic.prop("class","folderBrowsePic"); 
+			pic.prop("src",$(this).text()); 
+			picFrame.append(pic);
+			picFrame.append($("<i>"+$(this).text()+"</i>"));
+			picHolder.append(picFrame);
+			pic.click(function(){
+				console.log("targetPicElem:"+targetPicElem);
+				$(targetPicElem).prop("src", $(this).prop("src"));
+				holder.remove();
 			});
-//			$("#menuPriority").val( $(result).find( 'priority' ).first().text());
-		}, {"assetFolder":rootFolder}, "xml");
-		$(closeBar).click(function(){
-			$("#folderBrowser").remove();
 		});
-	}
-	
-	function destroyImageBrwoser()
-	{
-		var holder = $("#folderBrowser");
-		if(null!=holder)
-			holder.remove();
-	}
+//			$("#menuPriority").val( $(result).find( 'priority' ).first().text());
+	}, {"assetFolder":rootFolder}, "xml");
+	$(closeBar).click(function(){
+		$("#folderBrowser").remove();
+	});
+}
+
+function destroyImageBrwoser()
+{
+	var holder = $("#folderBrowser");
+	if(null!=holder)
+		holder.remove();
+}
 
 /********************************************************************************************
  *  Controls

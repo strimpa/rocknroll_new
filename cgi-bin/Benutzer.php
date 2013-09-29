@@ -1,6 +1,5 @@
 <?php
 
-require_once("Order/Bestellung.php");
 /**
 *	Diese Klasse beschreibt einen Benutzer
 */
@@ -226,7 +225,7 @@ class Benutzer{
 		$this->blz = SafeDBString($_POST['Bankleitzahl']);
 		$this->kundenNummer = SafeDBString($_POST['kundenNr']==NULL?"":$_POST['kundenNr']);
 		
-		Aufenthalt::GetInstance()->GetAblauf()->aktuelleBestellung->SetBezahlVerfahren($this->bezahlung);
+		BestellAblauf::GetInst()->aktuelleBestellung->SetBezahlVerfahren($this->bezahlung);
 
 		return $rueckgabe;
 	}

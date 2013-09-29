@@ -6,7 +6,7 @@
 	$errors = array();
 	
 	$query = FilenameFromUrl($params);
-	$builder = ContentMgr::GetInstance()->GetBuilder();
+	$builder = ContentMgr::GetInst()->GetBuilder();
 	$doc = $builder->Reset();
 	if(isset($_POST["io"]) && $_POST["io"]=="write")
 	{
@@ -96,7 +96,7 @@
 		}
 		if($table!=null)
 		{
-			$result = Aufenthalt::GetInstance()->DBConn()->InsertTableContent(
+			$result = DBCntrl::GetInst()->Conn()->InsertTableContent(
 				array(
 					'table'=>$table, 
 					'fields'=>$fields,
@@ -114,7 +114,7 @@
 				if(!isset($_POST["identifier"]) || $_POST["identifier"]=="")
 					return;
 				$contentDiv = $builder->AddTag("div");
-				$factory = ContentMgr::GetInstance()->GetFactory();
+				$factory = ContentMgr::GetInst()->GetFactory();
 				$p = $factory->CreateContentPages($_POST["identifier"]);
 				$doc->appendChild($contentDiv);
 				$p->GetArticle()->RenderParagraphs($contentDiv);

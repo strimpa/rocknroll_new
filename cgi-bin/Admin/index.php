@@ -4,11 +4,12 @@
 <head>
 <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
 <title>Adminbereich</title>
-<link href="../../css/mainstyles.css" rel="stylesheet" type="text/css" />
-<link href="../../css/adminStyles.css" rel="stylesheet" type="text/css" />
+<link href="css/adminStyles.css" rel="stylesheet" type="text/css" />
 <link href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" rel="stylesheet" type="text/css" />
 
 <script data-main="scripts/main" src="scripts/require.js"></script>
+<script>
+</script>
 </head>
 
 <body> <!--  onload="adminApp.Init();" -->
@@ -20,9 +21,25 @@
 		<select id="pagesDropDown" class="fullSizeControl">
 			<option></option>
 		</select>
-		<input id="pageTitle" class="fullSizeControl" type="text" value="" readonly="true" />
-		<input id="menuPriority" class="shortControl" type="text" value="" readonly="true" />
 		<input id="refreshButton" class="editButton" type="image" title="Refresh" src="images/061 Sync.png" />
+		<table>
+			<tr>
+				<td>Name im Hauptmenu:</td>
+				<td><input id="pageTitle" class="fullSizeControl" type="text" value="" readonly="true" /></td>
+			</tr>
+			<tr>
+				<td>Anzeigepriorit&auml;t im Hauptmenu:</td>
+				<td><input id="menuPriority" class="shortControl" type="text" value="" readonly="true" /></td>
+			</tr>
+			<tr>
+				<td>Plugin:</td>
+				<td>
+					<select id="pluginDropDown" class="fullSizeControl">
+						<option></option>
+					</select>
+				</td>
+			</tr>
+		</table>
 	</fieldset>
 	<fieldset class="RightGroupBox">
 		<legend>Bearbeiten:</legend>

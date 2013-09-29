@@ -3,8 +3,7 @@
 //require_once("cgi-bin/Aufenthalt.php");
 require_once("cgi-bin/Content/ContentMgr.php");
 session_start();
-Aufenthalt::GetInstance()->DBConn()->schliesse();
-ContentMgr::GetInstance()->Genesis();
+ContentMgr::GetInst()->Genesis();
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -12,10 +11,13 @@ ContentMgr::GetInstance()->Genesis();
 <head>
 <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
 <?php 
-	ContentMgr::GetInstance()->RenderHeader();
+	ContentMgr::GetInst()->RenderHeader();
 ?>
 <link href="/css/mainstyles.css" rel="stylesheet" type="text/css" />
+<link rel="stylesheet" href="/css/mediaboxAdvWhite.css" type="text/css" media="screen" />
 <script type="text/javascript" src="/script/jquery-1.5.1.min.js"></script>
+<script type="text/javascript" src="/script/mootools.js"></script>
+<script type="text/javascript" src="/script/mediaboxAdv-1.3.4b.js"></script>
 <script type="text/javascript" src="/script/mainScript.js"></script>
 </head>
 
@@ -26,7 +28,7 @@ ContentMgr::GetInstance()->Genesis();
   var js, fjs = d.getElementsByTagName(s)[0];
   if (d.getElementById(id)) return;
   js = d.createElement(s); js.id = id;
-  js.src = "//connect.facebook.net/de_DE/all.js#xfbml=1&appId=133353956731320";
+  js.src = "//Connect.facebook.net/de_DE/all.js#xfbml=1&appId=133353956731320";
   fjs.parentNode.insertBefore(js, fjs);
 }(document, 'script', 'facebook-jssdk'));</script>
 
@@ -36,7 +38,7 @@ ContentMgr::GetInstance()->Genesis();
 
 <!-- Content //-->
 <?php 
-	ContentMgr::GetInstance()->RenderContent();
+	ContentMgr::GetInst()->RenderContent();
 ?>
 
 </div>	

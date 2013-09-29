@@ -18,7 +18,7 @@ class SubMenu
 
 	public function Render(&$parentNode)
 	{
-		$builder = ContentMgr::GetInstance()->GetBuilder();
+		$builder = ContentMgr::GetInst()->GetBuilder();
 		
 		for($menuIndex = 0;$menuIndex<count($this->entries); $menuIndex++)
 		{
