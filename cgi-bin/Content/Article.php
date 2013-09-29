@@ -46,7 +46,8 @@ class Article
 		}
 		foreach($this->paragraphs as $para)
 		{
-		    $para->Render($contentDiv, $currentOffset);
+			if(is_a($para, "iParagraph"))
+			    $para->Render($contentDiv, $currentOffset);
 		}	
 		// if($currentOffset!=20)
 			// $builder->AddStyle($contentDiv, ("height:".$currentOffset."px;"));
