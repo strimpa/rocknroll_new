@@ -5,7 +5,7 @@
  * PERSISTENCE: instanced by Controller
  * ***/
 
-class DBConnMysqli implements DBConn
+class DBConnMysqli implements iDBConn
 {
 	private $ablauf;
 	//MySQL Server oder Host

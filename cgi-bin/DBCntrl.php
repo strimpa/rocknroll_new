@@ -4,7 +4,7 @@
  * 
  * PERSISTENCE: PAGE RUN / STATIC!
 */
-interface DBConn
+interface iDBConn
 {
 	function Connect();
 	function GetTableContent($settings);
