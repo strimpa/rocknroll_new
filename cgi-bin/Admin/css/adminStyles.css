@@ -6,13 +6,18 @@ body {
 fieldset{
 	border-radius: 5px;
 }
+h3
+{
+	-webkit-margin-before: 0em;
+	-webkit-margin-after: 0em;
+	font-family: monospace;
+	font-size: 2em;
+}
 
 .editfield
 {
-	position:absolute;
 	background-color:#01274C;
 	border:1px white solid; 
-	left:112px;
 	width:625px;
 	padding:5px;
 	font-family:Arial, Helvetica, sans-serif;
@@ -20,6 +25,7 @@ fieldset{
 	color:#A3BADB;
 	z-index:1;
 	border-radius: 5px;
+	margin: 5px;
 }
 
 .editDiv
@@ -58,10 +64,8 @@ fieldset{
 
 #settings
 {
-	top:0px;
-	left:755px;
 	width:455px;
-	height:220px;
+	float:right;
 }
 
 #TitleNavigation
@@ -79,8 +83,6 @@ fieldset{
 }
 #meta
 {
-	top:165px;
-	height:140px;
 }
 
 #contentCreate
@@ -139,9 +141,7 @@ fieldset{
 .RightGroupBox
 {
 	border: 1px solid #444;
-	position:absolute; 
-	left:410px;
-	top:5px; 
+	float:right;
 	width:200px;
 }
 .ThinGroupBox
@@ -174,7 +174,6 @@ fieldset{
 	font-size:12px;
 	border:1px solid white;
 	overflow:auto;
-	float:left;
 }
 
 .listboxRow
@@ -201,6 +200,11 @@ fieldset{
 	background-color:black;
 	z-index:19;
 	opacity:0.7;
+}
+
+#submenuEntries
+{
+	float:left;
 }
 .creationBox
 {

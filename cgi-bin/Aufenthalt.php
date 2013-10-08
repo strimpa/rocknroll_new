@@ -4,6 +4,8 @@
  * 
  * PERSISTENCE: SESSION
 */
+require_once('globals.php');
+require_once($serverRoot."cgi-bin/config.php");
 require_once("IPlugin.php");
 require_once("Benutzer.php");
 require_once("DBCntrl.php");
@@ -67,10 +69,6 @@ class Aufenthalt
 					foreach ($diff as $key => $potentialClass) 
 					{
 						$interfaces = class_implements($potentialClass);
-						PrintHtmlComment("interfaces for $potentialClass in $potentialDir:");
-						foreach ($interfaces as $value) {
-							PrintHtmlComment($value);
-						}
 						if(array_key_exists("IPlugin", $interfaces))
 						{
 							$this->plugins[$potentialDir] = new $potentialClass;

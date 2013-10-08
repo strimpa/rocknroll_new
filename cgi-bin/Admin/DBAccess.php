@@ -1,5 +1,4 @@
 <?php
-	include("../Utils.php");
 	include("../Aufenthalt.php");
 
 	session_start();
@@ -103,6 +102,19 @@
 		else if(isset($params["folder"]))
 		{
 			$result = GetFolderContent($_POST['assetFolder'], isset($params["recursive"]));
+		}
+		else if(isset($params["lang"]))
+		{
+			$markers = NULL;
+			if($_POST['markers'])
+				$markers = $_POST['markers'];
+			
+			$unexploded = explode(",", $params["keys"]);
+			$result = array();
+			foreach ($unexploded as $key) {
+				$result[$key] = lang($key, $markers);
+			}
+			
 		}
 		else if(isset($params["plugins"]))
 		{

@@ -1,7 +1,5 @@
 <?php
 
-include 'globals.php';
-
 function MyHtmlSpecialVars_decode($string)
 {
 	$newString = preg_replace("/%27/", "'", $string);
@@ -648,5 +646,40 @@ function handleError($errno, $errstr, $errfile, $errline, array $errcontext)
 
     throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
 }
+
+function lang($key,$markers = NULL)
+{
+	global $lang;
+	
+	if($markers == NULL)
+	{
+		$str = $lang[$key];
+	}
+	else
+	{
+		//Replace any dyamic markers
+		$str = $lang[$key];
+
+		$iteration = 1;
+		
+		foreach($markers as $marker)
+		{
+			$str = str_replace("%m".$iteration."%",$marker,$str);
+			
+			$iteration++;
+		}
+	}
+	
+	//Ensure we have something to return
+	if($str == "")
+	{
+		return ("No language key found");
+	}
+	else
+	{
+		return $str;
+	}
+}
+
 
 ?>

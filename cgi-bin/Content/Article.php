@@ -53,6 +53,26 @@ class Article
 			// $builder->AddStyle($contentDiv, ("height:".$currentOffset."px;"));
 	}
 	
+	private function RenderPageOverlay($contentDiv)
+	{
+		$builder = ContentMgr::GetInst()->GetBuilder();
+
+		$menuPicDiv = $builder->AddTag("div", "contentLeftOverlap");
+	    $pic = $builder->GetDoc()->createElement( "img" );
+		$pic->setAttribute("src", "/images/layout/BG_04.jpg");
+		$menuPicDiv->appendChild($pic);
+		$contentDiv->appendChild($menuPicDiv);
+	}
+	
+	public function RenderFooter($contentDiv)
+	{
+		$builder = ContentMgr::GetInst()->GetBuilder();
+
+		$footerDiv = $builder->AddTag("div", "footerDiv", NULL);
+		$contentDiv->appendChild($footerDiv);
+		$footerDiv->appendChild($builder->CreateImage("/images/layout/FooterDeko.jpg"));
+	}
+	
 	public function Render(&$parentNode)
 	{
 		$builder = ContentMgr::GetInst()->GetBuilder();
@@ -61,21 +81,17 @@ class Article
 		
 		$contentBGBorderDiv = $builder->AddTag("div", "contentBGBorder");
 		$contentBGDiv = $builder->AddTag("div", "contentBG");
-		$menuPicDiv = $builder->AddTag("div", "contentLeftOverlap");
-	    $pic = $builder->GetDoc()->createElement( "img" );
-		$pic->setAttribute("src", "/images/layout/BG_04.jpg");
-		$menuPicDiv->appendChild($pic);
-		$contentBGDiv->appendChild($menuPicDiv);
 		$contentBGBorderDiv->appendChild($contentBGDiv);
 		$parentNode->appendChild($contentBGBorderDiv);
 		
 		$contentDiv = $builder->AddTag("div", "content");
 		$contentBGDiv->appendChild($contentDiv);
 		
+		$this->RenderPageOverlay($contentBGDiv);
+		
 		$this->RenderParagraphs($contentDiv);
-		$footerDiv = $builder->AddTag("div", "footerDiv", NULL);
-		$contentBGBorderDiv->appendChild($footerDiv);
-		$footerDiv->appendChild($builder->CreateImage("/images/layout/FooterDeko.jpg"));
+		
+		$this->RenderFooter($contentBGBorderDiv);
 	}
 }
 
