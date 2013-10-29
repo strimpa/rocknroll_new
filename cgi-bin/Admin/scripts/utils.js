@@ -103,8 +103,8 @@ define(['config'], function(config)
 			headRow.appendChild(headCol);
 
 			var dataTd = document.createElement("td");
-			dataTd.setAttribute("class", "adminTableTd");
-			dataTd.setAttribute("id", name);
+			dataTd.setAttribute("class", "adminTableTd id_"+name);
+//			dataTd.setAttribute("id", name);
 			rowDiv.appendChild(dataTd);
 			
 			if(renderControls)
@@ -280,11 +280,11 @@ define(['config'], function(config)
 			}
 			else
 			{
-				console.log("create");
+				console.log("create:\""+name+"\"");
 				var textWin = $("<div id='showPlainTextWindow' ></div>");
 				var textArea = $("<textarea id='showPlainTextField' />");
 				textWin.append(textArea);
-				$(this).parents("table").find("#"+name).each(function(){
+				$(this).parents("table").find(".id_"+name).each(function(){
 					var tdText = $(this).text();
 					if(tdText != "Click to edit")
 						textArea.append(tdText+"\n");
