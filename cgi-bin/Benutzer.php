@@ -195,8 +195,8 @@ class Benutzer{
 						<strong>&Uuml;berweisung</strong> auf<br>
 									Rock&amp;Roll Musikmagazin:<br>
 									Volksbank Oldenburg<br>
-									Kto-Nr.: 140 325 026<br>
-									BLZ: 280 900 45
+									Kto-Nr.: 34 32 502 600<br>
+									BLZ: 280 618 22
 				";
 				$retVal .=  "
                   </TD>
