@@ -392,6 +392,19 @@ define(['config'], function(config)
 			{
 				objkeys.push(key);
 			}
+			
+			if(objkeys.length==0)
+			{
+				var td = $("<tr><td></td></tr>");
+				td.append("Es wurden keine Datenbank eintraege gefunden mit den Bedingungen:");
+				var list = $("<ul></ul>");
+				for (var i in requirements) {
+				  list.append($("<li>"+i+":"+requirements[i]+"</li>"));
+				};
+				td.append(list);
+				$(table).append(td);
+			}
+			
 			var keyIterator = 0;
 			
 			function addDelButton()
