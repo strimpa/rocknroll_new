@@ -569,8 +569,10 @@ jQuery = require([
 					{
 						var theId = defaultData['id'];
 						if(data['newCategory']!="")
+						{
 							data['category'] = data['newCategory'];
-						data.newCategory = null;	
+						}
+						delete data['newCategory'];
 						if(null!=theId)
 							$.fn.loadContent(theTable, triggerParagraphCreation, data, "data", {edit:true,req:("id="+theId)});
 						else
