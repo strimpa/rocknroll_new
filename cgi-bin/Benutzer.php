@@ -195,8 +195,8 @@ class Benutzer{
 						<strong>&Uuml;berweisung</strong> auf<br>
 									Rock&amp;Roll Musikmagazin:<br>
 									Volksbank Oldenburg<br>
-									Kto-Nr.: 34 32 502 600<br>
-									BLZ: 280 618 22
+									BIC: GENODEF 1EDE <br>
+									IBAN: DE02 2806 1822 3432 5026 00
 				";
 				$retVal .=  "
                   </TD>
