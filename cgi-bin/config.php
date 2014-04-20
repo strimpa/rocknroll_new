@@ -5,9 +5,9 @@
 	{
 		$language = $_GET['lang'];
 	}
-	else if (isset($_COOKIE['etaf']['lang'])) 
+	else if (isset($_COOKIE['rnr']['lang'])) 
 	{
-		$language = $_COOKIE['etaf']['lang'];
+		$language = $_COOKIE['rnr']['lang'];
 	}
 	else
 	{
@@ -30,7 +30,7 @@
 				break;
 		}
 	}	
-	setcookie("etaf[lang]", $language);
+	setcookie("rnr[lang]", $language);
 	
-	require_once("lang/".$language.".php");
+//	require_once("lang/".$language.".php");
 ?>
