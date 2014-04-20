@@ -189,11 +189,6 @@ class Bestellung{
 							<blockquote>
 								Rock&amp;Roll Musikmagazin:<br>
 								Volksbank Oldenburg<br>
-								Kto-Nr.: 34 32 502 600
-								BLZ: 280 618 22	
-							</blockquote>
-							For transactions from abroad please don't forget to enter:
-							<blockquote>
 								BIC: GENODEF 1EDE <br />
 								IBAN: DE02 2806 1822 3432 5026 00	
 							</blockquote>
@@ -213,11 +208,6 @@ class Bestellung{
 			<blockquote>
 				Rock&amp;Roll Musikmagazin:<br>
 				Volksbank Oldenburg<br>
-				Kto-Nr.: 34 32 502 600
-				BLZ: 280 618 22	
-			</blockquote>
-			For transactions from abroad please don't forget to enter:
-			<blockquote>
 				BIC: GENODEF 1EDE <br />
 				IBAN: DE02 2806 1822 3432 5026 00	
 			</blockquote>
