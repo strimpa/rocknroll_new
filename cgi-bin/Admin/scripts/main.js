@@ -29,11 +29,11 @@ jQuery = require([
 	{
 		require([
 		'utils',
-		'creationTemplates',
 		'lib/jquery-ui-1.10.3.custom.min',
 		'lib/jquery.ui.timepicker',
 		'lib/jquery.jeditable.mini',
-		'tiny_mce/jquery.tinymce'
+		'tiny_mce/jquery.tinymce',
+		'creationTemplates'
 		], 
 		function(utils)
 		{
@@ -208,10 +208,10 @@ jQuery = require([
 				
 				createContentHandler = function()
 				{
-					PageCreationDialog.createDialog(document, function()
+					$.PageCreationDialog.createDialog(document, function()
 					{
 						var data = {};
-						PageCreationDialog.getData(data);
+						$.PageCreationDialog.getData(data);
 						var menuTitle = data['menuTitle'];
 						var menuPriority = data['priority'];
 						var pattern = /[^a-z^A-Z^_]/ig;
@@ -242,10 +242,10 @@ jQuery = require([
 					{
 						var naviId = $(naviResult).find("id").text();
 						var menuPriority = $(naviResult).find("priority").text();
-						PageCreationDialog.createDialog(document, function()
+						$.PageCreationDialog.createDialog(document, function()
 						{
 							var data = {};
-							PageCreationDialog.getData(data);
+							$.PageCreationDialog.getData(data);
 							var reqString = "id="+pageId;
 							var menuTitle = data['menuTitle'];
 							var newMenuPriority = data['priority'];
@@ -359,7 +359,7 @@ jQuery = require([
 				    });
 				    
 					var presetOptions = {url:allTitles.join("|")};
-					SubMenuCreationDialog.createDialog(document, function(){
+					$.SubMenuCreationDialog.createDialog(document, function(){
 						// prepare data
 						/////////////////////////
 						var entryData = [];
@@ -370,7 +370,7 @@ jQuery = require([
 							urls.push(currSubMenuUrls[c]);
 						}
 						var newdata = {}; 
-						SubMenuCreationDialog.getData(newdata);
+						$.SubMenuCreationDialog.getData(newdata);
 						entryData.push(newdata['title']);
 						urls.push(newdata['url']);
 						var data = {entries:entryData.join("|"), links:urls.join("|")};
@@ -398,7 +398,7 @@ jQuery = require([
 					var index = $("#submenuEntries").prop("selectedIndex");
 					var selection = element("submenuEntries").children[index].innerHTML;
 					var presetValues = {title:selection, url:currSubMenuUrls[index]};
-					SubMenuCreationDialog.createDialog(document, function(){
+					$.SubMenuCreationDialog.createDialog(document, function(){
 						// prepare data
 						/////////////////////////
 						var entryData = [];
@@ -409,7 +409,7 @@ jQuery = require([
 							urls.push(currSubMenuUrls[c]);
 						}
 						var newdata = {}; 
-						SubMenuCreationDialog.getData(newdata);
+						$.SubMenuCreationDialog.getData(newdata);
 						currSubMenuUrls[index] = newdata['url'];
 						var data = {entries:entryData.join("|"), links:currSubMenuUrls.join("|")};
 		
@@ -579,11 +579,11 @@ jQuery = require([
 							$.fn.loadContent(theTable, triggerParagraphCreation, data, "data", {write:true});
 					};
 					
-					var theDialog = EventTableEntryDialog;
+					var theDialog = $.EventTableEntryDialog;
 					switch(theTable)
 					{
 						case "archive":
-							theDialog = ArchivTableEntryDialog;
+							theDialog = $.ArchivTableEntryDialog;
 							break;
 					}
 					theDialog.createDialog(document, function()
@@ -630,13 +630,13 @@ jQuery = require([
 					    for(paraIndex in paraArray)
 					    {
 					    	if(paraArray[paraIndex]=="" || paraArray[paraIndex]==null)
+					    	{
+					    		console.log("invalid index:"+paraArray[paraIndex]);
 					    		continue;
+					    	}
 							var paraDiv = document.createElement("div");
 							paraDiv.setAttribute("id", "paragraph_"+paraArray[paraIndex]);
-							// var titleIDDiv = document.createElement("div");
-							// titleIDDiv.setAttribute("class", "adminParaTitle");
-							// titleIDDiv.textContent = "Absatz ID:"+paraArray[paraIndex];
-							// contentDiv.appendChild(titleIDDiv);
+							
 					    	$.fn.loadContent("paragraphs", function(result)
 					    	{
 					    		//try{
@@ -648,7 +648,7 @@ jQuery = require([
 									    var myParagraph = element("paragraph_"+myParagraphId);
 									    if(null==myParagraph)
 									    {
-									    	throw("Can't resolve holding paragraph HTML node.");
+									    	throw("Can't resolve holding paragraph HTML node paragraph_"+myParagraphId+"!");
 									    	return;
 									    }
 		
@@ -668,7 +668,7 @@ jQuery = require([
 									// $(paraDiv).append("Der Ansatz konnte nicht gerendert werden. Ueberpruefen sie bitte das eingegebene html. Error:"+err+"<br />");
 								// }
 					    	}, {id:paraArray[paraIndex]}, "data");
-							
+
 							// append
 							contentDiv.appendChild(paraDiv);
 					    }
@@ -698,10 +698,10 @@ jQuery = require([
 					var pictureID = picID;
 					if(null==defaultData)
 						defaultData = {};
-					ParagraphCreationDialog.createDialog(document, function()
+					$.ParagraphCreationDialog.createDialog(document, function()
 					{
 						var data = {}; 
-						ParagraphCreationDialog.getData(data);
+						$.ParagraphCreationDialog.getData(data);
 		//				for(d in data)
 		//					output(d+":"+data[d]);
 						if(data['type']!="Tabelle")
@@ -709,7 +709,7 @@ jQuery = require([
 							var metaString = "height="+data['height']+";table="+data['table']+";category="+data['category'];
 							var paraData = {
 								title:data['title'],
-								type:ParaTypeStrings.indexOf(data['type']),
+								type:$.ParaTypeStrings.indexOf(data['type']),
 								content:data['content'],
 								meta:metaString
 							};
@@ -724,7 +724,6 @@ jQuery = require([
 								var paraArray = paragraphString.split(",");
 								var pageIndex = $(contentCache.find( 'id' )[selectedIndex]).text();
 								var lastParaIndex = parseInt(result);
-								console.log("result:"+lastParaIndex+" currentpargraphs:");
 								for(d in paraArray)
 									console.log("#"+paraArray[d]);
 								if(!isNaN(lastParaIndex) && paraArray.indexOf(lastParaIndex)==-1)
@@ -786,15 +785,14 @@ jQuery = require([
 						{
 							// Tabelle creation
 							var category = ""!=data['newCategory'] ? data['newCategory'] : data['category'];
-							var metaString = "height="+data['height']+";table="+data['table']+";category="+category;
+							var metaString = "height="+data['height']+";table="+data['table']+";category="+category+";flags="+data['flags'];
 							if("sortBy" in data)
 							{
-								console.log("sor by:"+data['sortBy']);
 								metaString += ";sortBy="+data['sortBy'];
 							}
 							var paraData = {
 								title:data['title'],
-								type:ParaTypeStrings.indexOf(data['type']),
+								type:$.ParaTypeStrings.indexOf(data['type']),
 								content:data['content'],
 								meta:metaString
 							};
@@ -882,7 +880,6 @@ jQuery = require([
 					{
 						var val = $(this).spinner("value");
 						utils.maxCols = val;
-						console.log("utils.maxCols:"+utils.maxCols);
 					}
 				});
 				refreshPages(populateContentDropDown);

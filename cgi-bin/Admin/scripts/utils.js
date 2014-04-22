@@ -218,7 +218,6 @@ define(['config'], function(config)
 									var theId = $(this).data("rowId");
 									var field = $(this).data("field");
 									var val = this.checked ? "1" : "0";
-									console.log("checkbox "+field+" is checked:"+val);
 								    var dbData = eval("({"+field+": \""+val+"\"})"); 
 								    $.fn.loadContent(tableName, null, dbData, "data", {edit:true,req:("id="+theId)});
 								});
@@ -271,7 +270,6 @@ define(['config'], function(config)
 		
 		// create plain textgrab 
 		$(textRowButton).click(function(){
-			console.log("click:"+$("#showPlainTextWindow"));
 			
 			if(null!=document.getElementById("showPlainTextWindow"))
 			{
@@ -367,12 +365,9 @@ define(['config'], function(config)
 				var resultString = $(uploadTarget).contents().text();
 				if(""==resultString)
 					return;
-				console.log("resultString:\""+resultString+"\"");
 				var lastSlash = resultString.lastIndexOf("/");
 				resultString = resultString.substring(lastSlash+1, resultString.length);
-				console.log("uploaded file:"+resultString);
 				$.fn.loadContent(tableName,function(result){
-					console.log(result);
 					triggerParagraphCreation();
 //						document.location = "openFile.php/?url="+result;
 				}, null, "xml", {xmlinput:resultString});
@@ -680,6 +675,7 @@ define(['config'], function(config)
 		var whichTable = metaData['table'];
 		var myCategory = metaData['category'];
 		var toSortBy = metaData['sortBy'];
+		var myflags = metaData['flags'];
 		
 		// clck handlers
 		$(editParaButton).click(function()
@@ -693,7 +689,8 @@ define(['config'], function(config)
 				content:paraContent,
 				table:whichTable,
 				category:myCategory,
-				sortBy:toSortBy
+				sortBy:toSortBy,
+				flags:myflags
 			};
 			createParagraphHandler(defaultData, paraID, picID);
 		});

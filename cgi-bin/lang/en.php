@@ -3,8 +3,8 @@
 /*
  *  UI labels
  */
-	global $lang;
-	$lang = array();
+ 	global $lang;
+ 	$lang = array();
  
  // static ones
  	$lang = array_merge($lang, array(

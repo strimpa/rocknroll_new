@@ -4,14 +4,15 @@
  * 
  * PERSISTENCE: SESSION
 */
+global $loadingErrors;
+global $lang;
+
 require_once('globals.php');
-require_once($serverRoot."cgi-bin/config.php");
+require_once("configuration.php");
 require_once("IPlugin.php");
 require_once("Benutzer.php");
 require_once("DBCntrl.php");
 require_once("Utils.php");
-
-global $loadingErrors;
 
 class Aufenthalt
 {

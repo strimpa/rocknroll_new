@@ -3,8 +3,14 @@
 	global $serverRoot;
 
 	$path_parts = pathinfo(__FILE__);
-	$serverRoot = $_SERVER['DOCUMENT_ROOT']."/"; 
+	$serverRoot = $_SERVER['DOCUMENT_ROOT']."/";
 	$httpRoot = "http://".$_SERVER['SERVER_NAME']."/";
+
+	if($_SERVER['SERVER_NAME']=="localhost")
+	{
+		$serverRoot .= "rocknroll_new/";
+		$httpRoot .= "rocknroll_new/";
+	}
 
 	setlocale(LC_ALL, 'de_DE');
 

@@ -60,12 +60,14 @@ class DBReq
 					$reqString .= $key." REGEXP '".$value."'";
 				else if($this->comparison==DBReq::DBReqCompContains)
 					$reqString .= $key." LIKE '%".$value."%'";
+				else if($value=="NOW()")
+					$reqString .= $key." >= ".$value."";
 				else
 					$reqString .= $key." = '".$value."'";
-//		        print("<!-- requirements:".$reqString." //-->\n");
 			}
 		}
 		$reqString .= ")";
+//        print("<!-- requirements:".$reqString." //-->\n");
 		
 		return $reqString;
 	}

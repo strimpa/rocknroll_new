@@ -11,26 +11,23 @@
 	}
 	else
 	{
-		$langKeys = $_SERVER['HTTP_ACCEPT_LANGUAGE'];
+		$langKeys = "en";
+		if(array_key_exists('HTTP_ACCEPT_LANGUAGE', $_SERVER))
+			$langKeys = $_SERVER['HTTP_ACCEPT_LANGUAGE'];
+		
 		$langKeyArray = explode(",", $langKeys);
 		$primaryLanguage = substr($langKeyArray[0], 0, 2);
 		switch($primaryLanguage)
 		{
-			case "en":
-				$language = "en";
-				break;
-			case "es":
-				$language = "es";
-				break;
 			case "de":
 				$language = "de";
 				break;
 			default:
-				$language = "cat";
+				$language = "en";
 				break;
 		}
 	}	
 	setcookie("rnr[lang]", $language);
 	
-//	require_once("lang/".$language.".php");
+	require_once("lang/".$language.".php");
 ?>
