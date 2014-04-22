@@ -155,7 +155,10 @@ class TablePara implements iParagraph
 	private $tableType; 
 	private $category;
 	private $sortBy;
+	private $flags;
 	private $eventTypePicPath = "/images/layout/";
+	
+	const TABLE_CULL_BY_DATE = 1;
 
 	public function PicPara($align)
 	{
@@ -169,6 +172,7 @@ class TablePara implements iParagraph
 		$this->tableType = $dataAssoc["table"];
 		$this->category = $dataAssoc["category"];
 		$this->sortBy = isset($dataAssoc["sortBy"]) ? $dataAssoc["sortBy"] : null;
+		$this->flags = isset($dataAssoc["flags"]) ? $dataAssoc["flags"] : 1;
 	}
 	
 	private function CreateStyleString($offset)
@@ -188,6 +192,7 @@ class TablePara implements iParagraph
 	public function RenderXMLNode(&$doc, &$parent, &$currRoot, $resultArray, &$hasPicAttached)
 	{
 		$myElement = NULL;
+		$success = true;
 		if(is_a($currRoot, "DOMElement"))
 		{
 			if($currRoot->tagName=="row")
@@ -320,20 +325,26 @@ class TablePara implements iParagraph
 						}
 					}
 				}
-				// only if not empty
-				if(null!=$myElement)
-				{
-					$parent->appendChild($myElement);
-				}
 			}
+
+			$renderMe = true;
 			foreach($currRoot->childNodes as $child)
 			{
 				$childParent = $parent;
 				if(NULL!=$myElement)
 					$childParent = $myElement;
-				$this->RenderXMLNode($doc, $childParent, $child, $resultArray, $hasPicAttached);
+				if(!$this->RenderXMLNode($doc, $childParent, $child, $resultArray, $hasPicAttached))
+				{
+					$renderMe = false;
+				}
+			}
+			// only if not empty
+			if(null!=$myElement)
+			{
+				$parent->appendChild($myElement);
 			}
 		}
+		return $success;
 	}
 
 	public function GetTableResults()
@@ -394,12 +405,17 @@ class TablePara implements iParagraph
 		if(array_key_exists("date", $tableDef[0]))
 		{
 			$reqArray["orderBy"] = "date";
+
+			if($this->flags&TablePara::TABLE_CULL_BY_DATE)
+			{
+				$reqArray["requirements"]["date"] = "NOW()";
+			}
 		}
 		else if(array_key_exists("issue", $tableDef[0]))
 		{
 			$reqArray["orderBy"] = "issue";
 		}
-
+			
 		$dbResult = DBCntrl::GetInst()->Conn()->GetTableContent($reqArray);
 		//$dbResult = $this->GetTableResults();
 		$doc = $builder->GetDoc();
